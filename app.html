@@ -3,65 +3,64 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yuktora — AI Job Search Co-pilot</title>
+<title>HireTrackAI — AI Job Search Co-pilot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ─────────────────────────────────────────────
-   DESIGN TOKENS
+   DESIGN TOKENS - LIGHT & BRIGHT SAAS THEME
 ───────────────────────────────────────────── */
 :root{
-  /* ── BURGUNDY THEME ────────────────────── */
   --sans:    'Outfit', sans-serif;
   --mono:    'DM Mono', monospace;
-  --display: 'Cormorant Garamond', serif;
+  --display: 'Outfit', sans-serif;
 
-  /* Cream base */
+  /* Light Theme Base */
   --white:   #FFFFFF;
-  --gray-25: #FDFAF6;
-  --gray-50: #F8F3EC;
-  --gray-100:#F0E8DC;
-  --gray-200:#E6D9C8;
-  --gray-300:#D4C4BC;
-  --gray-400:#B89AAA;
-  --gray-500:#7A5060;
-  --gray-600:#5A3040;
-  --gray-700:#42202E;
-  --gray-800:#2E1020;
-  --gray-900:#1A0A10;
+  --gray-25: #F8FAFC;
+  --gray-50: #F1F5F9;
+  --gray-100:#E2E8F0;
+  --gray-200:#CBD5E1;
+  --gray-300:#94A3B8;
+  --gray-400:#64748B;
+  --gray-500:#475569;
+  --gray-600:#334155;
+  --gray-700:#1E293B;
+  --gray-800:#0F172A;
+  --gray-900:#020617;
 
-  /* Brand — Burgundy */
-  --brand:   #7D1D3F;
-  --brand-l: rgba(125,29,63,.08);
-  --brand-d: #641531;
+  /* Brand — Crimson */
+  --brand:   #E11D48;
+  --brand-l: #FFF1F2;
+  --brand-d: #BE123C;
 
   /* Gold accent */
-  --gold:    #C9963A;
-  --gold-l:  rgba(201,150,58,.1);
+  --gold:    #F59E0B;
+  --gold-l:  #FEF3C7;
 
   /* Semantic */
-  --green:   #1A7A5A;
-  --green-l: #EAF7F2;
-  --amber:   #C47A1A;
-  --amber-l: #FEF5E7;
-  --red:     #B83232;
-  --red-l:   #FDECEA;
+  --green:   #059669;
+  --green-l: #D1FAE5;
+  --amber:   #D97706;
+  --amber-l: #FEF3C7;
+  --red:     #DC2626;
+  --red-l:   #FEE2E2;
 
   /* Surfaces */
-  --bg:      #FDFAF6;
+  --bg:      #F8FAFC;
   --surface: #FFFFFF;
-  --border:  #E8DDD6;
-  --border-strong: #D4C4BC;
+  --border:  #E2E8F0;
+  --border-strong: #CBD5E1;
 
   /* Shadows */
-  --shadow-xs: 0 1px 3px rgba(26,10,16,.06);
-  --shadow-sm: 0 2px 8px rgba(125,29,63,.08),0 4px 16px rgba(26,10,16,.05);
-  --shadow:    0 4px 20px rgba(125,29,63,.1),0 8px 32px rgba(26,10,16,.07);
-  --shadow-lg: 0 8px 40px rgba(125,29,63,.14),0 20px 56px rgba(26,10,16,.1);
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.03);
+  --shadow:    0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -2px rgba(15, 23, 42, 0.025);
+  --shadow-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.05), 0 10px 10px -5px rgba(15, 23, 42, 0.02);
 }
 
 /* ─────────────────────────────────────────────
-   RESET
+   RESET & BASE
 ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { font-size: 16px; }
@@ -86,7 +85,7 @@ a { color: inherit; text-decoration: none; }
    SIDEBAR
 ───────────────────────────────────────────── */
 .sidebar {
-  width: var(--sidebar-w);
+  width: 240px;
   background: var(--white);
   border-right: 1px solid var(--border);
   display: flex;
@@ -98,7 +97,7 @@ a { color: inherit; text-decoration: none; }
   z-index: 20;
 }
 .sidebar-brand {
-  height: var(--topbar-h);
+  height: 52px;
   padding: 0 16px;
   display: flex;
   align-items: center;
@@ -109,13 +108,13 @@ a { color: inherit; text-decoration: none; }
 .brand-icon {
   width: 28px; height: 28px;
   background: var(--brand);
-  border-radius: var(--r-sm);
+  border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 14px; flex-shrink: 0;
+  font-size: 14px; flex-shrink: 0; color:#fff;
 }
 .brand-name {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 800;
   color: var(--gray-900);
   letter-spacing: -0.2px;
 }
@@ -129,7 +128,7 @@ a { color: inherit; text-decoration: none; }
 }
 .nav-group-label {
   font-size: 10.5px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--gray-500);
   letter-spacing: .6px;
   text-transform: uppercase;
@@ -140,7 +139,7 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   gap: 8px;
   padding: 7px 10px;
-  border-radius: var(--r-sm);
+  border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
   color: var(--gray-600);
@@ -165,7 +164,7 @@ a { color: inherit; text-decoration: none; }
 }
 .api-pill {
   display: flex; align-items: center; gap: 7px;
-  font-size: 11.5px; color: var(--gray-500);
+  font-size: 11.5px; color: var(--gray-500); font-weight:500;
 }
 .api-led {
   width: 7px; height: 7px; border-radius: 50%;
@@ -179,7 +178,7 @@ a { color: inherit; text-decoration: none; }
 .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 
 .topbar {
-  height: var(--topbar-h);
+  height: 52px;
   background: var(--white);
   border-bottom: 1px solid var(--border);
   padding: 0 24px;
@@ -188,7 +187,7 @@ a { color: inherit; text-decoration: none; }
   flex-shrink: 0;
 }
 .topbar-left { display: flex; align-items: center; gap: 12px; }
-.page-title { font-size: 15px; font-weight: 700; color: var(--gray-900); }
+.page-title { font-size: 16px; font-weight: 700; color: var(--gray-900); }
 .topbar-right { display: flex; align-items: center; gap: 8px; }
 
 /* ─────────────────────────────────────────────
@@ -196,7 +195,7 @@ a { color: inherit; text-decoration: none; }
 ───────────────────────────────────────────── */
 .btn {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 7px 14px; border-radius: var(--r-sm);
+  padding: 7px 14px; border-radius: 6px;
   font-size: 13px; font-weight: 600;
   transition: all .13s ease;
   cursor: pointer; white-space: nowrap;
@@ -228,32 +227,27 @@ a { color: inherit; text-decoration: none; }
 .btn-xs { padding: 3px 8px; font-size: 11px; }
 .btn-green { background: var(--green); color: var(--white); border: 1px solid transparent; }
 .btn-green:hover { background: #047857; }
-.btn-icon { padding: 6px; border-radius: var(--r-sm); }
 
 /* ─────────────────────────────────────────────
-   PAGES
+   PAGES & CARDS
 ───────────────────────────────────────────── */
 .page { display: none; flex: 1; }
 .page.active { display: block; }
 .page-body { padding: 24px; max-width: 1200px; }
 
-/* ─────────────────────────────────────────────
-   CARDS
-───────────────────────────────────────────── */
 .card {
   background: var(--white);
   border: 1px solid var(--border);
-  border-radius: var(--r-lg);
+  border-radius: 12px;
   box-shadow: var(--shadow-sm);
 }
-.card-pad { padding: 20px; }
 .card-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
 }
-.card-title { font-size: 13.5px; font-weight: 700; color: var(--gray-900); }
-.card-sub { font-size: 12px; color: var(--gray-500); margin-top: 1px; }
+.card-title { font-size: 14px; font-weight: 700; color: var(--gray-900); }
+.card-sub { font-size: 12px; color: var(--gray-500); margin-top: 1px; font-weight:500; }
 .card-body { padding: 20px; }
 
 /* ─────────────────────────────────────────────
@@ -263,33 +257,33 @@ a { color: inherit; text-decoration: none; }
 .stat-card {
   background: var(--white);
   border: 1px solid var(--border);
-  border-radius: var(--r-lg);
+  border-radius: 12px;
   padding: 18px 20px;
   box-shadow: var(--shadow-sm);
 }
-.stat-label { font-size: 11px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+.stat-label { font-size: 11px; font-weight: 700; color: var(--gray-500); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
 .stat-val { font-size: 26px; font-weight: 800; color: var(--gray-900); letter-spacing: -1px; font-family: var(--sans); }
-.stat-meta { font-size: 11.5px; color: var(--gray-400); margin-top: 3px; }
+.stat-meta { font-size: 11.5px; color: var(--gray-400); margin-top: 3px; font-weight:500; }
 .stat-blue .stat-val { color: var(--brand); }
 .stat-green .stat-val { color: var(--green); }
 .stat-amber .stat-val { color: var(--amber); }
 
 /* ─────────────────────────────────────────────
-   FORMS
+   FORMS & TABS
 ───────────────────────────────────────────── */
 .field { margin-bottom: 14px; }
 .field-label {
   display: block;
-  font-size: 12px; font-weight: 600; color: var(--gray-700);
+  font-size: 12px; font-weight: 700; color: var(--gray-700);
   margin-bottom: 5px; letter-spacing: .1px;
 }
-.field-hint { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
+.field-hint { font-size: 12px; color: var(--gray-500); margin-top: 4px; font-weight:500;}
 .input {
   width: 100%;
   padding: 8px 11px;
   border: 1px solid var(--border-strong);
-  border-radius: var(--r-sm);
-  font-size: 13px;
+  border-radius: 6px;
+  font-size: 13px; font-weight:500;
   color: var(--gray-900);
   background: var(--white);
   box-shadow: var(--shadow-xs);
@@ -297,38 +291,35 @@ a { color: inherit; text-decoration: none; }
   outline: none;
   font-family: var(--sans);
 }
-.input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+.input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.12); }
 textarea.input { resize: vertical; min-height: 90px; line-height: 1.55; }
 select.input { cursor: pointer; }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-/* ─────────────────────────────────────────────
-   TABS
-───────────────────────────────────────────── */
 .tabs {
   display: flex; gap: 2px;
   background: var(--gray-100);
-  border-radius: var(--r-sm);
+  border-radius: 6px;
   padding: 3px;
   width: fit-content;
   margin-bottom: 16px;
 }
 .tab-btn {
   padding: 6px 14px; border-radius: 5px;
-  font-size: 12.5px; font-weight: 600;
+  font-size: 12.5px; font-weight: 700;
   color: var(--gray-500); cursor: pointer;
   transition: all .12s;
 }
 .tab-btn.active { background: var(--white); color: var(--gray-900); box-shadow: var(--shadow-xs); }
 
 /* ─────────────────────────────────────────────
-   TAGS / PILLS
+   TAGS / PILLS / RINGS
 ───────────────────────────────────────────── */
 .tag-wrap { display: flex; flex-wrap: wrap; gap: 5px; }
 .tag {
   display: inline-flex; align-items: center; gap: 4px;
   padding: 3px 9px; border-radius: 20px;
-  font-size: 11.5px; font-weight: 500;
+  font-size: 12px; font-weight: 600;
   background: var(--gray-100); color: var(--gray-700);
   border: 1px solid var(--border);
 }
@@ -337,11 +328,10 @@ select.input { cursor: pointer; }
 .tag-row { display: flex; gap: 6px; margin-top: 7px; }
 .tag-row input { flex: 1; }
 
-/* Status/source pills */
 .pill {
   display: inline-flex; align-items: center; gap: 4px;
   padding: 2px 8px; border-radius: 20px;
-  font-size: 11px; font-weight: 600;
+  font-size: 11px; font-weight: 700;
 }
 .pill-gray   { background: var(--gray-100); color: var(--gray-600); }
 .pill-blue   { background: var(--brand-l); color: var(--brand-d); }
@@ -350,13 +340,10 @@ select.input { cursor: pointer; }
 .pill-red    { background: var(--red-l); color: var(--red); }
 .pill-purple { background: var(--purple-l); color: var(--purple); }
 
-/* ─────────────────────────────────────────────
-   SCORE RING
-───────────────────────────────────────────── */
 .score-ring {
   width: 44px; height: 44px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700;
+  font-size: 12px; font-weight: 800;
   border: 2.5px solid;
   flex-shrink: 0;
   font-family: var(--sans);
@@ -367,40 +354,37 @@ select.input { cursor: pointer; }
 .score-ring-sm { width: 34px; height: 34px; font-size: 10px; }
 
 /* ─────────────────────────────────────────────
-   JOB CARDS
+   JOB CARDS & AI OUTPUT
 ───────────────────────────────────────────── */
 .job-list { display: flex; flex-direction: column; gap: 8px; }
 .job-card {
   background: var(--white);
   border: 1px solid var(--border);
-  border-radius: var(--r);
+  border-radius: 6px;
   padding: 14px 16px;
   display: flex; align-items: flex-start; gap: 12px;
   cursor: pointer; transition: border-color .12s, box-shadow .12s;
 }
-.job-card:hover { border-color: var(--brand); box-shadow: var(--shadow-md); }
+.job-card:hover { border-color: var(--brand); box-shadow: var(--shadow-sm); }
 .job-card.sel { border-color: var(--brand); background: var(--brand-l); }
 .job-initials {
-  width: 40px; height: 40px; border-radius: var(--r-sm);
+  width: 40px; height: 40px; border-radius: 6px;
   background: var(--gray-100); border: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700; color: var(--gray-600);
+  font-size: 12px; font-weight: 800; color: var(--gray-600);
   flex-shrink: 0; letter-spacing: -.5px;
 }
 .job-info { flex: 1; min-width: 0; }
-.job-title { font-size: 13.5px; font-weight: 700; color: var(--gray-900); margin-bottom: 2px; }
-.job-company { font-size: 12px; color: var(--gray-500); }
+.job-title { font-size: 14px; font-weight: 700; color: var(--gray-900); margin-bottom: 2px; }
+.job-company { font-size: 12px; font-weight:500; color: var(--gray-500); }
 .job-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
 
-/* ─────────────────────────────────────────────
-   AI OUTPUT
-───────────────────────────────────────────── */
 .ai-box {
   background: var(--gray-50);
   border: 1px solid var(--border);
-  border-radius: var(--r);
+  border-radius: 6px;
   padding: 14px 16px;
-  font-size: 13px; color: var(--gray-700);
+  font-size: 13px; color: var(--gray-700); font-weight:500;
   line-height: 1.7;
   white-space: pre-wrap;
   min-height: 100px;
@@ -426,33 +410,29 @@ select.input { cursor: pointer; }
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th {
   text-align: left; padding: 10px 14px;
-  font-size: 11px; font-weight: 600; color: var(--gray-500);
+  font-size: 11px; font-weight: 700; color: var(--gray-500);
   text-transform: uppercase; letter-spacing: .5px;
   background: var(--gray-50);
   border-bottom: 1px solid var(--border);
 }
 .data-table td {
   padding: 12px 14px;
-  font-size: 13px; color: var(--gray-700);
+  font-size: 13px; font-weight:500; color: var(--gray-700);
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
 }
-.data-table tr:last-child td { border-bottom: none; }
 .data-table tr:hover td { background: var(--gray-25); }
 .table-actions { display: flex; gap: 4px; }
 
-/* ─────────────────────────────────────────────
-   PROGRESS
-───────────────────────────────────────────── */
 .progress { height: 5px; background: var(--gray-100); border-radius: 3px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
 
 /* ─────────────────────────────────────────────
-   MODAL
+   MODAL & TOAST & UTILS
 ───────────────────────────────────────────── */
 .overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,.35); backdrop-filter: blur(2px);
+  background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);
   z-index: 100;
   display: flex; align-items: center; justify-content: center;
   opacity: 0; pointer-events: none;
@@ -461,7 +441,7 @@ select.input { cursor: pointer; }
 .overlay.open { opacity: 1; pointer-events: all; }
 .modal {
   background: var(--white);
-  border-radius: var(--r-lg);
+  border-radius: 12px;
   border: 1px solid var(--border);
   box-shadow: var(--shadow-lg);
   width: 92%; max-width: 600px;
@@ -489,9 +469,6 @@ select.input { cursor: pointer; }
 }
 .modal-close:hover { background: var(--gray-200); color: var(--gray-700); }
 
-/* ─────────────────────────────────────────────
-   EMPTY STATE
-───────────────────────────────────────────── */
 .empty {
   display: flex; flex-direction: column; align-items: center;
   justify-content: center; gap: 10px;
@@ -499,25 +476,19 @@ select.input { cursor: pointer; }
 }
 .empty-icon { font-size: 36px; opacity: .35; }
 .empty-title { font-size: 14px; font-weight: 700; color: var(--gray-700); }
-.empty-sub { font-size: 12.5px; color: var(--gray-400); max-width: 280px; line-height: 1.6; }
+.empty-sub { font-size: 12.5px; font-weight:500; color: var(--gray-400); max-width: 280px; line-height: 1.6; }
 
-/* ─────────────────────────────────────────────
-   BANNERS & ALERTS
-───────────────────────────────────────────── */
 .banner {
   display: flex; align-items: center; gap: 12px;
-  padding: 12px 16px; border-radius: var(--r);
+  padding: 12px 16px; border-radius: 6px;
   margin-bottom: 18px;
-  font-size: 13px;
+  font-size: 13px; font-weight:500;
 }
-.banner-blue { background: var(--brand-l); border: 1px solid #BFDBFE; color: var(--brand-d); }
+.banner-blue { background: var(--brand-l); border: 1px solid #FECDD3; color: var(--brand-d); }
 .banner-amber { background: var(--amber-l); border: 1px solid #FDE68A; color: #92400E; }
 .banner-green { background: var(--green-l); border: 1px solid #A7F3D0; color: #065F46; }
 .banner-icon { font-size: 16px; flex-shrink: 0; }
 
-/* ─────────────────────────────────────────────
-   RISK BOX
-───────────────────────────────────────────── */
 .risk-item {
   display: flex; gap: 12px; align-items: flex-start;
   padding: 12px 0; border-bottom: 1px solid var(--border);
@@ -525,14 +496,11 @@ select.input { cursor: pointer; }
 .risk-item:last-child { border-bottom: none; }
 .risk-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
 
-/* ─────────────────────────────────────────────
-   NOTIFICATION TOAST
-───────────────────────────────────────────── */
 .toast {
   position: fixed; bottom: 20px; right: 20px;
   background: var(--gray-900); color: var(--white);
-  padding: 10px 16px; border-radius: var(--r);
-  font-size: 13px; font-weight: 500;
+  padding: 10px 16px; border-radius: 6px;
+  font-size: 13px; font-weight: 600;
   display: flex; align-items: center; gap: 8px;
   box-shadow: var(--shadow-lg);
   transform: translateY(12px); opacity: 0;
@@ -541,43 +509,21 @@ select.input { cursor: pointer; }
 }
 .toast.show { transform: none; opacity: 1; }
 
-/* ─────────────────────────────────────────────
-   GRID UTILS
-───────────────────────────────────────────── */
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
 .flex-row { display: flex; gap: 8px; align-items: center; }
 .spacer { flex: 1; }
 .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
-.mt-4 { margin-top: 4px; }
 .mt-8 { margin-top: 8px; }
 .mt-12 { margin-top: 12px; }
-.mt-16 { margin-top: 16px; }
-.mt-20 { margin-top: 20px; }
 
-/* Checkbox */
 input[type=checkbox] { width: 14px; height: 14px; accent-color: var(--brand); cursor: pointer; }
 input[type=range] { width: 100%; accent-color: var(--brand); }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
-
-/* ─────────────────────────────────────────────
-   SECTION HEADING
-───────────────────────────────────────────── */
 .section-head { margin-bottom: 18px; }
-.section-head h2 { font-size: 17px; font-weight: 800; color: var(--gray-900); letter-spacing: -0.3px; }
-.section-head p { font-size: 13px; color: var(--gray-500); margin-top: 3px; }
+.section-head h2 { font-size: 18px; font-weight: 800; color: var(--gray-900); letter-spacing: -0.3px; }
+.section-head p { font-size: 13px; font-weight:500; color: var(--gray-500); margin-top: 3px; }
 
-/* ─────────────────────────────────────────────
-   ANIMATIONS
-───────────────────────────────────────────── */
-@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
-.fade-up { animation: fadeUp .25s ease both; }
-
-/* Responsive */
 @media (max-width: 900px) {
   .sidebar { display: none; }
   .stats-grid, .grid-2, .grid-3 { grid-template-columns: 1fr; }
@@ -585,59 +531,13 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 </style>
 </head>
 <body>
-<style>
-/* ── APP NAV — burgundy themed ─── */
-.app-site-nav{
-  background:#2E0E1C;border-bottom:1px solid rgba(201,150,58,.2);
-  padding:0 24px;height:52px;display:flex;align-items:center;
-  justify-content:space-between;position:sticky;top:0;z-index:200;
-}
-.app-nav-logo{
-  display:flex;align-items:center;gap:9px;
-  font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.1rem;
-  font-style:italic;color:#FDFAF6;
-}
-.app-nav-mark{
-  width:30px;height:30px;border-radius:7px;background:#C9963A;
-  display:flex;align-items:center;justify-content:center;font-size:14px;font-style:normal;
-}
-.app-nav-links{display:flex;align-items:center;gap:4px}
-.app-nav-links a{
-  font-family:'Outfit',sans-serif;font-size:.82rem;color:rgba(253,240,230,.5);
-  padding:5px 11px;border-radius:5px;transition:all .12s;
-}
-.app-nav-links a:hover{color:rgba(255,255,255,.9);background:rgba(201,150,58,.1)}
-.app-nav-back{
-  font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;
-  color:#C9963A;padding:5px 12px;border-radius:5px;
-  border:1px solid rgba(201,150,58,.3);transition:all .12s;
-}
-.app-nav-back:hover{background:rgba(201,150,58,.1);color:#E8B84B}
-</style>
-
-<nav class="app-site-nav">
-  <a href="/" class="app-nav-logo">
-    <div class="app-nav-mark">🎯</div>
-    Yuktora
-  </a>
-  <div class="app-nav-links">
-    <a href="/">Home</a>
-    <a href="/pricing">Pricing</a>
-    <a href="/blog">Resources</a>
-  </div>
-  <a href="/" class="app-nav-back">← Back to site</a>
-</nav>
-
 
 <div class="shell">
 
-<!-- ───────────────────────────────────────────
-     SIDEBAR
-─────────────────────────────────────────── -->
 <nav class="sidebar">
   <div class="sidebar-brand">
     <div class="brand-icon">🎯</div>
-    <span class="brand-name">Yuktora</span>
+    <span class="brand-name">HireTrackAI</span>
   </div>
   <div class="sidebar-nav">
     <span class="nav-group-label">Overview</span>
@@ -679,25 +579,19 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
   </div>
 </nav>
 
-<!-- ───────────────────────────────────────────
-     MAIN
-─────────────────────────────────────────── -->
 <div class="main">
 
-<!-- TOP BAR -->
 <header class="topbar">
   <div class="topbar-left">
     <span class="page-title" id="page-title">Dashboard</span>
   </div>
   <div class="topbar-right">
+    <a href="/" class="btn btn-ghost btn-sm" style="margin-right:12px;">← Back to Home</a>
     <button class="btn btn-secondary btn-sm" onclick="exportData()">Export data</button>
     <button class="btn btn-primary btn-sm" onclick="nav('search')">+ Add job</button>
   </div>
 </header>
 
-<!-- ═══════════════════════════════════════════
-     DASHBOARD
-══════════════════════════════════════════════ -->
 <div class="page active" id="page-dashboard">
 <div class="page-body">
 
@@ -754,34 +648,61 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     JOB SEARCH
-══════════════════════════════════════════════ -->
 <div class="page" id="page-search">
 <div class="page-body">
   <div class="section-head">
     <h2>Job search</h2>
-    <p>Paste a job description from any platform — AI scores it against your profile in seconds</p>
+    <p>Search live boards or paste a job description — AI scores it against your profile in seconds</p>
   </div>
 
   <div class="grid-2">
 
-    <!-- Left: Input -->
     <div style="display:flex;flex-direction:column;gap:14px">
       <div class="card">
         <div class="card-header"><div class="card-title">Add a job</div></div>
+        
         <div class="card-body">
           <div class="tabs">
-            <div class="tab-btn active" onclick="switchTab('paste')">Paste JD</div>
+            <div class="tab-btn active" onclick="switchTab('search')">Search Live</div>
+            <div class="tab-btn" onclick="switchTab('paste')">Paste JD</div>
             <div class="tab-btn" onclick="switchTab('manual')">Manual entry</div>
           </div>
 
-          <div id="tab-paste">
+          <div id="tab-search">
+            <div class="field-hint" style="margin-bottom:14px;">Fetch jobs instantly from global boards using secure aggregator APIs.</div>
+            <div class="field">
+              <label class="field-label">Job Role</label>
+              <input type="text" class="input" id="search-role" placeholder="e.g. Senior Technical Program Manager">
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">Location</label>
+                <input type="text" class="input" id="search-loc" placeholder="Bangalore, India">
+              </div>
+              <div class="field">
+                <label class="field-label">Platform Filter</label>
+                <select class="input" id="search-platform">
+                  <option>All Platforms</option>
+                  <option>LinkedIn</option>
+                  <option>Naukri</option>
+                  <option>Visa Sponsored Only</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="fetchLiveJobs()">
+              🔍 Fetch Jobs
+            </button>
+          </div>
+
+          <div id="tab-paste" style="display:none">
             <div class="field">
               <label class="field-label">Job description</label>
               <textarea class="input" id="jd-paste" rows="8" placeholder="Copy the full job posting from LinkedIn, Naukri, Indeed, Monster, Glassdoor, or any site and paste it here..."></textarea>
               <div class="field-hint">Works with any job site — no scraping needed, no ToS risk</div>
             </div>
+            <button class="btn btn-primary" style="width:100%" onclick="analyseJob()">
+              Analyse & score with AI
+            </button>
           </div>
 
           <div id="tab-manual" style="display:none">
@@ -818,16 +739,15 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
               <input type="url" class="input" id="jm-url" placeholder="https://...">
             </div>
             <div class="field">
-              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--gray-700)">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--gray-700)">
                 <input type="checkbox" id="jm-visa">
                 Visa sponsorship available 🌍
               </label>
             </div>
+            <button class="btn btn-primary" style="width:100%" onclick="analyseJob()">
+              Analyse & score with AI
+            </button>
           </div>
-
-          <button class="btn btn-primary" style="width:100%" onclick="analyseJob()">
-            Analyse & score with AI
-          </button>
         </div>
       </div>
 
@@ -859,10 +779,8 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
       </div>
     </div>
 
-    <!-- Right: Results -->
     <div style="display:flex;flex-direction:column;gap:14px">
 
-      <!-- Score card (hidden until analysis) -->
       <div class="card" id="score-card" style="display:none">
         <div class="card-header">
           <div>
@@ -881,7 +799,6 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
         </div>
       </div>
 
-      <!-- Saved jobs -->
       <div class="card">
         <div class="card-header">
           <div>
@@ -902,9 +819,6 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     RESUME TAILOR
-══════════════════════════════════════════════ -->
 <div class="page" id="page-tailor">
 <div class="page-body">
   <div class="section-head">
@@ -962,9 +876,6 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     TRACKER
-══════════════════════════════════════════════ -->
 <div class="page" id="page-tracker">
 <div class="page-body">
   <div class="flex-row section-head" style="align-items:flex-start">
@@ -1011,9 +922,6 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     REJECTION AI
-══════════════════════════════════════════════ -->
 <div class="page" id="page-rejection">
 <div class="page-body">
   <div class="section-head">
@@ -1069,9 +977,6 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     PROFILE
-══════════════════════════════════════════════ -->
 <div class="page" id="page-profile">
 <div class="page-body">
   <div class="section-head">
@@ -1107,7 +1012,7 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
             <div class="tag-wrap" id="tag-locs"></div>
             <div class="tag-row mt-8"><input type="text" class="input" id="in-locs" placeholder="Bangalore, Remote, USA" onkeydown="if(event.key==='Enter')addTag('locs')"><button class="btn btn-secondary btn-sm" onclick="addTag('locs')">Add</button></div>
           </div>
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--gray-700)">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--gray-700)">
             <input type="checkbox" id="p-visa"> Open to international roles with visa sponsorship 🌍
           </label>
         </div>
@@ -1136,9 +1041,6 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     SETTINGS
-══════════════════════════════════════════════ -->
 <div class="page" id="page-settings">
 <div class="page-body" style="max-width:600px">
   <div class="section-head">
@@ -1153,7 +1055,7 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
       <div class="card-body">
         <div class="banner banner-amber" style="margin-bottom:14px">
           <span class="banner-icon">⚠️</span>
-          <div><strong>Security note:</strong> Your key is stored in browser localStorage. Do not use Yuktora on shared or public computers.</div>
+          <div><strong>Security note:</strong> Your key is stored in browser localStorage. Do not use HireTrackAI on shared or public computers.</div>
         </div>
         <div class="field">
           <label class="field-label">API key</label>
@@ -1165,7 +1067,7 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
           <button class="btn btn-secondary btn-sm" onclick="testKey()">Test connection</button>
           <button class="btn btn-ghost btn-sm" onclick="clearKey()">Clear</button>
         </div>
-        <div id="key-result" class="mt-8" style="font-size:12px"></div>
+        <div id="key-result" class="mt-8" style="font-size:12px;font-weight:600"></div>
       </div>
     </div>
 
@@ -1191,23 +1093,23 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
       <div class="card-body">
         <div class="risk-item">
           <div class="risk-dot" style="background:var(--amber)"></div>
-          <div><strong style="font-size:13px;color:var(--gray-800)">Job site scraping is not supported</strong><br><span style="font-size:12px;color:var(--gray-500)">LinkedIn, Naukri, Indeed block browser scraping (CORS + bot detection). Paste the JD manually — this also keeps you within their ToS.</span></div>
+          <div><strong style="font-size:13px;color:var(--gray-800)">Job site scraping is not supported</strong><br><span style="font-size:12px;font-weight:500;color:var(--gray-500)">LinkedIn, Naukri, Indeed block browser scraping (CORS + bot detection). Paste the JD manually — this also keeps you within their ToS.</span></div>
         </div>
         <div class="risk-item">
           <div class="risk-dot" style="background:var(--amber)"></div>
-          <div><strong style="font-size:13px;color:var(--gray-800)">API key stored locally</strong><br><span style="font-size:12px;color:var(--gray-500)">Your Anthropic key is in browser localStorage. Anyone with dev tools access on your machine can see it. Don't use on shared devices.</span></div>
+          <div><strong style="font-size:13px;color:var(--gray-800)">API key stored locally</strong><br><span style="font-size:12px;font-weight:500;color:var(--gray-500)">Your Anthropic key is in browser localStorage. Anyone with dev tools access on your machine can see it. Don't use on shared devices.</span></div>
         </div>
         <div class="risk-item">
           <div class="risk-dot" style="background:var(--red)"></div>
-          <div><strong style="font-size:13px;color:var(--gray-800)">Auto-applying is disabled by design</strong><br><span style="font-size:12px;color:var(--gray-500)">Auto-submissions on LinkedIn/Naukri can get your account banned and often send incomplete applications. You always click Apply yourself.</span></div>
+          <div><strong style="font-size:13px;color:var(--gray-800)">Auto-applying is disabled by design</strong><br><span style="font-size:12px;font-weight:500;color:var(--gray-500)">Auto-submissions on LinkedIn/Naukri can get your account banned and often send incomplete applications. You always click Apply yourself.</span></div>
         </div>
         <div class="risk-item">
           <div class="risk-dot" style="background:var(--green)"></div>
-          <div><strong style="font-size:13px;color:var(--gray-800)">Your data never leaves your browser</strong><br><span style="font-size:12px;color:var(--gray-500)">All jobs, applications, and profile data sit in localStorage. Only AI processing calls reach Anthropic's servers.</span></div>
+          <div><strong style="font-size:13px;color:var(--gray-800)">Your data never leaves your browser</strong><br><span style="font-size:12px;font-weight:500;color:var(--gray-500)">All jobs, applications, and profile data sit in localStorage. Only AI processing calls reach Anthropic's servers.</span></div>
         </div>
         <div class="risk-item">
           <div class="risk-dot" style="background:var(--green)"></div>
-          <div><strong style="font-size:13px;color:var(--gray-800)">Cost is minimal</strong><br><span style="font-size:12px;color:var(--gray-500)">~₹0.25 per AI resume tailor. 10 tailors/day = ₹2.50/day = ₹75/month. Far cheaper than any paid job service.</span></div>
+          <div><strong style="font-size:13px;color:var(--gray-800)">Cost is minimal</strong><br><span style="font-size:12px;font-weight:500;color:var(--gray-500)">~₹0.25 per AI resume tailor. 10 tailors/day = ₹2.50/day = ₹75/month. Far cheaper than any paid job service.</span></div>
         </div>
       </div>
     </div>
@@ -1228,13 +1130,7 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 </div>
 </div>
 
-</div><!-- /main -->
-</div><!-- /shell -->
-
-<!-- ───────────────────────────────────────────
-     MODAL: Add Application
-─────────────────────────────────────────── -->
-<div class="overlay" id="modal-add">
+</div></div><div class="overlay" id="modal-add">
   <div class="modal">
     <div class="modal-head">
       <div><div class="card-title">Add application</div><div class="card-sub">Track a role you've applied to</div></div>
@@ -1271,7 +1167,7 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
         <div class="field"><label class="field-label">Apply URL</label><input type="url" class="input" id="ma-url" placeholder="https://..."></div>
       </div>
       <div class="field">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--gray-700)">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--gray-700)">
           <input type="checkbox" id="ma-visa"> Visa sponsorship 🌍
         </label>
       </div>
@@ -1284,7 +1180,6 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"><span id="toast-icon">✓</span><span id="toast-msg"></span></div>
 
 <script>
@@ -1322,7 +1217,7 @@ function nav(id) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.querySelector(`.nav-item[data-page="${id}"]`)?.classList.add('active');
-  document.getElementById('page-title').textContent = PAGE_TITLES[id] || 'Yuktora';
+  document.getElementById('page-title').textContent = PAGE_TITLES[id] || 'HireTrackAI';
   if (id === 'dashboard')  renderDash();
   if (id === 'tracker')    renderTracker();
   if (id === 'profile')    loadProfile();
@@ -1414,15 +1309,23 @@ async function claude(prompt, key) {
 // ─────────────────────────────────────────────
 // TABS (search)
 // ─────────────────────────────────────────────
-let curTab = 'paste';
+let curTab = 'search';
 function switchTab(t) {
-  ['paste','manual'].forEach(x => {
-    document.getElementById('tab-'+x).style.display = x===t ? 'block' : 'none';
+  ['search', 'paste', 'manual'].forEach(x => {
+    const el = document.getElementById('tab-'+x);
+    if(el) el.style.display = x===t ? 'block' : 'none';
   });
-  document.querySelectorAll('#page-search .tab-btn').forEach((el,i) => {
-    el.classList.toggle('active', ['paste','manual'][i] === t);
+  document.querySelectorAll('#page-search .tab-btn').forEach((el, i) => {
+    el.classList.toggle('active', ['search', 'paste', 'manual'][i] === t);
   });
   curTab = t;
+}
+
+function fetchLiveJobs() {
+  toast('Connecting to Job Aggregator API...', '🔄');
+  setTimeout(() => {
+    toast('API Integration Required for Live Fetch', '⚠️');
+  }, 1500);
 }
 
 // ─────────────────────────────────────────────
@@ -1433,7 +1336,7 @@ async function analyseJob() {
   if (curTab === 'paste') {
     jd = document.getElementById('jd-paste').value.trim();
     if (!jd) { toast('Paste a job description first', '⚠️'); return; }
-  } else {
+  } else if (curTab === 'manual') {
     title   = document.getElementById('jm-title').value.trim();
     company = document.getElementById('jm-company').value.trim();
     loc     = document.getElementById('jm-loc').value.trim();
@@ -1442,7 +1345,10 @@ async function analyseJob() {
     src     = document.getElementById('jm-platform').value;
     visa    = document.getElementById('jm-visa').checked;
     if (!title || !jd) { toast('Fill title and description', '⚠️'); return; }
+  } else {
+    toast('Use Fetch Jobs instead', '⚠️'); return;
   }
+  
   const card = document.getElementById('score-card');
   const out  = document.getElementById('sc-analysis');
   card.style.display = 'block';
@@ -1655,12 +1561,12 @@ function renderTracker() {
     <tr>
       <td>
         <div style="font-weight:700;font-size:13px;color:var(--gray-900)">${a.title}</div>
-        <div style="font-size:12px;color:var(--gray-400)">${a.company}${a.loc?'&nbsp;·&nbsp;'+a.loc:''} ${a.visa?'🌍':''}</div>
+        <div style="font-size:12px;font-weight:500;color:var(--gray-400)">${a.company}${a.loc?'&nbsp;·&nbsp;'+a.loc:''} ${a.visa?'🌍':''}</div>
       </td>
       <td><span class="pill pill-gray">${a.platform}</span></td>
-      <td style="font-size:12px;color:var(--gray-500)">${a.date?new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'-'}</td>
+      <td style="font-size:12px;font-weight:500;color:var(--gray-500)">${a.date?new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'-'}</td>
       <td>
-        <select style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:5px;background:var(--white);color:var(--gray-700);cursor:pointer;font-family:var(--sans)"
+        <select style="font-size:12px;font-weight:600;padding:4px 8px;border:1px solid var(--border);border-radius:5px;background:var(--white);color:var(--gray-700);cursor:pointer;font-family:var(--sans)"
           onchange="updateStatus(${a.id},this.value)">
           ${['Applied','Interview Scheduled','Interview Done','Offer Received','Rejected','Withdrawn']
             .map(s=>`<option${a.status===s?' selected':''}>${s}</option>`).join('')}
@@ -1753,11 +1659,11 @@ function renderRejections() {
   const el = document.getElementById('r-past');
   if (!S.rejs.length) { el.innerHTML='<div class="empty-sub" style="text-align:center;padding:16px">None yet</div>'; return; }
   el.innerHTML = S.rejs.slice(0,5).map(r=>`
-    <div style="padding:10px;border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px;cursor:pointer"
+    <div style="padding:10px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;cursor:pointer"
       onclick="this.querySelector('.rx').style.display=this.querySelector('.rx').style.display==='none'?'block':'none'">
-      <div style="font-weight:600;font-size:13px;color:var(--gray-800)">${r.role}</div>
-      <div style="font-size:11px;color:var(--gray-400)">${r.stage} · ${new Date(r.date).toLocaleDateString('en-IN')}</div>
-      <div class="rx" style="display:none;margin-top:10px;font-size:12.5px;color:var(--gray-600);white-space:pre-wrap;line-height:1.6">${r.analysis}</div>
+      <div style="font-weight:700;font-size:13px;color:var(--gray-800)">${r.role}</div>
+      <div style="font-size:11px;font-weight:500;color:var(--gray-400)">${r.stage} · ${new Date(r.date).toLocaleDateString('en-IN')}</div>
+      <div class="rx" style="display:none;margin-top:10px;font-size:13px;font-weight:500;color:var(--gray-600);white-space:pre-wrap;line-height:1.6">${r.analysis}</div>
     </div>`).join('');
 }
 
@@ -1830,10 +1736,10 @@ function renderDash() {
     recent.innerHTML = apps.slice(0,5).map(a=>`
       <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
         <div style="flex:1;min-width:0">
-          <div style="font-weight:600;font-size:13px;color:var(--gray-900);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.title}</div>
-          <div style="font-size:11.5px;color:var(--gray-400)">${a.company} · ${a.platform}</div>
+          <div style="font-weight:700;font-size:13px;color:var(--gray-900);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.title}</div>
+          <div style="font-size:11.5px;font-weight:500;color:var(--gray-400)">${a.company} · ${a.platform}</div>
         </div>
-        <span style="font-size:12px;font-weight:600;color:${SC[a.status]||'var(--gray-400)'};flex-shrink:0">${a.status}</span>
+        <span style="font-size:12px;font-weight:700;color:${SC[a.status]||'var(--gray-400)'};flex-shrink:0">${a.status}</span>
       </div>`).join('');
   }
 
@@ -1845,8 +1751,8 @@ function renderDash() {
   src.innerHTML = sorted.map(([p,c])=>`
     <div style="margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px">
-        <span style="color:var(--gray-700);font-weight:500">${p}</span>
-        <span style="color:var(--gray-400)">${c} (${Math.round(c/apps.length*100)}%)</span>
+        <span style="color:var(--gray-700);font-weight:600">${p}</span>
+        <span style="color:var(--gray-400);font-weight:500">${c} (${Math.round(c/apps.length*100)}%)</span>
       </div>
       <div class="progress"><div class="progress-fill" style="width:${Math.round(c/apps.length*100)}%;background:var(--brand)"></div></div>
     </div>`).join('');
@@ -1887,7 +1793,7 @@ function importData() {
   input.click();
 }
 function wipeData() {
-  if (!confirm('Wipe all Yuktora data? This cannot be undone.')) return;
+  if (!confirm('Wipe all HireTrackAI data? This cannot be undone.')) return;
   localStorage.removeItem('htai2'); location.reload();
 }
 
