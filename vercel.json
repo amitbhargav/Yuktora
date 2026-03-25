@@ -4,11 +4,13 @@
   "rewrites": [
     { "source": "/app", "destination": "/app.html" },
     { "source": "/pricing", "destination": "/pricing.html" },
-    { "source": "/blog", "destination": "/blog.html" }
+    { "source": "/blog", "destination": "/blog.html" },
+    { "source": "/signin", "destination": "/signin.html" }
   ],
   "redirects": [
     { "source": "/app.html", "destination": "/app", "permanent": false },
     { "source": "/pricing.html", "destination": "/pricing", "permanent": false },
-    { "source": "/blog.html", "destination": "/blog", "permanent": false }
+    { "source": "/blog.html", "destination": "/blog", "permanent": false },
+    { "source": "/signin.html", "destination": "/signin", "permanent": false }
   ]
 }

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — Yuktora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+.signin-page{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,var(--cream) 0%,var(--blush) 60%,var(--cream-2) 100%);
+  padding:80px 24px 40px;position:relative;overflow:hidden;
+}
+.signin-page::before{
+  content:'';position:absolute;top:-80px;right:-60px;
+  width:400px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,var(--burg-soft),transparent 65%);
+  pointer-events:none;
+}
+.signin-page::after{
+  content:'';position:absolute;bottom:-60px;left:-40px;
+  width:280px;height:280px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,150,58,.07),transparent 65%);
+  pointer-events:none;
+}
+.signin-card{
+  background:#fff;border:1.5px solid var(--border);
+  border-radius:var(--r-xl);padding:44px 40px;
+  width:100%;max-width:440px;
+  box-shadow:var(--shadow-lg);
+  position:relative;overflow:hidden;
+  z-index:1;
+}
+.signin-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--burg),var(--gold),var(--burg-light));
+}
+.signin-logo{
+  display:flex;align-items:center;gap:10px;justify-content:center;
+  font-family:var(--font-display);font-weight:700;font-size:1.3rem;
+  font-style:italic;color:var(--ink);margin-bottom:8px;
+}
+.signin-logo-mark{
+  width:36px;height:36px;border-radius:9px;
+  background:var(--burg);display:flex;align-items:center;
+  justify-content:center;font-size:18px;font-style:normal;
+}
+.signin-tagline{
+  text-align:center;font-size:.82rem;color:var(--ink-3);
+  margin-bottom:32px;
+}
+.signin-divider{
+  display:flex;align-items:center;gap:12px;
+  margin:20px 0;font-size:.75rem;color:var(--ink-4);
+}
+.signin-divider::before,.signin-divider::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+.signin-heading{
+  font-family:var(--font-display);font-size:1.8rem;font-weight:600;
+  color:var(--ink);text-align:center;margin-bottom:6px;
+}
+.signin-sub{font-size:.85rem;color:var(--ink-3);text-align:center;margin-bottom:28px;}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:.78rem;font-weight:600;color:var(--ink-2);margin-bottom:5px;}
+.btn-signin{
+  width:100%;padding:13px;background:var(--burg);color:#fff;
+  border:none;border-radius:var(--r);font-family:var(--font-body);
+  font-size:.95rem;font-weight:600;cursor:pointer;
+  box-shadow:var(--shadow-burg);transition:all .18s;
+  margin-top:4px;letter-spacing:.02em;
+}
+.btn-signin:hover{background:var(--burg-2);transform:translateY(-1px)}
+.signin-api-note{
+  background:var(--burg-soft);border:1px solid var(--burg-mid);
+  border-radius:var(--r);padding:14px;margin-top:20px;
+  font-size:.8rem;color:var(--ink-2);line-height:1.6;
+}
+.signin-api-note strong{color:var(--burg);font-weight:600;}
+.signin-api-note a{color:var(--burg);text-decoration:underline;}
+.signin-footer-link{
+  text-align:center;margin-top:20px;
+  font-size:.82rem;color:var(--ink-3);
+}
+.signin-footer-link a{color:var(--burg);font-weight:600;}
+.btn-launch{
+  width:100%;padding:13px;background:#fff;color:var(--burg);
+  border:2px solid var(--burg);border-radius:var(--r);font-family:var(--font-body);
+  font-size:.95rem;font-weight:600;cursor:pointer;transition:all .18s;
+  letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-launch:hover{background:var(--burg-soft);transform:translateY(-1px)}
+.or-text{text-align:center;font-size:.8rem;color:var(--ink-4);margin:16px 0}
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="nav-wrap">
+    <a href="/" class="nav-logo">
+      <div class="nav-logo-mark">🎯</div>
+      Yuktora
+    </a>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/#how-it-works">How it works</a>
+      <a href="/#platforms">Platforms</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/blog">Resources</a>
+    </div>
+    <div class="nav-right">
+      <a href="/app" class="btn btn-burg btn-sm">Launch App →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="signin-page">
+  <div class="signin-card">
+    <div class="signin-logo">
+      <div class="signin-logo-mark">🎯</div>
+      Yuktora
+    </div>
+    <p class="signin-tagline">Your AI job search co-pilot</p>
+
+    <div class="signin-heading">Welcome back</div>
+    <p class="signin-sub">Yuktora stores all your data securely in your browser — no account needed to get started.</p>
+
+    <!-- Direct launch — primary action -->
+    <a href="/app" class="btn-launch">
+      🚀 Open My Dashboard →
+    </a>
+
+    <div class="or-text">— or set up your API key first —</div>
+
+    <!-- API key setup -->
+    <div class="form-group">
+      <label class="form-label">Anthropic API Key</label>
+      <input class="input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." autocomplete="off">
+    </div>
+    <button class="btn-signin" onclick="saveAndLaunch()">Save Key &amp; Open Dashboard →</button>
+
+    <div class="signin-api-note">
+      <strong>What is this?</strong> Yuktora uses Claude AI to score jobs and tailor your resume. On the free plan, you provide your own key — it costs ~₹0.25 per resume tailor.<br><br>
+      Get a free key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> (no credit card needed for the free tier).
+    </div>
+
+    <div class="signin-footer-link">
+      New here? <a href="/app">Launch the app free →</a> — no key needed to track jobs.
+    </div>
+  </div>
+</div>
+
+<script>
+function saveAndLaunch() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key) {
+    alert('Please enter your API key, or click "Open My Dashboard" to launch without one.');
+    return;
+  }
+  // Save to localStorage so the app picks it up
+  try {
+    const state = JSON.parse(localStorage.getItem('htai2') || '{}');
+    state.apiKey = key;
+    localStorage.setItem('htai2', JSON.stringify(state));
+  } catch(e) {
+    localStorage.setItem('htai_apikey', key);
+  }
+  window.location.href = '/app';
+}
+// If user already has a key, prefill
+try {
+  const state = JSON.parse(localStorage.getItem('htai2') || '{}');
+  if (state.apiKey) {
+    document.getElementById('api-key-input').value = state.apiKey;
+  }
+} catch(e) {}
+</script>
+
+</body>
+</html>

@@ -5,35 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Yuktora — AI Job Search Co-pilot</title>
 <meta name="description" content="Score any job, tailor your resume with AI, track every application. Your unfair advantage in the job market.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 <style>
-
-/* ── HERO ────────────────────────────────── */
+/* ── HERO ─────────────────────────────────── */
 .hero{
-  padding-top:64px;
-  background:var(--cream);
+  padding-top:64px;background:var(--cream);
   border-bottom:1px solid var(--border);
   position:relative;overflow:hidden;
 }
-/* Subtle texture pattern */
+.hero-accent-line{
+  position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--burg),var(--gold),var(--burg-light));
+}
 .hero::before{
   content:'';position:absolute;inset:0;pointer-events:none;
   background-image:radial-gradient(circle,rgba(125,29,63,.04) 1px,transparent 1px);
   background-size:32px 32px;
   mask-image:radial-gradient(ellipse 80% 70% at 70% 50%,black 30%,transparent 75%);
 }
-.hero-accent-line{
-  position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--burg),var(--gold),var(--burg-light));
-}
 .hero-inner{
   position:relative;z-index:1;
   display:grid;grid-template-columns:1fr 1fr;
-  gap:72px;align-items:center;
-  padding:88px 0 80px;
+  gap:72px;align-items:center;padding:88px 0 80px;
 }
 .hero-kicker{
   display:inline-flex;align-items:center;gap:8px;
@@ -44,50 +40,32 @@
 }
 .hero-kicker-dot{width:5px;height:5px;border-radius:50%;background:var(--burg);animation:pulse 2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
-.hero h1{
-  margin-bottom:20px;
-  font-size:clamp(3rem,5.5vw,4.8rem);
-}
+.hero h1{margin-bottom:20px;font-size:clamp(3rem,5.5vw,4.8rem);}
 .hero h1 em{color:var(--burg);font-style:italic}
-.hero-sub{
-  font-size:1.08rem;color:var(--ink-2);line-height:1.78;
-  margin-bottom:34px;max-width:460px;font-weight:400;
-}
+.hero-sub{font-size:1.08rem;color:var(--ink-2);line-height:1.78;margin-bottom:34px;max-width:460px;font-weight:400;}
 .hero-ctas{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:32px}
-.hero-trust{
-  display:flex;flex-wrap:wrap;gap:18px;
-  font-size:.78rem;color:var(--ink-3);
-}
+.hero-trust{display:flex;flex-wrap:wrap;gap:18px;font-size:.78rem;color:var(--ink-3);}
 .hero-trust-item{display:flex;align-items:center;gap:6px}
 .hero-trust-check{color:var(--green);font-weight:700;font-size:.85rem}
 
-/* Dashboard mock */
-.mock-outer{
-  position:relative;
-}
+/* Mock */
+.mock-outer{position:relative;}
 .mock-outer::before{
-  content:'';
-  position:absolute;top:20px;left:20px;right:-12px;bottom:-12px;
+  content:'';position:absolute;top:20px;left:20px;right:-12px;bottom:-12px;
   background:var(--burg-soft);border:1.5px solid var(--burg-mid);
   border-radius:var(--r-xl);z-index:0;
 }
 .hero-mock{
   position:relative;z-index:1;
-  background:#fff;
-  border:1.5px solid var(--border);
-  border-radius:var(--r-xl);
-  box-shadow:var(--shadow-lg);
-  overflow:hidden;
+  background:#fff;border:1.5px solid var(--border);
+  border-radius:var(--r-xl);box-shadow:var(--shadow-lg);overflow:hidden;
 }
 .mock-bar{
   background:linear-gradient(135deg,var(--burg-3),var(--burg-2));
   padding:11px 16px;display:flex;align-items:center;gap:7px;
 }
 .mock-dot{width:9px;height:9px;border-radius:50%}
-.mock-url{
-  flex:1;text-align:center;font-family:var(--font-mono);
-  font-size:.66rem;color:rgba(255,255,255,.35);
-}
+.mock-url{flex:1;text-align:center;font-family:var(--font-mono);font-size:.66rem;color:rgba(255,255,255,.35);}
 .mock-body{padding:16px;display:flex;flex-direction:column;gap:10px}
 .mock-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .mock-stat{border-radius:var(--r);padding:11px 13px;border:1px solid var(--border)}
@@ -96,28 +74,10 @@
 .ms-b{background:linear-gradient(135deg,var(--burg-soft),rgba(125,29,63,.03));border-color:var(--burg-mid)}.ms-b .mock-stat-val{color:var(--burg)}
 .ms-g{background:linear-gradient(135deg,var(--gold-soft),rgba(201,150,58,.03));border-color:var(--gold-mid)}.ms-g .mock-stat-val{color:var(--gold-2)}
 .ms-k{background:var(--green-soft);border-color:rgba(26,122,90,.15)}.ms-k .mock-stat-val{color:var(--green)}
-.mock-label{
-  font-size:.6rem;color:var(--ink-3);font-weight:600;
-  letter-spacing:.08em;text-transform:uppercase;
-  display:flex;justify-content:space-between;
-  padding:4px 2px;border-bottom:1.5px solid var(--border);
-  font-family:var(--font-mono);
-}
-.mock-job{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 10px;border-radius:var(--r);
-  border:1px solid var(--border);background:#fff;transition:all .12s;
-}
-.mock-job.top{
-  background:linear-gradient(135deg,var(--burg-soft),rgba(125,29,63,.02));
-  border-color:var(--burg-mid);
-}
-.mock-co{
-  width:30px;height:30px;border-radius:6px;
-  background:var(--cream-3);border:1px solid var(--border-2);
-  display:flex;align-items:center;justify-content:center;
-  font-size:.68rem;font-weight:700;color:var(--ink-3);flex-shrink:0;
-}
+.mock-label{font-size:.6rem;color:var(--ink-3);font-weight:600;letter-spacing:.08em;text-transform:uppercase;display:flex;justify-content:space-between;padding:4px 2px;border-bottom:1.5px solid var(--border);font-family:var(--font-mono);}
+.mock-job{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);border:1px solid var(--border);background:#fff;}
+.mock-job.top{background:linear-gradient(135deg,var(--burg-soft),rgba(125,29,63,.02));border-color:var(--burg-mid);}
+.mock-co{width:30px;height:30px;border-radius:6px;background:var(--cream-3);border:1px solid var(--border-2);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;color:var(--ink-3);flex-shrink:0;}
 .mock-info{flex:1;min-width:0}
 .mock-role{font-size:.78rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mock-meta{font-size:.6rem;color:var(--ink-3);font-family:var(--font-mono);margin-top:1px}
@@ -125,88 +85,40 @@
 .sc-hi{background:var(--green-soft);color:var(--green);border:1px solid var(--green-mid)}
 .sc-md{background:var(--amber-soft);color:var(--amber)}
 
-/* ── STATS BAND ──────────────────────────── */
-.stats-band{
-  background:#fff;
-  border-bottom:1px solid var(--border);
-  padding:28px 0;
-}
-.stats-row{
-  display:flex;align-items:center;justify-content:space-around;
-  gap:32px;flex-wrap:wrap;
-}
+/* Stats band */
+.stats-band{background:#fff;border-bottom:1px solid var(--border);padding:28px 0;}
+.stats-row{display:flex;align-items:center;justify-content:space-around;gap:32px;flex-wrap:wrap;}
 .stat-item{text-align:center}
-.stat-num{
-  font-family:var(--font-display);font-weight:700;font-size:2.2rem;
-  color:var(--burg);letter-spacing:-.02em;display:block;line-height:1;
-}
+.stat-num{font-family:var(--font-display);font-weight:700;font-size:2.2rem;color:var(--burg);letter-spacing:-.02em;display:block;line-height:1;}
 .stat-sep{width:1px;height:40px;background:var(--border)}
 .stat-label{font-size:.75rem;color:var(--ink-3);margin-top:4px;display:block;letter-spacing:.02em}
 
-/* ── HOW IT WORKS ────────────────────────── */
-.hiw-section{
-  background:var(--cream-2);
-  border-top:1px solid var(--border);
-  border-bottom:1px solid var(--border);
-}
-.steps-grid{
-  display:grid;grid-template-columns:repeat(4,1fr);
-  gap:0;margin-top:52px;
-  border:1.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;
-}
-.step{
-  padding:32px 24px;background:#fff;
-  border-right:1px solid var(--border);
-  position:relative;overflow:hidden;
-  transition:background .18s;
-}
+/* How it works */
+.hiw-section{background:var(--cream-2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:52px;border:1.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;}
+.step{padding:32px 24px;background:#fff;border-right:1px solid var(--border);position:relative;overflow:hidden;transition:background .18s;}
 .step:last-child{border-right:none}
 .step:hover{background:var(--burg-soft)}
-.step::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  transform:scaleX(0);transition:transform .25s ease;transform-origin:left;
-}
+.step::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;transform:scaleX(0);transition:transform .25s ease;transform-origin:left;}
 .step:nth-child(1)::before{background:var(--burg)}
 .step:nth-child(2)::before{background:var(--gold)}
 .step:nth-child(3)::before{background:var(--burg-light)}
 .step:nth-child(4)::before{background:var(--green)}
 .step:hover::before{transform:scaleX(1)}
-.step-num{
-  font-family:var(--font-display);font-weight:700;font-size:3rem;
-  line-height:1;margin-bottom:16px;color:var(--cream-4);
-  transition:color .18s;
-}
+.step-num{font-family:var(--font-display);font-weight:700;font-size:3rem;line-height:1;margin-bottom:16px;color:var(--cream-4);transition:color .18s;}
 .step:hover .step-num{color:var(--burg-mid)}
 .step-icon{font-size:1.5rem;margin-bottom:10px}
 .step h3{font-size:.93rem;margin-bottom:7px;color:var(--ink)}
 .step p{font-size:.82rem;color:var(--ink-3);line-height:1.62}
 
-/* ── FEATURES ────────────────────────────── */
+/* Features */
 .features-section{background:var(--cream)}
-.features-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:14px;margin-top:52px;
-}
-.feat-card{
-  background:#fff;border:1px solid var(--border);
-  border-radius:var(--r-lg);padding:26px;
-  transition:all .2s ease;position:relative;
-}
-.feat-card::after{
-  content:'';position:absolute;top:0;left:0;width:2px;bottom:0;
-  border-radius:var(--r-lg) 0 0 var(--r-lg);
-  background:var(--burg);transform:scaleY(0);
-  transition:transform .25s ease;transform-origin:bottom;
-}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:52px;}
+.feat-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:26px;transition:all .2s ease;position:relative;}
+.feat-card::after{content:'';position:absolute;top:0;left:0;width:2px;bottom:0;border-radius:var(--r-lg) 0 0 var(--r-lg);background:var(--burg);transform:scaleY(0);transition:transform .25s ease;transform-origin:bottom;}
 .feat-card:hover{border-color:var(--border-burg);box-shadow:var(--shadow-sm);transform:translateY(-3px)}
 .feat-card:hover::after{transform:scaleY(1)}
-.feat-icon-wrap{
-  width:46px;height:46px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:20px;margin-bottom:14px;
-  border:1px solid var(--border);
-}
-/* Each icon a slightly different warm tint */
+.feat-icon-wrap{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px;border:1px solid var(--border);}
 .fi-1{background:linear-gradient(135deg,#F9EEF3,#F5E4EB)}
 .fi-2{background:linear-gradient(135deg,#FDF5E8,#F9EDD0)}
 .fi-3{background:linear-gradient(135deg,#EAF7F2,#D4F0E6)}
@@ -216,154 +128,63 @@
 .feat-card h3{font-size:.96rem;margin-bottom:7px;color:var(--ink)}
 .feat-card p{font-size:.83rem;color:var(--ink-3);line-height:1.63}
 
-/* ── PLATFORMS ───────────────────────────── */
-.platforms-section{
-  background:linear-gradient(135deg,var(--burg-3) 0%,#3E0A1A 100%);
-  border-top:3px solid var(--gold);
-  padding:72px 0;
-}
+/* Platforms */
+.platforms-section{background:linear-gradient(135deg,var(--burg-3) 0%,#3E0A1A 100%);border-top:3px solid var(--gold);padding:72px 0;}
 .platforms-section .eyebrow{color:var(--gold);opacity:.8}
 .platforms-section .eyebrow::before{background:var(--gold)}
 .platforms-section h2{color:#fff}
 .platforms-section p{color:rgba(255,255,255,.55)}
-.platforms-grid{
-  display:flex;flex-wrap:wrap;gap:8px;margin-top:36px;justify-content:center;
-}
-.platform-tag{
-  display:flex;align-items:center;gap:7px;
-  padding:9px 17px;border-radius:100px;
-  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
-  font-size:.85rem;font-weight:500;color:rgba(255,255,255,.65);
-  transition:all .15s;
-}
-.platform-tag:hover{
-  background:rgba(201,150,58,.15);border-color:var(--gold-mid);
-  color:var(--gold);transform:translateY(-1px);
-}
+.platforms-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:36px;justify-content:center;}
+.platform-tag{display:flex;align-items:center;gap:7px;padding:9px 17px;border-radius:100px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);font-size:.85rem;font-weight:500;color:rgba(255,255,255,.65);transition:all .15s;}
+.platform-tag:hover{background:rgba(201,150,58,.15);border-color:var(--gold-mid);color:var(--gold);transform:translateY(-1px);}
 
-/* ── VS SECTION ──────────────────────────── */
+/* VS */
 .vs-section{background:var(--cream-2)}
-.vs-grid{
-  display:grid;grid-template-columns:1fr auto 1fr;
-  gap:20px;align-items:start;margin-top:52px;
-}
-.vs-card{
-  background:#fff;border:1.5px solid var(--border);
-  border-radius:var(--r-xl);padding:30px;
-}
-.vs-card.winner{
-  border-color:var(--burg-mid);
-  box-shadow:0 0 0 3px var(--burg-soft);
-}
-.vs-title{
-  font-family:var(--font-display);font-size:1.1rem;font-weight:600;
-  margin-bottom:16px;color:var(--ink-3);
-}
+.vs-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:20px;align-items:start;margin-top:52px;}
+.vs-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r-xl);padding:30px;}
+.vs-card.winner{border-color:var(--burg-mid);box-shadow:0 0 0 3px var(--burg-soft);}
+.vs-title{font-family:var(--font-display);font-size:1.1rem;font-weight:600;margin-bottom:16px;color:var(--ink-3);}
 .vs-title.win{color:var(--burg)}
-.vs-item{
-  display:flex;align-items:flex-start;gap:9px;font-size:.85rem;
-  color:var(--ink-2);padding:8px 0;
-  border-bottom:1px solid var(--border);line-height:1.45;
-}
+.vs-item{display:flex;align-items:flex-start;gap:9px;font-size:.85rem;color:var(--ink-2);padding:8px 0;border-bottom:1px solid var(--border);line-height:1.45;}
 .vs-item:last-child{border-bottom:none}
 .vi-no{color:var(--cream-4);flex-shrink:0;font-weight:600}
 .vi-yes{color:var(--burg);flex-shrink:0;font-weight:600}
 .vs-mid{display:flex;align-items:center;justify-content:center;padding-top:90px}
-.vs-badge{
-  background:var(--cream-3);border:1.5px solid var(--border-2);
-  border-radius:20px;padding:6px 14px;
-  font-size:.8rem;font-weight:600;color:var(--ink-3);
-}
+.vs-badge{background:var(--cream-3);border:1.5px solid var(--border-2);border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:600;color:var(--ink-3);}
 
-/* ── RECRUITER LEAD CAPTURE ──────────────── */
-.recruiter-section{
-  background:var(--cream);
-  border-top:1px solid var(--border);
-  padding:88px 0;
-}
-.recruiter-eyebrow{
-  display:inline-flex;align-items:center;gap:7px;
-  background:var(--burg-soft);border:1px solid var(--burg-mid);
-  color:var(--burg);font-size:.72rem;font-weight:600;
-  letter-spacing:.1em;text-transform:uppercase;
-  padding:5px 13px;border-radius:20px;margin-bottom:18px;
-}
-.recruiter-inner{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:72px;align-items:center;
-}
-.recruiter-section h2{margin-bottom:14px}
+/* Recruiter */
+.recruiter-section{background:var(--cream);border-top:1px solid var(--border);padding:88px 0;}
+.recruiter-eyebrow{display:inline-flex;align-items:center;gap:7px;background:var(--burg-soft);border:1px solid var(--burg-mid);color:var(--burg);font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:5px 13px;border-radius:20px;margin-bottom:18px;}
+.recruiter-inner{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;}
 .recruiter-perks{display:flex;flex-direction:column;gap:12px;margin-top:22px}
-.recruiter-perk{
-  display:flex;align-items:flex-start;gap:11px;
-  font-size:.88rem;color:var(--ink-2);line-height:1.5;
-}
-.perk-check{
-  width:22px;height:22px;border-radius:50%;
-  background:var(--burg-soft);border:1px solid var(--burg-mid);
-  flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  font-size:.7rem;color:var(--burg);font-weight:700;margin-top:1px;
-}
-/* Lead form */
-.lead-form{
-  background:#fff;border-radius:var(--r-xl);
-  padding:36px;box-shadow:var(--shadow-lg);
-  border:1px solid var(--border);
-  position:relative;overflow:hidden;
-}
-.lead-form::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--burg),var(--gold),var(--burg-light));
-}
-.lead-form h3{
-  font-family:var(--font-display);font-size:1.5rem;
-  color:var(--ink);margin-bottom:6px;
-}
+.recruiter-perk{display:flex;align-items:flex-start;gap:11px;font-size:.88rem;color:var(--ink-2);line-height:1.5;}
+.perk-check{width:22px;height:22px;border-radius:50%;background:var(--burg-soft);border:1px solid var(--burg-mid);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:var(--burg);font-weight:700;margin-top:1px;}
+.lead-form{background:#fff;border-radius:var(--r-xl);padding:36px;box-shadow:var(--shadow-lg);border:1px solid var(--border);position:relative;overflow:hidden;}
+.lead-form::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--burg),var(--gold),var(--burg-light));}
+.lead-form h3{font-family:var(--font-display);font-size:1.5rem;color:var(--ink);margin-bottom:6px;}
 .lead-sub{font-size:.85rem;color:var(--ink-3);margin-bottom:22px}
 .form-group{margin-bottom:14px}
 .form-label{display:block;font-size:.76rem;font-weight:600;color:var(--ink-2);margin-bottom:5px;letter-spacing:.02em}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.form-submit{
-  width:100%;padding:13px;
-  background:var(--burg);color:#fff;
-  border:none;border-radius:var(--r);
-  font-family:var(--font-body);font-size:.95rem;font-weight:600;
-  cursor:pointer;margin-top:6px;
-  box-shadow:var(--shadow-burg);
-  transition:all .18s;letter-spacing:.02em;
-}
-.form-submit:hover{background:var(--burg-2);transform:translateY(-1px);box-shadow:0 8px 32px rgba(125,29,63,.35)}
+.form-submit{width:100%;padding:13px;background:var(--burg);color:#fff;border:none;border-radius:var(--r);font-family:var(--font-body);font-size:.95rem;font-weight:600;cursor:pointer;margin-top:6px;box-shadow:var(--shadow-burg);transition:all .18s;letter-spacing:.02em;}
+.form-submit:hover{background:var(--burg-2);transform:translateY(-1px)}
+.form-submit:disabled{opacity:.7;transform:none;cursor:wait}
 .form-note{font-size:.72rem;color:var(--ink-4);text-align:center;margin-top:9px}
 .form-success{display:none;text-align:center;padding:24px 0}
 .form-success-icon{font-size:2.5rem;margin-bottom:10px}
 .form-success h4{font-family:var(--font-display);font-size:1.3rem;color:var(--burg);margin-bottom:6px}
 .form-success p{font-size:.85rem;color:var(--ink-3)}
 
-/* ── CTA ─────────────────────────────────── */
-.cta-section{
-  background:linear-gradient(135deg,var(--burg-3) 0%,#3E0A1A 50%,var(--burg-2) 100%);
-  padding:104px 0;text-align:center;position:relative;overflow:hidden;
-  border-top:3px solid var(--gold);
-}
-.cta-section::before{
-  content:'';position:absolute;inset:0;pointer-events:none;
-  background-image:radial-gradient(circle,rgba(201,150,58,.06) 1px,transparent 1px);
-  background-size:40px 40px;
-}
-.cta-orb{
-  position:absolute;border-radius:50%;pointer-events:none;
-  filter:blur(60px);
-}
-.cta-section h2{
-  color:#fff;margin-bottom:14px;font-size:clamp(2.4rem,4.5vw,4rem);
-  position:relative;z-index:1;
-}
+/* CTA */
+.cta-section{background:linear-gradient(135deg,var(--burg-3) 0%,#3E0A1A 50%,var(--burg-2) 100%);padding:104px 0;text-align:center;position:relative;overflow:hidden;border-top:3px solid var(--gold);}
+.cta-section::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,rgba(201,150,58,.06) 1px,transparent 1px);background-size:40px 40px;}
+.cta-orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(60px);}
+.cta-section h2{color:#fff;margin-bottom:14px;font-size:clamp(2.4rem,4.5vw,4rem);position:relative;z-index:1;}
 .cta-section h2 em{color:var(--gold)}
-.cta-section p{color:rgba(255,255,255,.6);max-width:440px;margin:0 auto 36px;position:relative;z-index:1}
-.cta-btns{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;position:relative;z-index:1}
-.cta-note{font-size:.76rem;color:rgba(255,255,255,.3);margin-top:14px;position:relative;z-index:1}
+.cta-section p{color:rgba(255,255,255,.6);max-width:440px;margin:0 auto 36px;position:relative;z-index:1;}
+.cta-btns{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;position:relative;z-index:1;}
+.cta-note{font-size:.76rem;color:rgba(255,255,255,.3);margin-top:14px;position:relative;z-index:1;}
 
-/* ── RESPONSIVE ──────────────────────────── */
 @media(max-width:960px){
   .hero-inner{grid-template-columns:1fr;gap:48px}
   .mock-outer::before{display:none}
@@ -382,6 +203,7 @@
 </head>
 <body>
 
+<!-- NAV — includes Platforms, Sign in goes to /signin -->
 <nav class="site-nav">
   <div class="nav-wrap">
     <a href="/" class="nav-logo">
@@ -389,15 +211,15 @@
       Yuktora
     </a>
     <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#how-it-works">How it works</a>
-      <a href="#platforms">Platforms</a>
+      <a href="/#features">Features</a>
+      <a href="/#how-it-works">How it works</a>
+      <a href="/#platforms">Platforms</a>
       <a href="/pricing">Pricing</a>
       <a href="/blog">Resources</a>
-      <a href="#hire">For Recruiters</a>
+      <a href="/#hire">For Recruiters</a>
     </div>
     <div class="nav-right">
-      <a href="/app" class="btn btn-ghost btn-sm">Sign in</a>
+      <a href="/signin" class="btn btn-ghost btn-sm">Sign in</a>
       <a href="/app" class="btn btn-burg btn-sm">Launch App →</a>
     </div>
   </div>
@@ -408,7 +230,7 @@
   <div class="hero-accent-line"></div>
   <div class="container">
     <div class="hero-inner">
-      <div class="">
+      <div>
         <div class="hero-kicker">
           <span class="hero-kicker-dot"></span>
           Powered by Claude AI · Built in Bengaluru
@@ -417,7 +239,7 @@
         <p class="hero-sub">Paste any job description — AI scores your match, rewrites your resume, and tracks every application. LinkedIn to Naukri to international visa roles. One dashboard.</p>
         <div class="hero-ctas">
           <a href="/app" class="btn btn-burg btn-lg">Start Free — No signup →</a>
-          <a href="#how-it-works" class="btn btn-outline btn-lg">See how it works</a>
+          <a href="/#how-it-works" class="btn btn-outline btn-lg">See how it works</a>
         </div>
         <div class="hero-trust">
           <span class="hero-trust-item"><span class="hero-trust-check">✓</span> No signup required</span>
@@ -426,15 +248,14 @@
           <span class="hero-trust-item"><span class="hero-trust-check">✓</span> Built in Bengaluru 🇮🇳</span>
         </div>
       </div>
-
-      <div class="">
+      <div>
         <div class="mock-outer">
           <div class="hero-mock">
             <div class="mock-bar">
               <div class="mock-dot" style="background:#FF5F57"></div>
               <div class="mock-dot" style="background:#FEBC2E"></div>
               <div class="mock-dot" style="background:#28C840"></div>
-              <div class="mock-url">hiretrack.ai / dashboard</div>
+              <div class="mock-url">yuktora.vercel.app / dashboard</div>
             </div>
             <div class="mock-body">
               <div class="mock-stats">
@@ -496,30 +317,10 @@
     <h2>From JD to tailored application<br>in under 60 seconds</h2>
     <p style="max-width:460px;margin-top:10px">No scraping, no auto-applying, no bans. You click Apply — AI does everything else.</p>
     <div class="steps-grid">
-      <div class="step">
-        <div class="step-num">01</div>
-        <div class="step-icon">📋</div>
-        <h3>Paste the JD</h3>
-        <p>Copy any job from LinkedIn, Naukri, Indeed, Monster, or any global board and paste it in.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">02</div>
-        <div class="step-icon">✦</div>
-        <h3>AI scores your match</h3>
-        <p>Claude analyses against your profile — 0–100 score, gaps identified, visa sponsorship flagged.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">03</div>
-        <div class="step-icon">✍</div>
-        <h3>Tailor your resume</h3>
-        <p>One click — Claude rewrites your bullets for this exact JD. ATS-ready, your voice.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">04</div>
-        <div class="step-icon">📊</div>
-        <h3>Track everything</h3>
-        <p>Log applications, update statuses, analyse rejections — full pipeline in one dashboard.</p>
-      </div>
+      <div class="step"><div class="step-num">01</div><div class="step-icon">📋</div><h3>Paste the JD</h3><p>Copy any job from LinkedIn, Naukri, Indeed, Monster, or any global board and paste it in.</p></div>
+      <div class="step"><div class="step-num">02</div><div class="step-icon">✦</div><h3>AI scores your match</h3><p>Claude analyses against your profile — 0–100 score, gaps identified, visa sponsorship flagged.</p></div>
+      <div class="step"><div class="step-num">03</div><div class="step-icon">✍</div><h3>Tailor your resume</h3><p>One click — Claude rewrites your bullets for this exact JD. ATS-ready, your voice.</p></div>
+      <div class="step"><div class="step-num">04</div><div class="step-icon">📊</div><h3>Track everything</h3><p>Log applications, update statuses, analyse rejections — full pipeline in one dashboard.</p></div>
     </div>
   </div>
 </section>
@@ -528,38 +329,14 @@
 <section class="section features-section" id="features">
   <div class="container">
     <div class="eyebrow">Features</div>
-    <h2>Every tool your search needs.<br><em>Nothing it doesn't.</em></h2>
+    <h2>Every tool your search needs.<br><em class="text-burg">Nothing it doesn't.</em></h2>
     <div class="features-grid">
-      <div class="feat-card">
-        <div class="feat-icon-wrap fi-1">🎯</div>
-        <h3>AI Match Scoring</h3>
-        <p>0–100 match score with specific strengths, gaps, and exact keywords missing from your resume. Visa sponsorship auto-detected.</p>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon-wrap fi-2">✦</div>
-        <h3>Resume Tailor</h3>
-        <p>AI rewrites your resume bullets for each JD — Balanced, Aggressive, or Conservative modes. ATS-ready in seconds. Download as .txt.</p>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon-wrap fi-3">📊</div>
-        <h3>Application Tracker</h3>
-        <p>Every application across every platform in one view. Filter by status, platform, visa sponsorship. Update status in one click.</p>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon-wrap fi-4">🧠</div>
-        <h3>Rejection Analyser</h3>
-        <p>AI explains exactly why you were filtered out — specific gaps, missing keywords, and precise fixes to try next time.</p>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon-wrap fi-5">🌍</div>
-        <h3>Global + Visa Roles</h3>
-        <p>Works with any job board globally. AI auto-detects visa sponsorship. Track your international pipeline separately from India roles.</p>
-      </div>
-      <div class="feat-card">
-        <div class="feat-icon-wrap fi-6">🔒</div>
-        <h3>100% Private</h3>
-        <p>All data stays in your browser. No servers, no accounts, zero collection. Only the Claude AI API is called for analysis.</p>
-      </div>
+      <div class="feat-card"><div class="feat-icon-wrap fi-1">🎯</div><h3>AI Match Scoring</h3><p>0–100 match score with specific strengths, gaps, and exact keywords missing from your resume. Visa sponsorship auto-detected.</p></div>
+      <div class="feat-card"><div class="feat-icon-wrap fi-2">✦</div><h3>Resume Tailor</h3><p>AI rewrites your resume bullets for each JD — Balanced, Aggressive, or Conservative modes. ATS-ready in seconds. Download as .txt.</p></div>
+      <div class="feat-card"><div class="feat-icon-wrap fi-3">📊</div><h3>Application Tracker</h3><p>Every application across every platform in one view. Filter by status, platform, visa sponsorship. Update status in one click.</p></div>
+      <div class="feat-card"><div class="feat-icon-wrap fi-4">🧠</div><h3>Rejection Analyser</h3><p>AI explains exactly why you were filtered out — specific gaps, missing keywords, and precise fixes to try next time.</p></div>
+      <div class="feat-card"><div class="feat-icon-wrap fi-5">🌍</div><h3>Global + Visa Roles</h3><p>Works with any job board globally. AI auto-detects visa sponsorship. Track your international pipeline separately from India roles.</p></div>
+      <div class="feat-card"><div class="feat-icon-wrap fi-6">🔒</div><h3>100% Private</h3><p>All data stays in your browser. No servers, no accounts, zero collection. Only the Claude AI API is called for analysis.</p></div>
     </div>
   </div>
 </section>
@@ -592,7 +369,7 @@
   <div class="container">
     <div style="text-align:center">
       <div class="eyebrow" style="justify-content:center">Why not just use ChatGPT?</div>
-      <h2>"ChatGPT is a calculator.<br><em>Yuktora is the spreadsheet.</em>"</h2>
+      <h2>"ChatGPT is a calculator.<br><em class="text-burg">Yuktora is the spreadsheet.</em>"</h2>
       <p style="max-width:480px;margin:10px auto 0">ChatGPT forgets everything after each chat. Yuktora remembers every job, application, and rejection — and gets smarter the more you use it.</p>
     </div>
     <div class="vs-grid">
@@ -623,8 +400,8 @@
 <section class="recruiter-section" id="hire">
   <div class="container">
     <div class="recruiter-inner">
-      <div class="">
-        <div class="recruiter-eyebrow">👔 For Recruiters & Hiring Managers</div>
+      <div>
+        <div class="recruiter-eyebrow">👔 For Recruiters &amp; Hiring Managers</div>
         <h2>Hiring senior TPM, engineering,<br>or tech talent?</h2>
         <p style="margin-top:12px;font-size:1.02rem;max-width:440px">Yuktora is used by senior tech professionals actively searching for their next role. Post your opportunity and we'll surface it to matched, qualified candidates.</p>
         <div class="recruiter-perks">
@@ -634,7 +411,7 @@
           <div class="recruiter-perk"><div class="perk-check">✓</div>Early access — founding recruiter pricing while in beta</div>
         </div>
       </div>
-      <div class="">
+      <div>
         <div class="lead-form">
           <h3>Get early access</h3>
           <p class="lead-sub">Tell us about your role — we'll reach out within 24 hours.</p>
@@ -648,13 +425,18 @@
               <div class="form-group"><label class="form-label">Role hiring for *</label><input class="input" id="rf-role" type="text" placeholder="Senior TPM, Staff Eng..." required></div>
             </div>
             <div class="form-group">
-              <label class="form-label">Location & visa sponsorship?</label>
+              <label class="form-label">Location &amp; visa sponsorship?</label>
               <select class="input" id="rf-loc">
-                <option>Bangalore, India</option><option>Mumbai, India</option>
-                <option>Delhi/NCR, India</option><option>Hyderabad, India</option>
-                <option>Remote (India)</option><option>USA — H1B Sponsored</option>
-                <option>UK — Visa Sponsored</option><option>Canada — PR Pathway</option>
-                <option>Singapore</option><option>Other International</option>
+                <option>Bangalore, India</option>
+                <option>Mumbai, India</option>
+                <option>Delhi/NCR, India</option>
+                <option>Hyderabad, India</option>
+                <option>Remote (India)</option>
+                <option>USA — H1B Sponsored</option>
+                <option>UK — Visa Sponsored</option>
+                <option>Canada — PR Pathway</option>
+                <option>Singapore</option>
+                <option>Other International</option>
               </select>
             </div>
             <div class="form-group"><label class="form-label">Brief about the role (optional)</label><textarea class="input" id="rf-notes" rows="2" placeholder="Key requirements, team size, salary range..."></textarea></div>
@@ -694,11 +476,11 @@
     <div class="footer-grid">
       <div>
         <div class="footer-logo"><div class="footer-logo-mark">🎯</div>Yuktora</div>
-        <p class="footer-brand-text">AI-powered job search co-pilot. Score jobs, tailor resumes, and track every application. Built in Bengaluru 🇮🇳</p>
+        <p class="footer-brand-text">AI-powered job search co-pilot. Score jobs, tailor resumes, track every application. Built in Bengaluru 🇮🇳</p>
       </div>
       <div class="footer-col">
         <h4>Product</h4>
-        <a href="#features">Features</a>
+        <a href="/#features">Features</a>
         <a href="/pricing">Pricing</a>
         <a href="/app">Launch App</a>
         <a href="/blog">Resources</a>
@@ -712,9 +494,10 @@
       </div>
       <div class="footer-col">
         <h4>Company</h4>
-        <a href="#hire">For Recruiters</a>
-        <a href="/cdn-cgi/l/email-protection#53323e3a27313b32213432257d20263d3d2a13343e323a3f7d303c3e">Contact Us</a>
+        <a href="/#hire">For Recruiters</a>
+        <a href="mailto:amitbhargav.sunny@gmail.com">Contact Us</a>
         <a href="#">Privacy Policy</a>
+        <a href="https://wealthmind-ai.vercel.app" target="_blank">WealthMindAI ↗</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -724,13 +507,42 @@
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-const obs=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('vis')}),{threshold:.07});
-document.querySelectorAll('.').forEach(el=>obs.observe(el));
-function submitForm(e){
+<script>
+async function submitForm(e) {
   e.preventDefault();
-  const d={name:document.getElementById('rf-name').value,email:document.getElementById('rf-email').value,company:document.getElementById('rf-company').value,role:document.getElementById('rf-role').value,location:document.getElementById('rf-loc').value,notes:document.getElementById('rf-notes').value,ts:new Date().toISOString()};
-  const leads=JSON.parse(localStorage.getItem('ht_leads')||'[]');leads.push(d);localStorage.setItem('ht_leads',JSON.stringify(leads));
-  const s=encodeURIComponent(`Yuktora Lead: ${d.role} at ${d.company}`);
-  const b=encodeURIComponent(`Name: ${d.name}\nEmail: ${d.email}\nCompany: ${d.company}\nRole: ${d.role}\nLocation: ${d.location}\nNotes: ${d.notes}`);
-  window.open(`mailto:amitbhargav.sunny@gmail.com?subje
+  const btn = e.target.querySelector('.form-submit');
+  if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
+  const d = {
+    name:     document.getElementById('rf-name').value,
+    email:    document.getElementById('rf-email').value,
+    company:  document.getElementById('rf-company').value,
+    role:     document.getElementById('rf-role').value,
+    location: document.getElementById('rf-loc').value,
+    notes:    document.getElementById('rf-notes').value
+  };
+  // Save lead locally
+  const leads = JSON.parse(localStorage.getItem('ht_leads') || '[]');
+  leads.push({...d, ts: new Date().toISOString()});
+  localStorage.setItem('ht_leads', JSON.stringify(leads));
+  // Submit to Formspree — free at formspree.io, replace ID with your own
+  try {
+    await fetch('https://formspree.io/f/xpwzgnjv', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        name: d.name,
+        email: d.email,
+        _replyto: d.email,
+        message: 'Company: ' + d.company + '\nRole: ' + d.role + '\nLocation: ' + d.location + '\nNotes: ' + d.notes
+      })
+    });
+  } catch(err) {
+    console.log('Form: lead saved locally, submission fallback');
+  }
+  document.getElementById('rf').style.display = 'none';
+  document.getElementById('fs').style.display = 'block';
+}
+</script>
+
+</body>
+</html>

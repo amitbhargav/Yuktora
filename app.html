@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YuktoraAI — AI Job Search Co-pilot</title>
+<title>HireTrackAI — AI Job Search Co-pilot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -618,7 +618,7 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 <nav class="app-site-nav">
   <a href="/" class="app-nav-logo">
     <div class="app-nav-mark">🎯</div>
-    YuktoraAI
+    HireTrackAI
   </a>
   <div class="app-nav-links">
     <a href="/">Home</a>
@@ -637,7 +637,7 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 <nav class="sidebar">
   <div class="sidebar-brand">
     <div class="brand-icon">🎯</div>
-    <span class="brand-name">YuktoraAI</span>
+    <span class="brand-name">HireTrackAI</span>
   </div>
   <div class="sidebar-nav">
     <span class="nav-group-label">Overview</span>
@@ -1153,7 +1153,7 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
       <div class="card-body">
         <div class="banner banner-amber" style="margin-bottom:14px">
           <span class="banner-icon">⚠️</span>
-          <div><strong>Security note:</strong> Your key is stored in browser localStorage. Do not use YuktoraAI on shared or public computers.</div>
+          <div><strong>Security note:</strong> Your key is stored in browser localStorage. Do not use HireTrackAI on shared or public computers.</div>
         </div>
         <div class="field">
           <label class="field-label">API key</label>
@@ -1322,7 +1322,7 @@ function nav(id) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.querySelector(`.nav-item[data-page="${id}"]`)?.classList.add('active');
-  document.getElementById('page-title').textContent = PAGE_TITLES[id] || 'YuktoraAI';
+  document.getElementById('page-title').textContent = PAGE_TITLES[id] || 'HireTrackAI';
   if (id === 'dashboard')  renderDash();
   if (id === 'tracker')    renderTracker();
   if (id === 'profile')    loadProfile();
@@ -1870,7 +1870,7 @@ function updateBadges() {
 function exportData() {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}));
-  a.download = 'Yuktora_data.json'; a.click();
+  a.download = 'hiretrack_data.json'; a.click();
   toast('Exported', '⬇');
 }
 function importData() {
@@ -1887,7 +1887,7 @@ function importData() {
   input.click();
 }
 function wipeData() {
-  if (!confirm('Wipe all YuktoraAI data? This cannot be undone.')) return;
+  if (!confirm('Wipe all HireTrackAI data? This cannot be undone.')) return;
   localStorage.removeItem('htai2'); location.reload();
 }
 
