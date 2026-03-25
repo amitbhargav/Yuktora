@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign In — Yuktora</title>
+<title>Sign In — HireTrackAI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <style>
 .signin-page{
@@ -23,7 +23,7 @@
 .signin-page::after{
   content:'';position:absolute;bottom:-60px;left:-40px;
   width:280px;height:280px;border-radius:50%;
-  background:radial-gradient(circle,rgba(201,150,58,.07),transparent 65%);
+  background:radial-gradient(circle,rgba(245, 158, 11, 0.07),transparent 65%);
   pointer-events:none;
 }
 .signin-card{
@@ -40,36 +40,36 @@
 }
 .signin-logo{
   display:flex;align-items:center;gap:10px;justify-content:center;
-  font-family:var(--font-display);font-weight:700;font-size:1.3rem;
-  font-style:italic;color:var(--ink);margin-bottom:8px;
+  font-family:var(--font-display);font-weight:800;font-size:1.3rem;
+  color:var(--ink);margin-bottom:8px;
 }
 .signin-logo-mark{
   width:36px;height:36px;border-radius:9px;
   background:var(--burg);display:flex;align-items:center;
-  justify-content:center;font-size:18px;font-style:normal;
+  justify-content:center;font-size:18px;font-style:normal;color:#fff;
 }
 .signin-tagline{
-  text-align:center;font-size:.82rem;color:var(--ink-3);
+  text-align:center;font-size:.85rem;font-weight:500;color:var(--ink-3);
   margin-bottom:32px;
 }
 .signin-divider{
   display:flex;align-items:center;gap:12px;
-  margin:20px 0;font-size:.75rem;color:var(--ink-4);
+  margin:20px 0;font-size:.8rem;font-weight:600;color:var(--ink-4);
 }
 .signin-divider::before,.signin-divider::after{
   content:'';flex:1;height:1px;background:var(--border);
 }
 .signin-heading{
-  font-family:var(--font-display);font-size:1.8rem;font-weight:600;
+  font-family:var(--font-display);font-size:1.8rem;font-weight:700;
   color:var(--ink);text-align:center;margin-bottom:6px;
 }
-.signin-sub{font-size:.85rem;color:var(--ink-3);text-align:center;margin-bottom:28px;}
+.signin-sub{font-size:.85rem;font-weight:500;color:var(--ink-3);text-align:center;margin-bottom:28px;}
 .form-group{margin-bottom:16px}
-.form-label{display:block;font-size:.78rem;font-weight:600;color:var(--ink-2);margin-bottom:5px;}
+.form-label{display:block;font-size:.8rem;font-weight:700;color:var(--ink-2);margin-bottom:5px;}
 .btn-signin{
   width:100%;padding:13px;background:var(--burg);color:#fff;
   border:none;border-radius:var(--r);font-family:var(--font-body);
-  font-size:.95rem;font-weight:600;cursor:pointer;
+  font-size:.95rem;font-weight:700;cursor:pointer;
   box-shadow:var(--shadow-burg);transition:all .18s;
   margin-top:4px;letter-spacing:.02em;
 }
@@ -77,23 +77,23 @@
 .signin-api-note{
   background:var(--burg-soft);border:1px solid var(--burg-mid);
   border-radius:var(--r);padding:14px;margin-top:20px;
-  font-size:.8rem;color:var(--ink-2);line-height:1.6;
+  font-size:.8rem;font-weight:500;color:var(--ink-2);line-height:1.6;
 }
-.signin-api-note strong{color:var(--burg);font-weight:600;}
-.signin-api-note a{color:var(--burg);text-decoration:underline;}
+.signin-api-note strong{color:var(--burg);font-weight:700;}
+.signin-api-note a{color:var(--burg);text-decoration:underline;font-weight:600;}
 .signin-footer-link{
   text-align:center;margin-top:20px;
-  font-size:.82rem;color:var(--ink-3);
+  font-size:.85rem;font-weight:500;color:var(--ink-3);
 }
-.signin-footer-link a{color:var(--burg);font-weight:600;}
+.signin-footer-link a{color:var(--burg);font-weight:700;}
 .btn-launch{
   width:100%;padding:13px;background:#fff;color:var(--burg);
   border:2px solid var(--burg);border-radius:var(--r);font-family:var(--font-body);
-  font-size:.95rem;font-weight:600;cursor:pointer;transition:all .18s;
+  font-size:.95rem;font-weight:700;cursor:pointer;transition:all .18s;
   letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:8px;
 }
 .btn-launch:hover{background:var(--burg-soft);transform:translateY(-1px)}
-.or-text{text-align:center;font-size:.8rem;color:var(--ink-4);margin:16px 0}
+.or-text{text-align:center;font-size:.8rem;font-weight:600;color:var(--ink-4);margin:16px 0}
 </style>
 </head>
 <body>
@@ -102,7 +102,7 @@
   <div class="nav-wrap">
     <a href="/" class="nav-logo">
       <div class="nav-logo-mark">🎯</div>
-      Yuktora
+      HireTrackAI
     </a>
     <div class="nav-links">
       <a href="/#features">Features</a>
@@ -121,21 +121,19 @@
   <div class="signin-card">
     <div class="signin-logo">
       <div class="signin-logo-mark">🎯</div>
-      Yuktora
+      HireTrackAI
     </div>
     <p class="signin-tagline">Your AI job search co-pilot</p>
 
     <div class="signin-heading">Welcome back</div>
-    <p class="signin-sub">Yuktora stores all your data securely in your browser — no account needed to get started.</p>
+    <p class="signin-sub">HireTrackAI stores all your data securely in your browser — no account needed to get started.</p>
 
-    <!-- Direct launch — primary action -->
     <a href="/app" class="btn-launch">
       🚀 Open My Dashboard →
     </a>
 
     <div class="or-text">— or set up your API key first —</div>
 
-    <!-- API key setup -->
     <div class="form-group">
       <label class="form-label">Anthropic API Key</label>
       <input class="input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." autocomplete="off">
@@ -143,7 +141,7 @@
     <button class="btn-signin" onclick="saveAndLaunch()">Save Key &amp; Open Dashboard →</button>
 
     <div class="signin-api-note">
-      <strong>What is this?</strong> Yuktora uses Claude AI to score jobs and tailor your resume. On the free plan, you provide your own key — it costs ~₹0.25 per resume tailor.<br><br>
+      <strong>What is this?</strong> HireTrackAI uses Claude AI to score jobs and tailor your resume. On the free plan, you provide your own key — it costs ~₹0.25 per resume tailor.<br><br>
       Get a free key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> (no credit card needed for the free tier).
     </div>
 
@@ -160,7 +158,6 @@ function saveAndLaunch() {
     alert('Please enter your API key, or click "Open My Dashboard" to launch without one.');
     return;
   }
-  // Save to localStorage so the app picks it up
   try {
     const state = JSON.parse(localStorage.getItem('htai2') || '{}');
     state.apiKey = key;
@@ -170,7 +167,6 @@ function saveAndLaunch() {
   }
   window.location.href = '/app';
 }
-// If user already has a key, prefill
 try {
   const state = JSON.parse(localStorage.getItem('htai2') || '{}');
   if (state.apiKey) {
