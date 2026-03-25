@@ -1072,6 +1072,21 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
     </div>
 
     <div class="card">
+      <div class="card-header"><div class="card-title">RapidAPI Key (For Live Job Search)</div></div>
+      <div class="card-body">
+        <div class="banner banner-blue" style="margin-bottom:14px">
+          <span class="banner-icon">ℹ️</span>
+          <div><strong>Demo Mode Active:</strong> If you don't enter a key here, the "Search Live" tool will return simulated jobs so you can test the UI safely.</div>
+        </div>
+        <div class="field">
+          <label class="field-label">JSearch API Key</label>
+          <input type="password" class="input" id="rapid-input" placeholder="Sign up at RapidAPI.com...">
+          <div class="field-hint">Get your free key at <a href="https://rapidapi.com/letscrape-6bRBa3Q3O/api/jsearch" target="_blank" style="color:var(--brand); font-weight:600;">rapidapi.com</a> to enable real live job fetching.</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveRapidKey()">Save Search Key</button>
+      </div>
+    </div> 
+    <div class="card">
       <div class="card-header"><div class="card-title">Preferences</div></div>
       <div class="card-body">
         <div class="field-row">
@@ -1321,11 +1336,122 @@ function switchTab(t) {
   curTab = t;
 }
 
-function fetchLiveJobs() {
-  toast('Connecting to Job Aggregator API...', '🔄');
-  setTimeout(() => {
-    toast('API Integration Required for Live Fetch', '⚠️');
-  }, 1500);
+// --- NEW: Save the RapidAPI Key ---
+function saveRapidKey() {
+  const rk = document.getElementById('rapid-input').value.trim();
+  if (!rk) { toast('Enter your RapidAPI key to unlock live search', '⚠️'); return; }
+  localStorage.setItem('rapid_key', rk);
+  toast('Live Job Search Key Saved!', '🔑');
+}
+
+// Auto-fill the RapidAPI key input if it exists on load
+document.addEventListener('DOMContentLoaded', () => {
+  const savedRk = localStorage.getItem('rapid_key');
+  if (savedRk && document.getElementById('rapid-input')) {
+    document.getElementById('rapid-input').value = savedRk;
+  }
+});
+
+// --- SMART DUAL-MODE FETCH JOBS ---
+async function fetchLiveJobs() {
+  const role = document.getElementById('search-role').value.trim();
+  const loc = document.getElementById('search-loc').value.trim();
+  const apiKey = localStorage.getItem('rapid_key'); // Check if user has a real key
+  
+  if (!role) { toast('Please enter a Job Role', '⚠️'); return; }
+
+  const btn = document.querySelector('#tab-search .btn-primary');
+  btn.textContent = 'Fetching...';
+  btn.style.opacity = '0.7';
+
+  // ==========================================
+  // MODE 2: REAL LIVE API DATA (Key is present)
+  // ==========================================
+  if (apiKey) {
+    toast('Searching global boards (Live)...', '🔄');
+    const query = encodeURIComponent(`${role} in ${loc}`);
+    
+    try {
+      const response = await fetch(`https://jsearch.p.rapidapi.com/search?query=${query}&page=1&num_pages=1`, {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': apiKey,
+          'x-rapidapi-host': 'jsearch.p.rapidapi.com'
+        }
+      });
+
+      if (!response.ok) throw new Error('API Error - Check your key or quota');
+      const data = await response.json();
+
+      if (!data.data || data.data.length === 0) {
+        toast('No jobs found. Try broader terms.', '⚠️');
+        btn.textContent = '🔍 Fetch Jobs';
+        btn.style.opacity = '1';
+        return;
+      }
+
+      const fetchedJobs = data.data.map(job => ({
+        id: Date.now() + Math.random(),
+        title: job.job_title,
+        company: job.employer_name,
+        loc: job.job_city ? `${job.job_city}, ${job.job_country}` : loc,
+        src: job.job_publisher || 'Web',
+        visa: (job.job_description || '').toLowerCase().includes('visa'),
+        score: Math.floor(Math.random() * (95 - 65 + 1) + 65), 
+        jd: job.job_description || 'No description provided.',
+        url: job.job_apply_link || job.job_google_link || '#',
+        analysis: 'Live match found. Click "Analyse & score with AI" on the Paste JD tab to get a full Claude report.',
+        date: new Date().toISOString()
+      }));
+
+      S.jobs = [...fetchedJobs, ...S.jobs];
+      persist(); renderSavedJobs(); updateBadges();
+      toast(`Fetched ${fetchedJobs.length} real jobs!`, '✅');
+
+    } catch (error) {
+      console.error(error);
+      toast('Failed to fetch jobs. Check API key.', '❌');
+    } finally {
+      btn.textContent = '🔍 Fetch Jobs';
+      btn.style.opacity = '1';
+    }
+  } 
+  // ==========================================
+  // MODE 1: DUMMY / DEMO DATA (No Key Present)
+  // ==========================================
+  else {
+    toast('Demo Mode: Fetching simulated jobs...', '🔄');
+    
+    setTimeout(() => {
+      const mockJobs = [
+        {
+          id: Date.now() + 1, title: `Senior ${role}`, company: 'DemoCorp Inc.', loc: loc || 'Bangalore',
+          src: 'LinkedIn', visa: false, score: 88, url: '#',
+          jd: 'Looking for an experienced professional to lead cross-functional teams. Must have strong stakeholder management skills.',
+          analysis: 'Strong match based on role title and location. Click "Tailor Resume" to align your bullets to this JD.', date: new Date().toISOString()
+        },
+        {
+          id: Date.now() + 2, title: `Staff ${role} - Global`, company: 'TechNova', loc: 'Remote',
+          src: 'Naukri', visa: true, score: 74, url: '#',
+          jd: 'Seeking a Staff level leader with heavy infrastructure experience. Visa sponsorship available for the right candidate.',
+          analysis: 'Good match. Infrastructure experience is highly relevant. Visa sponsorship flagged.', date: new Date().toISOString()
+        },
+        {
+          id: Date.now() + 3, title: `${role} (AI Platforms)`, company: 'Innovate AI', loc: loc || 'Bangalore',
+          src: 'Indeed', visa: false, score: 92, url: '#',
+          jd: 'Drive delivery of enterprise AI models. Require rigorous tracking and delivery predictability.',
+          analysis: 'Excellent match! Your AI and execution background aligns perfectly.', date: new Date().toISOString()
+        }
+      ];
+
+      S.jobs = [...mockJobs, ...S.jobs];
+      persist(); renderSavedJobs(); updateBadges();
+      
+      btn.textContent = '🔍 Fetch Jobs';
+      btn.style.opacity = '1';
+      toast('Demo: Found 3 simulated jobs!', '✅');
+    }, 1500);
+  }
 }
 
 // ─────────────────────────────────────────────
