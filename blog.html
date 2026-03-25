@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resources — HireTrackAI</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+.blog-hero{
+  padding:120px 0 56px;
+  background:linear-gradient(160deg,#F0F0FF 0%,#FFF0F8 60%,#F0FFFA 100%);
+  border-bottom:1px solid var(--border);text-align:center;
+  position:relative;overflow:hidden;
+}
+.blog-hero::before{
+  content:'';position:absolute;top:-60px;left:-60px;
+  width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(219,39,119,.08),transparent 65%);
+  pointer-events:none;
+}
+.blog-hero::after{
+  content:'';position:absolute;bottom:-60px;right:-40px;
+  width:260px;height:260px;border-radius:50%;
+  background:radial-gradient(circle,rgba(13,148,136,.08),transparent 65%);
+  pointer-events:none;
+}
+.featured{
+  background:linear-gradient(135deg,rgba(79,70,229,.06),rgba(124,58,237,.04));
+  border:1.5px solid rgba(79,70,229,.15);
+  border-radius:var(--r-xl);padding:40px;
+  display:grid;grid-template-columns:1fr 1fr;gap:40px;
+  align-items:center;margin-bottom:56px;
+}
+.featured-kicker{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:10px}
+.featured h2{color:var(--ink);font-size:1.6rem;margin-bottom:12px}
+.featured p{font-size:.95rem;color:var(--ink-2);margin-bottom:20px}
+.featured-code{
+  background:var(--ink);border-radius:var(--r-lg);padding:22px;
+  font-family:var(--font-mono);font-size:.72rem;line-height:1.9;
+  color:rgba(255,255,255,.4);
+}
+.featured-code .hl{color:#A78BFA;font-weight:600}
+.featured-code .ok{color:#34D399;font-weight:600}
+.featured-code .warn{color:#FBBF24;font-weight:600}
+.blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:56px}
+.blog-card{
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--r-xl);overflow:hidden;
+  transition:all .18s ease;display:flex;flex-direction:column;
+}
+.blog-card:hover{border-color:var(--border-2);box-shadow:var(--shadow-sm);transform:translateY(-3px)}
+.blog-card-thumb{
+  height:140px;display:flex;align-items:center;justify-content:center;font-size:3rem;
+}
+.th-1{background:linear-gradient(135deg,rgba(79,70,229,.08),rgba(124,58,237,.06))}
+.th-2{background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(219,39,119,.06))}
+.th-3{background:linear-gradient(135deg,rgba(79,70,229,.1),rgba(79,70,229,.04))}
+.th-4{background:linear-gradient(135deg,rgba(13,148,136,.08),rgba(5,150,105,.06))}
+.th-5{background:linear-gradient(135deg,rgba(5,150,105,.08),rgba(13,148,136,.06))}
+.th-6{background:linear-gradient(135deg,rgba(79,70,229,.08),rgba(219,39,119,.06))}
+.blog-card-body{padding:22px;flex:1;display:flex;flex-direction:column}
+.blog-tag{
+  font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  display:inline-block;padding:3px 9px;border-radius:20px;margin-bottom:10px;
+}
+.tag-indigo{background:rgba(79,70,229,.08);color:var(--indigo);border:1px solid rgba(79,70,229,.15)}
+.tag-teal{background:var(--teal-soft);color:var(--teal)}
+.tag-gray{background:var(--bg);color:var(--ink-3);border:1px solid var(--border)}
+.blog-card h3{font-size:.97rem;color:var(--ink);margin-bottom:8px;line-height:1.4}
+.blog-card p{font-size:.83rem;color:var(--ink-3);line-height:1.62;flex:1;margin-bottom:14px}
+.blog-foot{display:flex;align-items:center;justify-content:space-between}
+.read-time{font-size:.72rem;color:var(--ink-4)}
+.read-link{
+  font-size:.8rem;font-weight:600;
+  background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.read-link:hover{opacity:.8}
+@media(max-width:768px){.blog-grid{grid-template-columns:1fr}.featured{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav class="site-nav">
+  <div class="nav-wrap">
+    <a href="/" class="nav-logo"><div class="nav-logo-mark">🎯</div>HireTrackAI</a>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/#how-it-works">How it works</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="blog.html" class="active">Resources</a>
+      <a href="/#hire">For Recruiters</a>
+    </div>
+    <div class="nav-right">
+      <a href="app.html" class="btn btn-ghost btn-sm">Sign in</a>
+      <a href="app.html" class="btn btn-brand btn-sm">Launch App →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="blog-hero">
+  <div class="container" style="position:relative;z-index:1">
+    <div class="eyebrow" style="justify-content:center">Free Resources</div>
+    <h1>Job Search <span class="text-brand">Intelligence</span></h1>
+    <p style="max-width:440px;margin:0 auto">Guides, strategies, and insider tips for senior tech professionals searching smarter.</p>
+  </div>
+</div>
+<hr class="rainbow-rule">
+
+<section class="section" style="background:var(--bg)">
+  <div class="container">
+    <div class="featured reveal">
+      <div>
+        <div class="featured-kicker">⭐ Featured Guide</div>
+        <h2>The Complete Senior TPM Job Search Playbook for 2026</h2>
+        <p>How to go from 0 interview calls to 5+ recruiter contacts in 3 weeks — resume, ATS strategy, LinkedIn setup.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a href="app.html" class="btn btn-brand">Read Guide →</a>
+          <a href="app.html" class="btn btn-white">Try HireTrackAI Free</a>
+        </div>
+      </div>
+      <div class="featured-code">
+<span class="hl">resume_score</span>  : <span class="ok">84/100</span>
+<span class="hl">linkedin_views</span>: <span class="ok">+340%</span>
+<span class="hl">recruiter_calls</span>: <span class="ok">8 in week 2</span>
+<span class="hl">match_score</span>   : Amazon <span class="ok">89%</span>
+<span class="hl">rejection_cause</span>: <span class="warn">missing RAID keywords</span>
+<span class="hl">fix_applied</span>   : resume v4 tailored
+<span class="hl">result</span>        : <span class="ok">interview_scheduled ✓</span></div>
+    </div>
+
+    <div class="blog-grid reveal">
+      <div class="blog-card">
+        <div class="blog-card-thumb th-1">📊</div>
+        <div class="blog-card-body">
+          <span class="blog-tag tag-indigo">ATS Strategy</span>
+          <h3>Why 75% of resumes never reach a human</h3>
+          <p>ATS systems filter most candidates before a recruiter reads them. The 6 changes that push your score from 60 to 85+.</p>
+          <div class="blog-foot"><span class="read-time">8 min read</span><a href="app.html" class="read-link">Read →</a></div>
+        </div>
+      </div>
+      <div class="blog-card">
+        <div class="blog-card-thumb th-2">💼</div>
+        <div class="blog-card-body">
+          <span class="blog-tag tag-indigo">LinkedIn</span>
+          <h3>The LinkedIn profile setup that gets 10+ recruiter calls/week</h3>
+          <p>Headline, About, skills, Open to Work — the exact copy-paste setup that transforms a dead profile into an inbound machine.</p>
+          <div class="blog-foot"><span class="read-time">12 min read</span><a href="app.html" class="read-link">Read →</a></div>
+        </div>
+      </div>
+      <div class="blog-card">
+        <div class="blog-card-thumb th-3">🎯</div>
+        <div class="blog-card-body">
+          <span class="blog-tag tag-indigo">Amazon</span>
+          <h3>Amazon TPM interview: what they actually test</h3>
+          <p>L6 TPM requires specific LP signals, governance depth, and technical credibility. The exact framework that works.</p>
+          <div class="blog-foot"><span class="read-time">15 min read</span><a href="app.html" class="read-link">Read →</a></div>
+        </div>
+      </div>
+      <div class="blog-card">
+        <div class="blog-card-thumb th-4">✍</div>
+        <div class="blog-card-body">
+          <span class="blog-tag tag-teal">Resume</span>
+          <h3>How to write TPM resume bullets that get shortlisted</h3>
+          <p>"Managed teams" vs "Coordinated 25+ engineers, reducing delays by 30%." Numbers change everything.</p>
+          <div class="blog-foot"><span class="read-time">7 min read</span><a href="app.html" class="read-link">Read →</a></div>
+        </div>
+      </div>
+      <div class="blog-card">
+        <div class="blog-card-thumb th-5">🌍</div>
+        <div class="blog-card-body">
+          <span class="blog-tag tag-gray">Global Jobs</span>
+          <h3>How Indian TPMs can land US/UK roles with visa sponsorship</h3>
+          <p>Which companies sponsor H1B for TPMs and how to position your India experience as a global asset.</p>
+          <div class="blog-foot"><span class="read-time">10 min read</span><a href="app.html" class="read-link">Read →</a></div>
+        </div>
+      </div>
+      <div class="blog-card">
+        <div class="blog-card-thumb th-6">🧠</div>
+        <div class="blog-card-body">
+          <span class="blog-tag tag-indigo">Rejections</span>
+          <h3>What rejection emails don't tell you — decoded by AI</h3>
+          <p>"We moved forward with others" tells you nothing. How to extract the real reason from your resume + JD mismatch.</p>
+          <div class="blog-foot"><span class="read-time">6 min read</span><a href="app.html" class="read-link">Read →</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#4F46E5,#7C3AED,#DB2777);border-radius:var(--r-xl);padding:48px;text-align:center">
+      <h2 style="color:#fff;margin-bottom:12px">Put the strategy into action</h2>
+      <p style="color:rgba(255,255,255,.7);max-width:380px;margin:0 auto 24px">All these frameworks are built into HireTrackAI. Free to start.</p>
+      <a href="app.html" class="btn btn-white btn-lg" style="color:var(--indigo)">Launch HireTrackAI Free →</a>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div><div class="footer-logo"><div class="footer-logo-mark">🎯</div>HireTrackAI</div><p class="footer-brand-text">AI-powered job search co-pilot. Built in Bengaluru 🇮🇳</p></div>
+      <div class="footer-col"><h4>Product</h4><a href="/#features">Features</a><a href="pricing.html">Pricing</a><a href="app.html">Launch App</a></div>
+      <div class="footer-col"><h4>Resources</h4><a href="blog.html">All Guides</a><a href="blog.html">ATS Tips</a><a href="blog.html">LinkedIn Guide</a></div>
+      <div class="footer-col"><h4>Company</h4><a href="/#hire">For Recruiters</a><a href="mailto:amitbhargav.sunny@gmail.com">Contact</a><a href="#">Privacy</a></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 HireTrackAI · Built in Bengaluru 🇮🇳</span>
+      <span>Powered by <a href="https://anthropic.com" target="_blank">Claude (Anthropic)</a></span>
+    </div>
+  </div>
+</footer>
+<script>
+const obs=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('vis')}),{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
