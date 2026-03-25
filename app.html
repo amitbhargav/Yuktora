@@ -5,62 +5,59 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HireTrackAI — AI Job Search Co-pilot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ─────────────────────────────────────────────
    DESIGN TOKENS
 ───────────────────────────────────────────── */
-:root {
-  --sans: 'Plus Jakarta Sans', system-ui, sans-serif;
-  --mono: 'JetBrains Mono', monospace;
+:root{
+  /* ── BURGUNDY THEME ────────────────────── */
+  --sans:    'Outfit', sans-serif;
+  --mono:    'DM Mono', monospace;
+  --display: 'Cormorant Garamond', serif;
 
-  /* Neutrals */
+  /* Cream base */
   --white:   #FFFFFF;
-  --gray-25: #FCFCFD;
-  --gray-50: #F8F9FA;
-  --gray-100:#F1F3F5;
-  --gray-200:#E9ECEF;
-  --gray-300:#DEE2E6;
-  --gray-400:#CED4DA;
-  --gray-500:#ADB5BD;
-  --gray-600:#868E96;
-  --gray-700:#495057;
-  --gray-800:#343A40;
-  --gray-900:#212529;
+  --gray-25: #FDFAF6;
+  --gray-50: #F8F3EC;
+  --gray-100:#F0E8DC;
+  --gray-200:#E6D9C8;
+  --gray-300:#D4C4BC;
+  --gray-400:#B89AAA;
+  --gray-500:#7A5060;
+  --gray-600:#5A3040;
+  --gray-700:#42202E;
+  --gray-800:#2E1020;
+  --gray-900:#1A0A10;
 
-  /* Brand */
-  --brand:   #2563EB;
-  --brand-l: #EFF6FF;
-  --brand-d: #1D4ED8;
+  /* Brand — Burgundy */
+  --brand:   #7D1D3F;
+  --brand-l: rgba(125,29,63,.08);
+  --brand-d: #641531;
+
+  /* Gold accent */
+  --gold:    #C9963A;
+  --gold-l:  rgba(201,150,58,.1);
 
   /* Semantic */
-  --green:   #059669;
-  --green-l: #ECFDF5;
-  --amber:   #D97706;
-  --amber-l: #FFFBEB;
-  --red:     #DC2626;
-  --red-l:   #FEF2F2;
-  --purple:  #7C3AED;
-  --purple-l:#F5F3FF;
+  --green:   #1A7A5A;
+  --green-l: #EAF7F2;
+  --amber:   #C47A1A;
+  --amber-l: #FEF5E7;
+  --red:     #B83232;
+  --red-l:   #FDECEA;
 
   /* Surfaces */
-  --bg:      #F4F6F9;
+  --bg:      #FDFAF6;
   --surface: #FFFFFF;
-  --border:  #E5E7EB;
-  --border-strong: #D1D5DB;
+  --border:  #E8DDD6;
+  --border-strong: #D4C4BC;
 
   /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(0,0,0,.05);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
-  --shadow-md: 0 4px 6px rgba(0,0,0,.05), 0 2px 4px rgba(0,0,0,.04);
-  --shadow-lg: 0 10px 15px rgba(0,0,0,.06), 0 4px 6px rgba(0,0,0,.04);
-
-  /* Layout */
-  --sidebar-w: 220px;
-  --topbar-h:  56px;
-  --r-sm: 6px;
-  --r:    10px;
-  --r-lg: 14px;
+  --shadow-xs: 0 1px 3px rgba(26,10,16,.06);
+  --shadow-sm: 0 2px 8px rgba(125,29,63,.08),0 4px 16px rgba(26,10,16,.05);
+  --shadow:    0 4px 20px rgba(125,29,63,.1),0 8px 32px rgba(26,10,16,.07);
+  --shadow-lg: 0 8px 40px rgba(125,29,63,.14),0 20px 56px rgba(26,10,16,.1);
 }
 
 /* ─────────────────────────────────────────────
@@ -588,6 +585,49 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 </style>
 </head>
 <body>
+<style>
+/* ── APP NAV — burgundy themed ─── */
+.app-site-nav{
+  background:#2E0E1C;border-bottom:1px solid rgba(201,150,58,.2);
+  padding:0 24px;height:52px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:200;
+}
+.app-nav-logo{
+  display:flex;align-items:center;gap:9px;
+  font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.1rem;
+  font-style:italic;color:#FDFAF6;
+}
+.app-nav-mark{
+  width:30px;height:30px;border-radius:7px;background:#C9963A;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-style:normal;
+}
+.app-nav-links{display:flex;align-items:center;gap:4px}
+.app-nav-links a{
+  font-family:'Outfit',sans-serif;font-size:.82rem;color:rgba(253,240,230,.5);
+  padding:5px 11px;border-radius:5px;transition:all .12s;
+}
+.app-nav-links a:hover{color:rgba(255,255,255,.9);background:rgba(201,150,58,.1)}
+.app-nav-back{
+  font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;
+  color:#C9963A;padding:5px 12px;border-radius:5px;
+  border:1px solid rgba(201,150,58,.3);transition:all .12s;
+}
+.app-nav-back:hover{background:rgba(201,150,58,.1);color:#E8B84B}
+</style>
+
+<nav class="app-site-nav">
+  <a href="/" class="app-nav-logo">
+    <div class="app-nav-mark">🎯</div>
+    HireTrackAI
+  </a>
+  <div class="app-nav-links">
+    <a href="/">Home</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/blog">Resources</a>
+  </div>
+  <a href="/" class="app-nav-back">← Back to site</a>
+</nav>
+
 
 <div class="shell">
 
