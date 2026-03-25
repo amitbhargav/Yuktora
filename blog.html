@@ -6,18 +6,18 @@
 <title>Resources — HireTrackAI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 <style>
 .blog-hero{padding:120px 0 56px;background:var(--cream);border-bottom:1px solid var(--border);text-align:center;position:relative;overflow:hidden}
 .blog-hero::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,var(--burg-soft) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 70% 70% at 50% 100%,black,transparent)}
 .featured{background:#fff;border:1.5px solid var(--border);border-radius:var(--r-xl);padding:40px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;margin-bottom:52px;box-shadow:var(--shadow-xs)}
 .featured:hover{border-color:var(--burg-mid);box-shadow:var(--shadow-sm)}
-.featured-kicker{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.featured-kicker{font-size:.7rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:7px}
 .featured-kicker::before{content:'';width:14px;height:1.5px;background:var(--gold)}
 .featured h2{color:var(--ink);font-size:1.7rem;margin-bottom:12px}
-.featured p{font-size:.93rem;color:var(--ink-2);margin-bottom:22px}
-.featured-code{background:var(--burg-3);border-radius:var(--r-lg);padding:22px;font-family:var(--font-mono);font-size:.72rem;line-height:2;color:rgba(255,255,255,.35)}
+.featured p{font-size:.95rem;font-weight:500;color:var(--ink-2);margin-bottom:22px}
+.featured-code{background:var(--ink);border-radius:var(--r-lg);padding:22px;font-family:var(--font-mono);font-size:.75rem;font-weight:500;line-height:2;color:rgba(255,255,255,.55)}
 .featured-code .hl{color:var(--gold);font-weight:500}
 .featured-code .ok{color:#6EE7B7;font-weight:500}
 .featured-code .warn{color:#FCD34D;font-weight:500}
@@ -25,22 +25,22 @@
 .blog-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r-xl);overflow:hidden;transition:all .2s ease;display:flex;flex-direction:column}
 .blog-card:hover{border-color:var(--burg-mid);box-shadow:var(--shadow-sm);transform:translateY(-3px)}
 .blog-thumb{height:140px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;border-bottom:1px solid var(--border)}
-.th-1{background:linear-gradient(135deg,#F9EEF3,#F5E4EB)}
-.th-2{background:linear-gradient(135deg,#F9EEF3,#EDD4E0)}
-.th-3{background:linear-gradient(135deg,#FAF0E8,#F2E0CC)}
-.th-4{background:linear-gradient(135deg,#EAF7F2,#D4F0E6)}
-.th-5{background:linear-gradient(135deg,#F0F4F7,#DDE8F0)}
-.th-6{background:linear-gradient(135deg,#F5F0E8,#EDE4D4)}
+.th-1{background:linear-gradient(135deg,#FEE2E2,#FECDD3)}
+.th-2{background:linear-gradient(135deg,#FEE2E2,#FDA4AF)}
+.th-3{background:linear-gradient(135deg,#FEF3C7,#FDE68A)}
+.th-4{background:linear-gradient(135deg,#D1FAE5,#A7F3D0)}
+.th-5{background:linear-gradient(135deg,#E0F2FE,#BAE6FD)}
+.th-6{background:linear-gradient(135deg,#F1F5F9,#E2E8F0)}
 .blog-body{padding:22px;flex:1;display:flex;flex-direction:column}
-.blog-tag{font-size:.67rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;display:inline-block;padding:3px 9px;border-radius:20px;margin-bottom:10px}
+.blog-tag{font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;display:inline-block;padding:3px 9px;border-radius:20px;margin-bottom:10px}
 .tag-burg{background:var(--burg-soft);color:var(--burg);border:1px solid var(--burg-mid)}
 .tag-gold{background:var(--gold-soft);color:var(--gold-2)}
 .tag-neutral{background:var(--cream-3);color:var(--ink-3);border:1px solid var(--border)}
 .blog-card h3{font-size:.97rem;color:var(--ink);margin-bottom:8px;line-height:1.4}
-.blog-card p{font-size:.82rem;color:var(--ink-3);line-height:1.62;flex:1;margin-bottom:14px}
+.blog-card p{font-size:.85rem;font-weight:500;color:var(--ink-3);line-height:1.62;flex:1;margin-bottom:14px}
 .blog-foot{display:flex;align-items:center;justify-content:space-between}
-.read-time{font-size:.72rem;color:var(--ink-4)}
-.read-link{font-size:.8rem;color:var(--burg);font-weight:600}
+.read-time{font-size:.75rem;font-weight:600;color:var(--ink-4)}
+.read-link{font-size:.8rem;color:var(--burg);font-weight:700}
 .read-link:hover{color:var(--burg-2)}
 @media(max-width:768px){.blog-grid{grid-template-columns:1fr}.featured{grid-template-columns:1fr}}
 </style>
@@ -68,7 +68,7 @@
   <div class="container" style="position:relative;z-index:1">
     <div class="eyebrow" style="justify-content:center">Free Resources</div>
     <h1>Job Search <em class="text-burg">Intelligence</em></h1>
-    <p style="max-width:440px;margin:0 auto">Guides, strategies, and insider tips for senior tech professionals searching smarter.</p>
+    <p style="max-width:440px;margin:0 auto;font-weight:500">Guides, strategies, and insider tips for senior tech professionals searching smarter.</p>
   </div>
 </div>
 <hr class="rule-gold">
@@ -104,9 +104,9 @@
       <div class="blog-card"><div class="blog-thumb th-6">🧠</div><div class="blog-body"><span class="blog-tag tag-burg">Rejections</span><h3>What rejection emails don't tell you — decoded by AI</h3><p>"We moved forward with others" tells you nothing. How to extract the real reason from your resume + JD mismatch.</p><div class="blog-foot"><span class="read-time">6 min read</span><a href="/app" class="read-link">Read →</a></div></div></div>
     </div>
 
-    <div style="background:linear-gradient(135deg,var(--burg-3),#3E0A1A);border-radius:var(--r-xl);padding:48px;text-align:center;border-top:3px solid var(--gold)">
+    <div style="background:linear-gradient(135deg,var(--burg-3),var(--burg-2));border-radius:var(--r-xl);padding:48px;text-align:center;border-top:3px solid var(--gold)">
       <h2 style="color:#fff;font-family:var(--font-display);margin-bottom:12px">Put the strategy into action</h2>
-      <p style="color:rgba(255,255,255,.55);max-width:380px;margin:0 auto 24px">All these frameworks are built into HireTrackAI. Free to start.</p>
+      <p style="color:rgba(255,255,255,.75);font-weight:500;max-width:380px;margin:0 auto 24px">All these frameworks are built into HireTrackAI. Free to start.</p>
       <a href="/app" class="btn btn-gold btn-lg">Launch HireTrackAI Free →</a>
     </div>
   </div>
@@ -118,7 +118,7 @@
       <div><div class="footer-logo"><div class="footer-logo-mark">🎯</div>HireTrackAI</div><p class="footer-brand-text">AI-powered job search co-pilot. Built in Bengaluru 🇮🇳</p></div>
       <div class="footer-col"><h4>Product</h4><a href="/#features">Features</a><a href="/pricing">Pricing</a><a href="/app">Launch App</a></div>
       <div class="footer-col"><h4>Resources</h4><a href="/blog">All Guides</a><a href="/blog">ATS Tips</a><a href="/blog">LinkedIn Guide</a></div>
-      <div class="footer-col"><h4>Company</h4><a href="/#hire">For Recruiters</a><a href="/cdn-cgi/l/email-protection#86e7ebeff2e4eee7f4e1e7f0a8f5f3e8e8ffc6e1ebe7efeaa8e5e9eb">Contact</a><a href="#">Privacy</a></div>
+      <div class="footer-col"><h4>Company</h4><a href="/#hire">For Recruiters</a><a href="mailto:amitbhargav.sunny@gmail.com">Contact</a><a href="#">Privacy</a></div>
     </div>
     <div class="footer-bottom">
       <span>© 2026 HireTrackAI · Built in Bengaluru 🇮🇳</span>
@@ -126,5 +126,5 @@
     </div>
   </div>
 </footer>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-const obs=new IntersectionObserver(e=>e.forEach(x=>{if(x.
+</body>
+</html>
