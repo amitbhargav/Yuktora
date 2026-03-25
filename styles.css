@@ -15,20 +15,20 @@ html{font-size:16px;scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-m
   --cream-3:     #F1F5F9;
   --cream-4:     #E2E8F0;
 
-  /* Brand — Vibrant Crimson */
-  --burg:        #E11D48;
-  --burg-2:      #BE123C;
-  --burg-3:      #9F1239;
-  --burg-light:  #FDA4AF;
-  --burg-soft:   #FFF1F2;
-  --burg-mid:    #FFE4E6;
+ /* Brand — Burgundy */
+  --burg:        #7D1D3F;
+  --burg-2:      #641531;
+  --burg-3:      #4E0E25;
+  --burg-light:  #A8466A;
+  --burg-soft:   rgba(125,29,63,.07);
+  --burg-mid:    rgba(125,29,63,.18);
 
-  /* Accent — Bright Amber */
-  --gold:        #F59E0B;
-  --gold-2:      #D97706;
-  --gold-soft:   #FEF3C7;
-  --gold-mid:    #FDE68A;
-
+  /* Accent — Champagne Gold */
+  --gold:        #C9963A;
+  --gold-2:      #A87B2A;
+  --gold-soft:   rgba(201,150,58,.08);
+  --gold-mid:    rgba(201,150,58,.22);
+   
   /* Blush transitions to soft slate */
   --blush:       #F8FAFC;
   --blush-2:     #F1F5F9;
@@ -67,7 +67,7 @@ html{font-size:16px;scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-m
   --shadow-sm: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.03);
   --shadow:    0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -2px rgba(15, 23, 42, 0.025);
   --shadow-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.05), 0 10px 10px -5px rgba(15, 23, 42, 0.02);
-  --shadow-burg:0 4px 14px rgba(225, 29, 72, 0.25);
+  --shadow-burg:0 4px 14px rgba(125, 29, 63, 0.25);
 }
 
 body{
