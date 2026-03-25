@@ -1,11 +1,14 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
-  "routes": [
-    { "src": "/app", "dest": "/app.html" },
-    { "src": "/pricing", "dest": "/pricing.html" },
-    { "src": "/blog", "dest": "/blog.html" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/404.html", "status": 404 }
+  "rewrites": [
+    { "source": "/app", "destination": "/app.html" },
+    { "source": "/pricing", "destination": "/pricing.html" },
+    { "source": "/blog", "destination": "/blog.html" }
+  ],
+  "redirects": [
+    { "source": "/app.html", "destination": "/app", "permanent": false },
+    { "source": "/pricing.html", "destination": "/pricing", "permanent": false },
+    { "source": "/blog.html", "destination": "/blog", "permanent": false }
   ]
 }
