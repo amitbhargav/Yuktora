@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HireTrackAI — AI Job Search Co-pilot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────────
+   DESIGN TOKENS
+───────────────────────────────────────────── */
+:root {
+  --sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+
+  /* Neutrals */
+  --white:   #FFFFFF;
+  --gray-25: #FCFCFD;
+  --gray-50: #F8F9FA;
+  --gray-100:#F1F3F5;
+  --gray-200:#E9ECEF;
+  --gray-300:#DEE2E6;
+  --gray-400:#CED4DA;
+  --gray-500:#ADB5BD;
+  --gray-600:#868E96;
+  --gray-700:#495057;
+  --gray-800:#343A40;
+  --gray-900:#212529;
+
+  /* Brand */
+  --brand:   #2563EB;
+  --brand-l: #EFF6FF;
+  --brand-d: #1D4ED8;
+
+  /* Semantic */
+  --green:   #059669;
+  --green-l: #ECFDF5;
+  --amber:   #D97706;
+  --amber-l: #FFFBEB;
+  --red:     #DC2626;
+  --red-l:   #FEF2F2;
+  --purple:  #7C3AED;
+  --purple-l:#F5F3FF;
+
+  /* Surfaces */
+  --bg:      #F4F6F9;
+  --surface: #FFFFFF;
+  --border:  #E5E7EB;
+  --border-strong: #D1D5DB;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.05);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.05), 0 2px 4px rgba(0,0,0,.04);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,.06), 0 4px 6px rgba(0,0,0,.04);
+
+  /* Layout */
+  --sidebar-w: 220px;
+  --topbar-h:  56px;
+  --r-sm: 6px;
+  --r:    10px;
+  --r-lg: 14px;
+}
+
+/* ─────────────────────────────────────────────
+   RESET
+───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--gray-900);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: var(--sans); cursor: pointer; border: none; }
+input, textarea, select { font-family: var(--sans); }
+a { color: inherit; text-decoration: none; }
+::placeholder { color: var(--gray-400); }
+
+/* ─────────────────────────────────────────────
+   LAYOUT
+───────────────────────────────────────────── */
+.shell { display: flex; min-height: 100vh; }
+
+/* ─────────────────────────────────────────────
+   SIDEBAR
+───────────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0;
+  z-index: 20;
+}
+.sidebar-brand {
+  height: var(--topbar-h);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.brand-icon {
+  width: 28px; height: 28px;
+  background: var(--brand);
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.brand-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gray-900);
+  letter-spacing: -0.2px;
+}
+.sidebar-nav {
+  flex: 1;
+  padding: 10px 8px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.nav-group-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--gray-500);
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  padding: 10px 8px 4px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-600);
+  cursor: pointer;
+  transition: background .1s, color .1s;
+  position: relative;
+}
+.nav-item:hover { background: var(--gray-50); color: var(--gray-800); }
+.nav-item.active { background: var(--brand-l); color: var(--brand); }
+.nav-item .ni-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  font-size: 10px; font-weight: 700;
+  background: var(--brand); color: var(--white);
+  padding: 1px 6px; border-radius: 20px; min-width: 18px; text-align: center;
+}
+.nav-badge.zero { background: var(--gray-200); color: var(--gray-500); }
+.sidebar-foot {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.api-pill {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11.5px; color: var(--gray-500);
+}
+.api-led {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--gray-300); flex-shrink: 0;
+}
+.api-led.on { background: var(--green); }
+
+/* ─────────────────────────────────────────────
+   MAIN
+───────────────────────────────────────────── */
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+.topbar {
+  height: var(--topbar-h);
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 10;
+  flex-shrink: 0;
+}
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.page-title { font-size: 15px; font-weight: 700; color: var(--gray-900); }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+
+/* ─────────────────────────────────────────────
+   BUTTONS
+───────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: var(--r-sm);
+  font-size: 13px; font-weight: 600;
+  transition: all .13s ease;
+  cursor: pointer; white-space: nowrap;
+  line-height: 1;
+}
+.btn-primary {
+  background: var(--brand); color: var(--white);
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-xs), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.btn-primary:hover { background: var(--brand-d); }
+.btn-secondary {
+  background: var(--white); color: var(--gray-700);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-xs);
+}
+.btn-secondary:hover { background: var(--gray-50); border-color: var(--gray-400); }
+.btn-ghost {
+  background: transparent; color: var(--gray-600);
+  border: 1px solid transparent;
+}
+.btn-ghost:hover { background: var(--gray-100); color: var(--gray-800); }
+.btn-danger {
+  background: var(--white); color: var(--red);
+  border: 1px solid var(--border-strong);
+}
+.btn-danger:hover { background: var(--red-l); border-color: var(--red); }
+.btn-sm { padding: 5px 11px; font-size: 12px; }
+.btn-xs { padding: 3px 8px; font-size: 11px; }
+.btn-green { background: var(--green); color: var(--white); border: 1px solid transparent; }
+.btn-green:hover { background: #047857; }
+.btn-icon { padding: 6px; border-radius: var(--r-sm); }
+
+/* ─────────────────────────────────────────────
+   PAGES
+───────────────────────────────────────────── */
+.page { display: none; flex: 1; }
+.page.active { display: block; }
+.page-body { padding: 24px; max-width: 1200px; }
+
+/* ─────────────────────────────────────────────
+   CARDS
+───────────────────────────────────────────── */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+.card-pad { padding: 20px; }
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.card-title { font-size: 13.5px; font-weight: 700; color: var(--gray-900); }
+.card-sub { font-size: 12px; color: var(--gray-500); margin-top: 1px; }
+.card-body { padding: 20px; }
+
+/* ─────────────────────────────────────────────
+   STAT CARDS
+───────────────────────────────────────────── */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+}
+.stat-label { font-size: 11px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+.stat-val { font-size: 26px; font-weight: 800; color: var(--gray-900); letter-spacing: -1px; font-family: var(--sans); }
+.stat-meta { font-size: 11.5px; color: var(--gray-400); margin-top: 3px; }
+.stat-blue .stat-val { color: var(--brand); }
+.stat-green .stat-val { color: var(--green); }
+.stat-amber .stat-val { color: var(--amber); }
+
+/* ─────────────────────────────────────────────
+   FORMS
+───────────────────────────────────────────── */
+.field { margin-bottom: 14px; }
+.field-label {
+  display: block;
+  font-size: 12px; font-weight: 600; color: var(--gray-700);
+  margin-bottom: 5px; letter-spacing: .1px;
+}
+.field-hint { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
+.input {
+  width: 100%;
+  padding: 8px 11px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-sm);
+  font-size: 13px;
+  color: var(--gray-900);
+  background: var(--white);
+  box-shadow: var(--shadow-xs);
+  transition: border-color .12s, box-shadow .12s;
+  outline: none;
+  font-family: var(--sans);
+}
+.input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+textarea.input { resize: vertical; min-height: 90px; line-height: 1.55; }
+select.input { cursor: pointer; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ─────────────────────────────────────────────
+   TABS
+───────────────────────────────────────────── */
+.tabs {
+  display: flex; gap: 2px;
+  background: var(--gray-100);
+  border-radius: var(--r-sm);
+  padding: 3px;
+  width: fit-content;
+  margin-bottom: 16px;
+}
+.tab-btn {
+  padding: 6px 14px; border-radius: 5px;
+  font-size: 12.5px; font-weight: 600;
+  color: var(--gray-500); cursor: pointer;
+  transition: all .12s;
+}
+.tab-btn.active { background: var(--white); color: var(--gray-900); box-shadow: var(--shadow-xs); }
+
+/* ─────────────────────────────────────────────
+   TAGS / PILLS
+───────────────────────────────────────────── */
+.tag-wrap { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 11.5px; font-weight: 500;
+  background: var(--gray-100); color: var(--gray-700);
+  border: 1px solid var(--border);
+}
+.tag-x { cursor: pointer; color: var(--gray-400); font-size: 13px; line-height: 1; }
+.tag-x:hover { color: var(--red); }
+.tag-row { display: flex; gap: 6px; margin-top: 7px; }
+.tag-row input { flex: 1; }
+
+/* Status/source pills */
+.pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+}
+.pill-gray   { background: var(--gray-100); color: var(--gray-600); }
+.pill-blue   { background: var(--brand-l); color: var(--brand-d); }
+.pill-green  { background: var(--green-l); color: var(--green); }
+.pill-amber  { background: var(--amber-l); color: var(--amber); }
+.pill-red    { background: var(--red-l); color: var(--red); }
+.pill-purple { background: var(--purple-l); color: var(--purple); }
+
+/* ─────────────────────────────────────────────
+   SCORE RING
+───────────────────────────────────────────── */
+.score-ring {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  border: 2.5px solid;
+  flex-shrink: 0;
+  font-family: var(--sans);
+}
+.score-hi { border-color: var(--green); color: var(--green); background: var(--green-l); }
+.score-md { border-color: var(--amber); color: var(--amber); background: var(--amber-l); }
+.score-lo { border-color: var(--red); color: var(--red); background: var(--red-l); }
+.score-ring-sm { width: 34px; height: 34px; font-size: 10px; }
+
+/* ─────────────────────────────────────────────
+   JOB CARDS
+───────────────────────────────────────────── */
+.job-list { display: flex; flex-direction: column; gap: 8px; }
+.job-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+  cursor: pointer; transition: border-color .12s, box-shadow .12s;
+}
+.job-card:hover { border-color: var(--brand); box-shadow: var(--shadow-md); }
+.job-card.sel { border-color: var(--brand); background: var(--brand-l); }
+.job-initials {
+  width: 40px; height: 40px; border-radius: var(--r-sm);
+  background: var(--gray-100); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: var(--gray-600);
+  flex-shrink: 0; letter-spacing: -.5px;
+}
+.job-info { flex: 1; min-width: 0; }
+.job-title { font-size: 13.5px; font-weight: 700; color: var(--gray-900); margin-bottom: 2px; }
+.job-company { font-size: 12px; color: var(--gray-500); }
+.job-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+
+/* ─────────────────────────────────────────────
+   AI OUTPUT
+───────────────────────────────────────────── */
+.ai-box {
+  background: var(--gray-50);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  font-size: 13px; color: var(--gray-700);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  min-height: 100px;
+  font-family: var(--sans);
+}
+.ai-box.loading {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 140px; color: var(--gray-400); gap: 10px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin .65s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────
+   TABLE
+───────────────────────────────────────────── */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th {
+  text-align: left; padding: 10px 14px;
+  font-size: 11px; font-weight: 600; color: var(--gray-500);
+  text-transform: uppercase; letter-spacing: .5px;
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--border);
+}
+.data-table td {
+  padding: 12px 14px;
+  font-size: 13px; color: var(--gray-700);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--gray-25); }
+.table-actions { display: flex; gap: 4px; }
+
+/* ─────────────────────────────────────────────
+   PROGRESS
+───────────────────────────────────────────── */
+.progress { height: 5px; background: var(--gray-100); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
+
+/* ─────────────────────────────────────────────
+   MODAL
+───────────────────────────────────────────── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.35); backdrop-filter: blur(2px);
+  z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity .18s;
+}
+.overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--white);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  width: 92%; max-width: 600px;
+  max-height: 88vh; overflow-y: auto;
+  transform: translateY(8px) scale(.99);
+  transition: transform .18s;
+}
+.overlay.open .modal { transform: none; }
+.modal-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-body { padding: 20px 22px; }
+.modal-foot {
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: 8px;
+}
+.modal-close {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--gray-100); color: var(--gray-500);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; cursor: pointer; flex-shrink: 0;
+}
+.modal-close:hover { background: var(--gray-200); color: var(--gray-700); }
+
+/* ─────────────────────────────────────────────
+   EMPTY STATE
+───────────────────────────────────────────── */
+.empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 10px;
+  padding: 48px 24px; text-align: center;
+}
+.empty-icon { font-size: 36px; opacity: .35; }
+.empty-title { font-size: 14px; font-weight: 700; color: var(--gray-700); }
+.empty-sub { font-size: 12.5px; color: var(--gray-400); max-width: 280px; line-height: 1.6; }
+
+/* ─────────────────────────────────────────────
+   BANNERS & ALERTS
+───────────────────────────────────────────── */
+.banner {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-radius: var(--r);
+  margin-bottom: 18px;
+  font-size: 13px;
+}
+.banner-blue { background: var(--brand-l); border: 1px solid #BFDBFE; color: var(--brand-d); }
+.banner-amber { background: var(--amber-l); border: 1px solid #FDE68A; color: #92400E; }
+.banner-green { background: var(--green-l); border: 1px solid #A7F3D0; color: #065F46; }
+.banner-icon { font-size: 16px; flex-shrink: 0; }
+
+/* ─────────────────────────────────────────────
+   RISK BOX
+───────────────────────────────────────────── */
+.risk-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.risk-item:last-child { border-bottom: none; }
+.risk-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+
+/* ─────────────────────────────────────────────
+   NOTIFICATION TOAST
+───────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 20px; right: 20px;
+  background: var(--gray-900); color: var(--white);
+  padding: 10px 16px; border-radius: var(--r);
+  font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(12px); opacity: 0;
+  transition: all .25s cubic-bezier(.34,1.56,.64,1);
+  z-index: 999; max-width: 300px;
+}
+.toast.show { transform: none; opacity: 1; }
+
+/* ─────────────────────────────────────────────
+   GRID UTILS
+───────────────────────────────────────────── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.flex-row { display: flex; gap: 8px; align-items: center; }
+.spacer { flex: 1; }
+.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.mt-4 { margin-top: 4px; }
+.mt-8 { margin-top: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+
+/* Checkbox */
+input[type=checkbox] { width: 14px; height: 14px; accent-color: var(--brand); cursor: pointer; }
+input[type=range] { width: 100%; accent-color: var(--brand); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 3px; }
+
+/* ─────────────────────────────────────────────
+   SECTION HEADING
+───────────────────────────────────────────── */
+.section-head { margin-bottom: 18px; }
+.section-head h2 { font-size: 17px; font-weight: 800; color: var(--gray-900); letter-spacing: -0.3px; }
+.section-head p { font-size: 13px; color: var(--gray-500); margin-top: 3px; }
+
+/* ─────────────────────────────────────────────
+   ANIMATIONS
+───────────────────────────────────────────── */
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+.fade-up { animation: fadeUp .25s ease both; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .stats-grid, .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<!-- ───────────────────────────────────────────
+     SIDEBAR
+─────────────────────────────────────────── -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">🎯</div>
+    <span class="brand-name">HireTrackAI</span>
+  </div>
+  <div class="sidebar-nav">
+    <span class="nav-group-label">Overview</span>
+    <div class="nav-item active" data-page="dashboard">
+      <span class="ni-icon">▣</span> Dashboard
+    </div>
+
+    <span class="nav-group-label">Search</span>
+    <div class="nav-item" data-page="search">
+      <span class="ni-icon">◎</span> Job Search
+      <span class="nav-badge zero" id="badge-search">0</span>
+    </div>
+    <div class="nav-item" data-page="tailor">
+      <span class="ni-icon">◈</span> Resume Tailor
+    </div>
+
+    <span class="nav-group-label">Track</span>
+    <div class="nav-item" data-page="tracker">
+      <span class="ni-icon">◷</span> Applications
+      <span class="nav-badge zero" id="badge-apps">0</span>
+    </div>
+    <div class="nav-item" data-page="rejection">
+      <span class="ni-icon">◉</span> Rejection AI
+    </div>
+
+    <span class="nav-group-label">Account</span>
+    <div class="nav-item" data-page="profile">
+      <span class="ni-icon">◌</span> My Profile
+    </div>
+    <div class="nav-item" data-page="settings">
+      <span class="ni-icon">◎</span> Settings
+    </div>
+  </div>
+  <div class="sidebar-foot">
+    <div class="api-pill">
+      <span class="api-led" id="api-led"></span>
+      <span id="api-txt">API key not set</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ───────────────────────────────────────────
+     MAIN
+─────────────────────────────────────────── -->
+<div class="main">
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <span class="page-title" id="page-title">Dashboard</span>
+  </div>
+  <div class="topbar-right">
+    <button class="btn btn-secondary btn-sm" onclick="exportData()">Export data</button>
+    <button class="btn btn-primary btn-sm" onclick="nav('search')">+ Add job</button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     DASHBOARD
+══════════════════════════════════════════════ -->
+<div class="page active" id="page-dashboard">
+<div class="page-body">
+
+  <div id="dash-setup-banner" class="banner banner-blue" style="display:none">
+    <span class="banner-icon">🔑</span>
+    <div style="flex:1">
+      <strong>Set your Anthropic API key</strong> to unlock AI scoring, resume tailoring, and rejection analysis.
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="nav('settings')">Set key →</button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card stat-blue">
+      <div class="stat-label">Jobs analysed</div>
+      <div class="stat-val" id="s-found">0</div>
+      <div class="stat-meta">across all platforms</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Applied</div>
+      <div class="stat-val" id="s-applied">0</div>
+      <div class="stat-meta">applications tracked</div>
+    </div>
+    <div class="stat-card stat-green">
+      <div class="stat-label">Interviews</div>
+      <div class="stat-val" id="s-interviews">0</div>
+      <div class="stat-meta">calls & rounds</div>
+    </div>
+    <div class="stat-card stat-amber">
+      <div class="stat-label">Response rate</div>
+      <div class="stat-val" id="s-rate">—</div>
+      <div class="stat-meta">of applications</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Recent applications</div>
+          <div class="card-sub">Last 5 tracked</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="nav('tracker')">View all</button>
+      </div>
+      <div class="card-body" id="dash-recent"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Source breakdown</div>
+      </div>
+      <div class="card-body" id="dash-sources"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     JOB SEARCH
+══════════════════════════════════════════════ -->
+<div class="page" id="page-search">
+<div class="page-body">
+  <div class="section-head">
+    <h2>Job search</h2>
+    <p>Paste a job description from any platform — AI scores it against your profile in seconds</p>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- Left: Input -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Add a job</div></div>
+        <div class="card-body">
+          <div class="tabs">
+            <div class="tab-btn active" onclick="switchTab('paste')">Paste JD</div>
+            <div class="tab-btn" onclick="switchTab('manual')">Manual entry</div>
+          </div>
+
+          <div id="tab-paste">
+            <div class="field">
+              <label class="field-label">Job description</label>
+              <textarea class="input" id="jd-paste" rows="8" placeholder="Copy the full job posting from LinkedIn, Naukri, Indeed, Monster, Glassdoor, or any site and paste it here..."></textarea>
+              <div class="field-hint">Works with any job site — no scraping needed, no ToS risk</div>
+            </div>
+          </div>
+
+          <div id="tab-manual" style="display:none">
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">Job title *</label>
+                <input type="text" class="input" id="jm-title" placeholder="Senior TPM">
+              </div>
+              <div class="field">
+                <label class="field-label">Company *</label>
+                <input type="text" class="input" id="jm-company" placeholder="Amazon">
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">Location</label>
+                <input type="text" class="input" id="jm-loc" placeholder="Bangalore / Remote">
+              </div>
+              <div class="field">
+                <label class="field-label">Platform</label>
+                <select class="input" id="jm-platform">
+                  <option>LinkedIn</option><option>Naukri</option><option>Indeed</option>
+                  <option>Monster</option><option>Instahyre</option><option>iimjobs</option>
+                  <option>Glassdoor</option><option>AngelList</option><option>Company website</option><option>Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Job description *</label>
+              <textarea class="input" id="jm-jd" rows="5" placeholder="Requirements and responsibilities..."></textarea>
+            </div>
+            <div class="field">
+              <label class="field-label">Apply URL</label>
+              <input type="url" class="input" id="jm-url" placeholder="https://...">
+            </div>
+            <div class="field">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--gray-700)">
+                <input type="checkbox" id="jm-visa">
+                Visa sponsorship available 🌍
+              </label>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" style="width:100%" onclick="analyseJob()">
+            Analyse & score with AI
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Filters</div></div>
+        <div class="card-body">
+          <div class="field">
+            <label class="field-label">Min match score: <strong id="min-score-lbl">60</strong>%</label>
+            <input type="range" min="0" max="100" value="60" id="min-score"
+              oninput="document.getElementById('min-score-lbl').textContent=this.value">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="field-label">Visa filter</label>
+              <select class="input" id="f-visa">
+                <option value="">All jobs</option>
+                <option value="visa">Visa sponsored only 🌍</option>
+                <option value="india">India only 🇮🇳</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Type</label>
+              <select class="input" id="f-type">
+                <option>All</option><option>Full-time</option><option>Contract</option><option>Remote</option><option>Hybrid</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Results -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+
+      <!-- Score card (hidden until analysis) -->
+      <div class="card" id="score-card" style="display:none">
+        <div class="card-header">
+          <div>
+            <div class="card-title" id="sc-title">—</div>
+            <div class="card-sub" id="sc-company"></div>
+          </div>
+          <div class="score-ring" id="sc-ring">—</div>
+        </div>
+        <div class="card-body">
+          <div class="ai-box" id="sc-analysis">—</div>
+          <div class="flex-row mt-12">
+            <button class="btn btn-green btn-sm" onclick="addToTracker()">Add to tracker</button>
+            <button class="btn btn-primary btn-sm" onclick="goTailor()">Tailor resume</button>
+            <button class="btn btn-secondary btn-sm" id="sc-apply-btn" onclick="applyNow()">Apply ↗</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Saved jobs -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Analysed jobs</div>
+            <div class="card-sub" id="jobs-count">None yet</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="clearJobs()">Clear</button>
+        </div>
+        <div class="card-body">
+          <div class="job-list" id="jobs-list">
+            <div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">No jobs yet</div><div class="empty-sub">Paste a JD above and click Analyse</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     RESUME TAILOR
+══════════════════════════════════════════════ -->
+<div class="page" id="page-tailor">
+<div class="page-body">
+  <div class="section-head">
+    <h2>AI resume tailor</h2>
+    <p>Claude rewrites your bullets to match each JD — ATS-optimised, keyword-aligned</p>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Input</div></div>
+      <div class="card-body">
+        <div class="field">
+          <label class="field-label">Role &amp; company</label>
+          <input type="text" class="input" id="t-role" placeholder="Senior TPM at Amazon">
+        </div>
+        <div class="field">
+          <label class="field-label">Job description (key requirements)</label>
+          <textarea class="input" id="t-jd" rows="6" placeholder="Paste requirements..."></textarea>
+        </div>
+        <div class="field">
+          <label class="field-label">Your resume</label>
+          <textarea class="input" id="t-resume" rows="10" placeholder="Paste your resume text..."></textarea>
+        </div>
+        <div class="field">
+          <label class="field-label">Tailoring style</label>
+          <select class="input" id="t-style">
+            <option value="balanced">Balanced — natural + keyword-rich</option>
+            <option value="aggressive">Aggressive — maximum keyword density</option>
+            <option value="conservative">Conservative — minimal changes only</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="tailorResume()">Tailor with AI</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Tailored resume</div>
+          <div class="flex-row" style="gap:6px">
+            <button class="btn btn-secondary btn-sm" onclick="copyTailored()">Copy</button>
+            <button class="btn btn-secondary btn-sm" onclick="downloadTailored()">Download</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="ai-box" id="t-output">Your tailored resume will appear here...</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Keyword report</div></div>
+        <div class="card-body">
+          <div class="ai-box" id="t-keywords" style="min-height:60px">Run tailor to see keyword gaps...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TRACKER
+══════════════════════════════════════════════ -->
+<div class="page" id="page-tracker">
+<div class="page-body">
+  <div class="flex-row section-head" style="align-items:flex-start">
+    <div>
+      <h2>Applications</h2>
+      <p>Track every application, status, and next step</p>
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ Add application</button>
+  </div>
+
+  <div class="card">
+    <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <select class="input" style="width:auto;font-size:12px" id="tf-status" onchange="renderTracker()">
+        <option value="">All status</option>
+        <option>Applied</option><option>Interview Scheduled</option><option>Interview Done</option>
+        <option>Offer Received</option><option>Rejected</option><option>Withdrawn</option>
+      </select>
+      <select class="input" style="width:auto;font-size:12px" id="tf-platform" onchange="renderTracker()">
+        <option value="">All platforms</option>
+        <option>LinkedIn</option><option>Naukri</option><option>Indeed</option><option>Monster</option>
+        <option>Instahyre</option><option>iimjobs</option><option>Company website</option><option>Other</option>
+      </select>
+      <select class="input" style="width:auto;font-size:12px" id="tf-visa" onchange="renderTracker()">
+        <option value="">All locations</option>
+        <option value="visa">Visa sponsored 🌍</option>
+        <option value="india">India 🇮🇳</option>
+      </select>
+      <input type="text" class="input" style="width:180px;font-size:12px" placeholder="Search..." id="tf-search" oninput="renderTracker()">
+    </div>
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Role</th><th>Platform</th><th>Applied</th><th>Status</th><th>Match</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tracker-body">
+          <tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div><div class="empty-title">No applications</div><div class="empty-sub">Add your first application</div></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     REJECTION AI
+══════════════════════════════════════════════ -->
+<div class="page" id="page-rejection">
+<div class="page-body">
+  <div class="section-head">
+    <h2>Rejection analyser</h2>
+    <p>Understand exactly why you didn't get called back — and how to fix it</p>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Input</div></div>
+      <div class="card-body">
+        <div class="field">
+          <label class="field-label">Role &amp; company</label>
+          <input type="text" class="input" id="r-role" placeholder="Senior TPM at Amazon">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Rejection stage</label>
+            <select class="input" id="r-stage">
+              <option>ATS / Resume screening</option><option>Recruiter screen</option>
+              <option>Hiring manager screen</option><option>Technical interview</option>
+              <option>Final round</option><option>Unknown</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Job requirements</label>
+          <textarea class="input" id="r-jd" rows="4" placeholder="What the job required..."></textarea>
+        </div>
+        <div class="field">
+          <label class="field-label">Resume you submitted</label>
+          <textarea class="input" id="r-resume" rows="5" placeholder="Paste the resume version you sent..."></textarea>
+        </div>
+        <div class="field">
+          <label class="field-label">Rejection message (optional)</label>
+          <textarea class="input" id="r-msg" rows="2" placeholder="Any feedback received..."></textarea>
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="analyseRejection()">Analyse with AI</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-header"><div class="card-title">AI analysis</div></div>
+        <div class="card-body">
+          <div class="ai-box" id="r-output">Run analysis to see why you were rejected and exactly what to fix.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Past rejections</div></div>
+        <div class="card-body" id="r-past"><div class="empty-sub" style="text-align:center;padding:16px">None yet</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PROFILE
+══════════════════════════════════════════════ -->
+<div class="page" id="page-profile">
+<div class="page-body">
+  <div class="section-head">
+    <h2>My profile</h2>
+    <p>Used by AI to score and tailor resumes — keep it current</p>
+  </div>
+  <div class="grid-2">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Basic info</div></div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field"><label class="field-label">Name</label><input type="text" class="input" id="p-name" placeholder="Amit Bhargav KA"></div>
+            <div class="field"><label class="field-label">Email</label><input type="email" class="input" id="p-email" placeholder="you@email.com"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label class="field-label">Phone</label><input type="text" class="input" id="p-phone" placeholder="+91 98765 43210"></div>
+            <div class="field"><label class="field-label">Location</label><input type="text" class="input" id="p-loc" placeholder="Bangalore, India"></div>
+          </div>
+          <div class="field"><label class="field-label">LinkedIn</label><input type="url" class="input" id="p-li" placeholder="https://linkedin.com/in/..."></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Target roles</div></div>
+        <div class="card-body">
+          <div class="field">
+            <label class="field-label">Roles</label>
+            <div class="tag-wrap" id="tag-roles"></div>
+            <div class="tag-row mt-8"><input type="text" class="input" id="in-roles" placeholder="e.g. Senior TPM" onkeydown="if(event.key==='Enter')addTag('roles')"><button class="btn btn-secondary btn-sm" onclick="addTag('roles')">Add</button></div>
+          </div>
+          <div class="field">
+            <label class="field-label">Preferred locations</label>
+            <div class="tag-wrap" id="tag-locs"></div>
+            <div class="tag-row mt-8"><input type="text" class="input" id="in-locs" placeholder="Bangalore, Remote, USA" onkeydown="if(event.key==='Enter')addTag('locs')"><button class="btn btn-secondary btn-sm" onclick="addTag('locs')">Add</button></div>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--gray-700)">
+            <input type="checkbox" id="p-visa"> Open to international roles with visa sponsorship 🌍
+          </label>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Skills</div></div>
+        <div class="card-body">
+          <div class="tag-wrap" id="tag-skills"></div>
+          <div class="tag-row mt-8"><input type="text" class="input" id="in-skills" placeholder="Technical Program Management" onkeydown="if(event.key==='Enter')addTag('skills')"><button class="btn btn-secondary btn-sm" onclick="addTag('skills')">Add</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Base resume</div></div>
+        <div class="card-body">
+          <div class="field">
+            <textarea class="input" id="p-resume" rows="14" placeholder="Paste your full resume — used as base for AI tailoring..."></textarea>
+            <div class="field-hint">Auto-loaded into Resume Tailor</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="saveProfile()">Save profile</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SETTINGS
+══════════════════════════════════════════════ -->
+<div class="page" id="page-settings">
+<div class="page-body" style="max-width:600px">
+  <div class="section-head">
+    <h2>Settings</h2>
+    <p>API key, preferences, and data management</p>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px">
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Anthropic API key</div></div>
+      <div class="card-body">
+        <div class="banner banner-amber" style="margin-bottom:14px">
+          <span class="banner-icon">⚠️</span>
+          <div><strong>Security note:</strong> Your key is stored in browser localStorage. Do not use HireTrackAI on shared or public computers.</div>
+        </div>
+        <div class="field">
+          <label class="field-label">API key</label>
+          <input type="password" class="input" id="api-input" placeholder="sk-ant-api03-...">
+          <div class="field-hint">Get your free key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--brand)">console.anthropic.com</a> — ~₹0.25 per resume tailor</div>
+        </div>
+        <div class="flex-row">
+          <button class="btn btn-primary btn-sm" onclick="saveKey()">Save key</button>
+          <button class="btn btn-secondary btn-sm" onclick="testKey()">Test connection</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearKey()">Clear</button>
+        </div>
+        <div id="key-result" class="mt-8" style="font-size:12px"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Preferences</div></div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Min match score (%)</label>
+            <input type="number" class="input" id="s-score" value="60" min="0" max="100">
+          </div>
+          <div class="field">
+            <label class="field-label">Max applications / day</label>
+            <input type="number" class="input" id="s-max" value="10" min="1" max="50">
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveSettings()">Save</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Risks & limitations</div></div>
+      <div class="card-body">
+        <div class="risk-item">
+          <div class="risk-dot" style="background:var(--amber)"></div>
+          <div><strong style="font-size:13px;color:var(--gray-800)">Job site scraping is not supported</strong><br><span style="font-size:12px;color:var(--gray-500)">LinkedIn, Naukri, Indeed block browser scraping (CORS + bot detection). Paste the JD manually — this also keeps you within their ToS.</span></div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-dot" style="background:var(--amber)"></div>
+          <div><strong style="font-size:13px;color:var(--gray-800)">API key stored locally</strong><br><span style="font-size:12px;color:var(--gray-500)">Your Anthropic key is in browser localStorage. Anyone with dev tools access on your machine can see it. Don't use on shared devices.</span></div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-dot" style="background:var(--red)"></div>
+          <div><strong style="font-size:13px;color:var(--gray-800)">Auto-applying is disabled by design</strong><br><span style="font-size:12px;color:var(--gray-500)">Auto-submissions on LinkedIn/Naukri can get your account banned and often send incomplete applications. You always click Apply yourself.</span></div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-dot" style="background:var(--green)"></div>
+          <div><strong style="font-size:13px;color:var(--gray-800)">Your data never leaves your browser</strong><br><span style="font-size:12px;color:var(--gray-500)">All jobs, applications, and profile data sit in localStorage. Only AI processing calls reach Anthropic's servers.</span></div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-dot" style="background:var(--green)"></div>
+          <div><strong style="font-size:13px;color:var(--gray-800)">Cost is minimal</strong><br><span style="font-size:12px;color:var(--gray-500)">~₹0.25 per AI resume tailor. 10 tailors/day = ₹2.50/day = ₹75/month. Far cheaper than any paid job service.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Data management</div></div>
+      <div class="card-body">
+        <div class="field-hint" style="margin-bottom:12px">All data is stored locally in your browser. Clear browser storage to wipe everything — export first to back up.</div>
+        <div class="flex-row">
+          <button class="btn btn-secondary btn-sm" onclick="exportData()">Export JSON</button>
+          <button class="btn btn-secondary btn-sm" onclick="importData()">Import JSON</button>
+          <button class="btn btn-danger btn-sm" onclick="wipeData()">Clear all data</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- ───────────────────────────────────────────
+     MODAL: Add Application
+─────────────────────────────────────────── -->
+<div class="overlay" id="modal-add">
+  <div class="modal">
+    <div class="modal-head">
+      <div><div class="card-title">Add application</div><div class="card-sub">Track a role you've applied to</div></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field"><label class="field-label">Job title *</label><input type="text" class="input" id="ma-title" placeholder="Senior TPM"></div>
+        <div class="field"><label class="field-label">Company *</label><input type="text" class="input" id="ma-co" placeholder="Amazon"></div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Platform</label>
+          <select class="input" id="ma-platform">
+            <option>LinkedIn</option><option>Naukri</option><option>Indeed</option><option>Monster</option>
+            <option>Instahyre</option><option>iimjobs</option><option>Glassdoor</option><option>AngelList</option>
+            <option>Company website</option><option>Other</option>
+          </select>
+        </div>
+        <div class="field"><label class="field-label">Date applied</label><input type="date" class="input" id="ma-date"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="field-label">Location</label><input type="text" class="input" id="ma-loc" placeholder="Bangalore / Remote / USA"></div>
+        <div class="field">
+          <label class="field-label">Status</label>
+          <select class="input" id="ma-status">
+            <option>Applied</option><option>Interview Scheduled</option><option>Interview Done</option>
+            <option>Offer Received</option><option>Rejected</option><option>Withdrawn</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="field-label">Match score (%)</label><input type="number" class="input" id="ma-score" placeholder="75" min="0" max="100"></div>
+        <div class="field"><label class="field-label">Apply URL</label><input type="url" class="input" id="ma-url" placeholder="https://..."></div>
+      </div>
+      <div class="field">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--gray-700)">
+          <input type="checkbox" id="ma-visa"> Visa sponsorship 🌍
+        </label>
+      </div>
+      <div class="field"><label class="field-label">Notes</label><textarea class="input" id="ma-notes" rows="2" placeholder="Recruiter name, salary range, next steps..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveApp()">Save application</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span id="toast-icon">✓</span><span id="toast-msg"></span></div>
+
+<script>
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+const S = {
+  key: '',
+  profile: { name:'',email:'',phone:'',loc:'',li:'', roles:[],locs:[],skills:[], resume:'', visa:false },
+  prefs: { minScore:60, maxPerDay:10 },
+  jobs: [],
+  apps: [],
+  rejs: [],
+  curJob: null
+};
+
+function persist() { try { localStorage.setItem('htai2', JSON.stringify(S)); } catch(e){} }
+function restore() {
+  try {
+    const d = localStorage.getItem('htai2');
+    if (d) { const p = JSON.parse(d); Object.assign(S, p); }
+  } catch(e) {}
+}
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+const PAGE_TITLES = {
+  dashboard:'Dashboard', search:'Job search', tailor:'Resume tailor',
+  tracker:'Applications', rejection:'Rejection AI',
+  profile:'My profile', settings:'Settings'
+};
+function nav(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelector(`.nav-item[data-page="${id}"]`)?.classList.add('active');
+  document.getElementById('page-title').textContent = PAGE_TITLES[id] || 'HireTrackAI';
+  if (id === 'dashboard')  renderDash();
+  if (id === 'tracker')    renderTracker();
+  if (id === 'profile')    loadProfile();
+  if (id === 'settings')   loadSettings();
+  if (id === 'tailor')     loadTailorDefaults();
+  if (id === 'rejection')  renderRejections();
+}
+document.querySelectorAll('.nav-item').forEach(el => {
+  el.addEventListener('click', () => nav(el.dataset.page));
+});
+
+// ─────────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────────
+let toastTimer;
+function toast(msg, icon='✓') {
+  clearTimeout(toastTimer);
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast').classList.add('show');
+  toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
+}
+
+// ─────────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('ma-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('modal-add').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal-add').classList.remove('open');
+}
+document.getElementById('modal-add').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-add')) closeModal();
+});
+
+// ─────────────────────────────────────────────
+// API
+// ─────────────────────────────────────────────
+function updateApiStatus() {
+  const led = document.getElementById('api-led');
+  const txt = document.getElementById('api-txt');
+  const banner = document.getElementById('dash-setup-banner');
+  if (S.key) {
+    led.classList.add('on');
+    txt.textContent = 'AI ready';
+    if (banner) banner.style.display = 'none';
+  } else {
+    led.classList.remove('on');
+    txt.textContent = 'API key not set';
+    if (banner) banner.style.display = 'flex';
+  }
+}
+function saveKey() {
+  const k = document.getElementById('api-input').value.trim();
+  if (!k) { toast('Enter your API key first', '⚠️'); return; }
+  S.key = k; persist(); updateApiStatus(); toast('API key saved', '🔑');
+}
+function clearKey() {
+  S.key = ''; document.getElementById('api-input').value = '';
+  persist(); updateApiStatus(); toast('Key cleared');
+}
+async function testKey() {
+  const k = S.key || document.getElementById('api-input').value.trim();
+  if (!k) { toast('Enter a key first', '⚠️'); return; }
+  const el = document.getElementById('key-result');
+  el.style.color = 'var(--gray-400)'; el.textContent = 'Testing...';
+  try {
+    const r = await claude('Say "Connected" and nothing else.', k);
+    el.style.color = 'var(--green)'; el.textContent = '✓ Connected — ' + r.slice(0,40);
+    S.key = k; persist(); updateApiStatus();
+  } catch(e) {
+    el.style.color = 'var(--red)'; el.textContent = '✗ ' + e.message;
+  }
+}
+async function claude(prompt, key) {
+  const k = key || S.key;
+  if (!k) throw new Error('No API key. Go to Settings.');
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json', 'x-api-key':k, 'anthropic-version':'2023-06-01' },
+    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:2000, messages:[{role:'user',content:prompt}] })
+  });
+  if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'API error'); }
+  return (await res.json()).content[0].text;
+}
+
+// ─────────────────────────────────────────────
+// TABS (search)
+// ─────────────────────────────────────────────
+let curTab = 'paste';
+function switchTab(t) {
+  ['paste','manual'].forEach(x => {
+    document.getElementById('tab-'+x).style.display = x===t ? 'block' : 'none';
+  });
+  document.querySelectorAll('#page-search .tab-btn').forEach((el,i) => {
+    el.classList.toggle('active', ['paste','manual'][i] === t);
+  });
+  curTab = t;
+}
+
+// ─────────────────────────────────────────────
+// JOB ANALYSIS
+// ─────────────────────────────────────────────
+async function analyseJob() {
+  let jd='', title='', company='', loc='', url='', src='', visa=false;
+  if (curTab === 'paste') {
+    jd = document.getElementById('jd-paste').value.trim();
+    if (!jd) { toast('Paste a job description first', '⚠️'); return; }
+  } else {
+    title   = document.getElementById('jm-title').value.trim();
+    company = document.getElementById('jm-company').value.trim();
+    loc     = document.getElementById('jm-loc').value.trim();
+    jd      = document.getElementById('jm-jd').value.trim();
+    url     = document.getElementById('jm-url').value.trim();
+    src     = document.getElementById('jm-platform').value;
+    visa    = document.getElementById('jm-visa').checked;
+    if (!title || !jd) { toast('Fill title and description', '⚠️'); return; }
+  }
+  const card = document.getElementById('score-card');
+  const out  = document.getElementById('sc-analysis');
+  card.style.display = 'block';
+  out.className = 'ai-box loading';
+  out.innerHTML = '<div class="spinner"></div><span>Analysing with AI...</span>';
+  document.getElementById('sc-ring').textContent = '…';
+  document.getElementById('sc-ring').className = 'score-ring';
+
+  const p = S.profile;
+  const prompt = `You are an expert ATS analyst. Analyse this job posting against the candidate.
+
+JOB:
+${jd}
+
+CANDIDATE:
+Name: ${p.name||'Not set'} | Roles: ${(p.roles||[]).join(', ')||'Not set'}
+Skills: ${(p.skills||[]).join(', ')||'Not set'}
+Resume: ${(p.resume||'').slice(0,1200)||'Not provided'}
+
+Reply in EXACT format (no markdown):
+TITLE: [job title]
+COMPANY: [company]
+LOCATION: [location]
+SOURCE: [platform: LinkedIn/Naukri/Indeed/Monster/Instahyre/Company website/Unknown]
+VISA: [Yes/No]
+SCORE: [0-100]
+STRENGTHS:
+▸ [match 1]
+▸ [match 2]
+▸ [match 3]
+GAPS:
+▸ [gap 1]
+▸ [gap 2]
+RECOMMENDATION: [2 sentences on whether to apply and how to position]
+KEYWORDS: [8 top keywords from JD to add to resume, comma-separated]`;
+
+  try {
+    const res = await claude(prompt);
+    out.className = 'ai-box';
+    const get = (k) => { const l = res.split('\n').find(x => x.startsWith(k+':')); return l ? l.replace(k+':','').trim() : ''; };
+    title   = title   || get('TITLE');
+    company = company || get('COMPANY');
+    loc     = loc     || get('LOCATION');
+    src     = src     || get('SOURCE');
+    visa    = visa    || get('VISA').toLowerCase() === 'yes';
+    const score = Math.min(100, Math.max(0, parseInt(get('SCORE')) || 0));
+
+    document.getElementById('sc-title').textContent   = title || 'Job analysis';
+    document.getElementById('sc-company').textContent = [company, loc, visa ? '🌍 Visa' : ''].filter(Boolean).join(' · ');
+    const ring = document.getElementById('sc-ring');
+    ring.textContent = score + '%';
+    ring.className = 'score-ring ' + (score >= 70 ? 'score-hi' : score >= 50 ? 'score-md' : 'score-lo');
+
+    const body = res.replace(/^(TITLE|COMPANY|LOCATION|SOURCE|VISA|SCORE|KEYWORDS):.*$/gm,'').replace(/^\s*\n/gm,'').trim();
+    out.textContent = body;
+
+    S.curJob = { id:Date.now(), title, company, loc, src, visa, score, jd, url, analysis:res, date:new Date().toISOString() };
+    S.jobs.unshift(S.curJob);
+    persist(); renderSavedJobs(); updateBadges();
+    toast(`Match: ${score}%`, score>=70?'🟢':score>=50?'🟡':'🔴');
+  } catch(e) {
+    out.className = 'ai-box'; out.textContent = 'Error: ' + e.message; toast(e.message, '✗');
+  }
+}
+
+function addToTracker() {
+  if (!S.curJob) { toast('Analyse a job first', '⚠️'); return; }
+  const j = S.curJob;
+  S.apps.unshift({
+    id:j.id, title:j.title, company:j.company, loc:j.loc,
+    platform:j.src||'Other', date:new Date().toISOString().split('T')[0],
+    status:'Applied', score:j.score, url:j.url, visa:j.visa, notes:''
+  });
+  persist(); updateBadges(); toast('Added to tracker', '📋');
+}
+function goTailor() {
+  if (!S.curJob) { toast('Analyse a job first', '⚠️'); return; }
+  document.getElementById('t-role').value = [S.curJob.title, S.curJob.company].filter(Boolean).join(' at ');
+  document.getElementById('t-jd').value   = S.curJob.jd || '';
+  nav('tailor');
+}
+function applyNow() {
+  const url = S.curJob?.url;
+  if (url) window.open(url, '_blank');
+  else toast('No apply URL — open the job listing manually', '⚠️');
+}
+function clearJobs() { S.jobs = []; persist(); renderSavedJobs(); toast('Cleared'); }
+
+function renderSavedJobs() {
+  const list  = document.getElementById('jobs-list');
+  const count = document.getElementById('jobs-count');
+  count.textContent = S.jobs.length ? S.jobs.length + ' analysed' : 'None yet';
+  if (!S.jobs.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">No jobs yet</div><div class="empty-sub">Paste a JD above and click Analyse</div></div>';
+    return;
+  }
+  list.innerHTML = S.jobs.slice(0,15).map(j => `
+    <div class="job-card${S.curJob?.id===j.id?' sel':''}" onclick="selectJob(${j.id})">
+      <div class="job-initials">${(j.company||'?').slice(0,2).toUpperCase()}</div>
+      <div class="job-info">
+        <div class="job-title">${j.title||'Unknown'}</div>
+        <div class="job-company">${j.company||''}${j.loc?' · '+j.loc:''}</div>
+        <div class="job-pills">
+          <span class="pill pill-gray">${j.src||'Other'}</span>
+          ${j.visa?'<span class="pill pill-blue">🌍 Visa</span>':''}
+        </div>
+      </div>
+      <div class="score-ring score-ring-sm ${j.score>=70?'score-hi':j.score>=50?'score-md':'score-lo'}">${j.score}%</div>
+    </div>`).join('');
+}
+function selectJob(id) {
+  const j = S.jobs.find(x => x.id===id);
+  if (!j) return;
+  S.curJob = j;
+  document.getElementById('score-card').style.display = 'block';
+  document.getElementById('sc-title').textContent = j.title||'Job';
+  document.getElementById('sc-company').textContent = [j.company,j.loc,j.visa?'🌍 Visa':''].filter(Boolean).join(' · ');
+  const ring = document.getElementById('sc-ring');
+  ring.textContent = j.score+'%';
+  ring.className = 'score-ring '+(j.score>=70?'score-hi':j.score>=50?'score-md':'score-lo');
+  const out = document.getElementById('sc-analysis');
+  out.className = 'ai-box';
+  out.textContent = j.analysis?.replace(/^(TITLE|COMPANY|LOCATION|SOURCE|VISA|SCORE|KEYWORDS):.*$/gm,'').replace(/^\s*\n/gm,'').trim()||'';
+  renderSavedJobs();
+}
+
+// ─────────────────────────────────────────────
+// TAILOR
+// ─────────────────────────────────────────────
+function loadTailorDefaults() {
+  if (S.profile.resume && !document.getElementById('t-resume').value)
+    document.getElementById('t-resume').value = S.profile.resume;
+}
+async function tailorResume() {
+  const role  = document.getElementById('t-role').value.trim();
+  const jd    = document.getElementById('t-jd').value.trim();
+  const res   = document.getElementById('t-resume').value.trim();
+  const style = document.getElementById('t-style').value;
+  if (!jd || !res) { toast('Fill JD and resume', '⚠️'); return; }
+  const out  = document.getElementById('t-output');
+  const kout = document.getElementById('t-keywords');
+  out.className  = 'ai-box loading';
+  out.innerHTML  = '<div class="spinner"></div><span>Tailoring with Claude...</span>';
+  kout.textContent = 'Analysing keywords...';
+  const guides = {
+    balanced:'Rewrite bullets to naturally incorporate JD terms. 70% authenticity, 30% keyword optimisation.',
+    aggressive:'Maximise keyword density. Mirror JD language as closely as possible in every bullet.',
+    conservative:'Minimal changes only. Preserve voice. Add only clearly missing critical keywords.'
+  };
+  const prompt = `You are an expert ATS resume optimiser. Tailor this resume for the job.
+
+JOB: ${role||'Not specified'}
+JD: ${jd}
+RESUME: ${res}
+STYLE: ${guides[style]}
+
+Rules:
+1. Rewrite to maximise JD match
+2. Add missing keywords naturally
+3. Keep all dates, companies, titles EXACTLY as-is
+4. Never invent experience
+5. After resume add "---KEYWORDS---" then:
+   ADDED: [keywords added]
+   MISSING: [critical JD keywords still absent]
+   SCORE: [estimated ATS score 0-100]`;
+  try {
+    const result = await claude(prompt);
+    const [resume, keywords] = result.split('---KEYWORDS---');
+    out.className = 'ai-box'; out.textContent = resume.trim();
+    kout.textContent = keywords?.trim() || 'No keyword report generated.';
+    toast('Resume tailored ✓', '✨');
+  } catch(e) { out.className='ai-box'; out.textContent='Error: '+e.message; toast(e.message,'✗'); }
+}
+function copyTailored() {
+  const t = document.getElementById('t-output').textContent;
+  navigator.clipboard.writeText(t).then(() => toast('Copied', '📋'));
+}
+function downloadTailored() {
+  const t = document.getElementById('t-output').textContent;
+  if (t.length < 50) { toast('Nothing to download yet', '⚠️'); return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([t], {type:'text/plain'}));
+  a.download = 'tailored_resume.txt'; a.click();
+}
+
+// ─────────────────────────────────────────────
+// TRACKER
+// ─────────────────────────────────────────────
+const STATUS_PILL = {
+  'Applied':'pill-gray','Interview Scheduled':'pill-blue','Interview Done':'pill-purple',
+  'Offer Received':'pill-green','Rejected':'pill-red','Withdrawn':'pill-amber'
+};
+function renderTracker() {
+  let apps = [...S.apps];
+  const fs = document.getElementById('tf-status')?.value||'';
+  const fp = document.getElementById('tf-platform')?.value||'';
+  const fv = document.getElementById('tf-visa')?.value||'';
+  const fq = document.getElementById('tf-search')?.value.toLowerCase()||'';
+  if (fs) apps = apps.filter(a => a.status===fs);
+  if (fp) apps = apps.filter(a => a.platform===fp);
+  if (fv==='visa') apps = apps.filter(a => a.visa);
+  if (fv==='india') apps = apps.filter(a => !a.visa);
+  if (fq) apps = apps.filter(a => (a.title+a.company).toLowerCase().includes(fq));
+  const tbody = document.getElementById('tracker-body');
+  if (!apps.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="empty-icon">📋</div><div class="empty-title">No applications found</div></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = apps.map(a => `
+    <tr>
+      <td>
+        <div style="font-weight:700;font-size:13px;color:var(--gray-900)">${a.title}</div>
+        <div style="font-size:12px;color:var(--gray-400)">${a.company}${a.loc?'&nbsp;·&nbsp;'+a.loc:''} ${a.visa?'🌍':''}</div>
+      </td>
+      <td><span class="pill pill-gray">${a.platform}</span></td>
+      <td style="font-size:12px;color:var(--gray-500)">${a.date?new Date(a.date).toLocaleDateString('en-IN',{day:'numeric',month:'short'}):'-'}</td>
+      <td>
+        <select style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:5px;background:var(--white);color:var(--gray-700);cursor:pointer;font-family:var(--sans)"
+          onchange="updateStatus(${a.id},this.value)">
+          ${['Applied','Interview Scheduled','Interview Done','Offer Received','Rejected','Withdrawn']
+            .map(s=>`<option${a.status===s?' selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+      <td>
+        ${a.score!=null?`<div class="score-ring score-ring-sm ${a.score>=70?'score-hi':a.score>=50?'score-md':'score-lo'}">${a.score}%</div>`:'-'}
+      </td>
+      <td>
+        <div class="table-actions">
+          ${a.url?`<button class="btn btn-ghost btn-xs" onclick="window.open('${a.url}','_blank')">↗</button>`:''}
+          <button class="btn btn-ghost btn-xs" onclick="prefillRej(${a.id})" title="Analyse rejection">🧠</button>
+          <button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="deleteApp(${a.id})">✕</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+function saveApp() {
+  const title   = document.getElementById('ma-title').value.trim();
+  const company = document.getElementById('ma-co').value.trim();
+  if (!title||!company) { toast('Fill title and company', '⚠️'); return; }
+  S.apps.unshift({
+    id:Date.now(), title, company,
+    platform: document.getElementById('ma-platform').value,
+    date:     document.getElementById('ma-date').value,
+    loc:      document.getElementById('ma-loc').value,
+    status:   document.getElementById('ma-status').value,
+    score:    parseInt(document.getElementById('ma-score').value)||null,
+    url:      document.getElementById('ma-url').value,
+    visa:     document.getElementById('ma-visa').checked,
+    notes:    document.getElementById('ma-notes').value
+  });
+  persist(); updateBadges(); renderTracker(); closeModal();
+  ['ma-title','ma-co','ma-loc','ma-score','ma-url','ma-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ma-visa').checked=false;
+  toast('Application saved', '📋');
+}
+function updateStatus(id, status) {
+  const a = S.apps.find(x=>x.id===id);
+  if (a) { a.status=status; persist(); updateBadges(); toast('Updated: '+status,'✓'); }
+}
+function deleteApp(id) {
+  S.apps = S.apps.filter(x=>x.id!==id);
+  persist(); renderTracker(); updateBadges(); toast('Removed','🗑');
+}
+function prefillRej(id) {
+  const a = S.apps.find(x=>x.id===id);
+  if (!a) return;
+  document.getElementById('r-role').value = a.title+' at '+(a.company||'');
+  nav('rejection');
+}
+
+// ─────────────────────────────────────────────
+// REJECTION ANALYSER
+// ─────────────────────────────────────────────
+async function analyseRejection() {
+  const role  = document.getElementById('r-role').value.trim();
+  const stage = document.getElementById('r-stage').value;
+  const jd    = document.getElementById('r-jd').value.trim();
+  const res   = document.getElementById('r-resume').value.trim() || S.profile.resume;
+  const msg   = document.getElementById('r-msg').value.trim();
+  if (!role) { toast('Enter the job role', '⚠️'); return; }
+  const out = document.getElementById('r-output');
+  out.className = 'ai-box loading';
+  out.innerHTML = '<div class="spinner"></div><span>Analysing with AI...</span>';
+  const prompt = `You are an expert career coach. Analyse why this candidate was rejected and give specific, actionable feedback.
+
+ROLE: ${role}
+STAGE: ${stage}
+JD: ${jd||'Not provided'}
+RESUME: ${res||'Not provided'}
+REJECTION: ${msg||'None'}
+
+Give:
+1. LIKELY ROOT CAUSE: Why rejected at this stage?
+2. SPECIFIC GAPS: Missing keywords, experience, or skills?
+3. RESUME FIXES: Exact bullets to rewrite (quote from resume)
+4. STRATEGY: Apply to similar roles? How to position better?
+5. NEXT 3 ACTIONS: Concrete immediate steps
+
+Be direct and specific. Reference actual content.`;
+  try {
+    const result = await claude(prompt);
+    out.className = 'ai-box'; out.textContent = result;
+    S.rejs.unshift({ id:Date.now(), role, stage, date:new Date().toISOString(), analysis:result });
+    persist(); renderRejections(); toast('Analysis done', '🧠');
+  } catch(e) { out.className='ai-box'; out.textContent='Error: '+e.message; toast(e.message,'✗'); }
+}
+function renderRejections() {
+  const el = document.getElementById('r-past');
+  if (!S.rejs.length) { el.innerHTML='<div class="empty-sub" style="text-align:center;padding:16px">None yet</div>'; return; }
+  el.innerHTML = S.rejs.slice(0,5).map(r=>`
+    <div style="padding:10px;border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px;cursor:pointer"
+      onclick="this.querySelector('.rx').style.display=this.querySelector('.rx').style.display==='none'?'block':'none'">
+      <div style="font-weight:600;font-size:13px;color:var(--gray-800)">${r.role}</div>
+      <div style="font-size:11px;color:var(--gray-400)">${r.stage} · ${new Date(r.date).toLocaleDateString('en-IN')}</div>
+      <div class="rx" style="display:none;margin-top:10px;font-size:12.5px;color:var(--gray-600);white-space:pre-wrap;line-height:1.6">${r.analysis}</div>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────────────
+// PROFILE / TAGS
+// ─────────────────────────────────────────────
+const TAG_KEYS = { roles:'roles', locs:'locs', skills:'skills' };
+function renderTags(key) {
+  const arr = S.profile[key] || [];
+  const el = document.getElementById('tag-'+key);
+  if (!el) return;
+  el.innerHTML = arr.map((t,i)=>`
+    <span class="tag">${t}<span class="tag-x" onclick="removeTag('${key}',${i})">×</span></span>`).join('');
+}
+function addTag(key) {
+  const input = document.getElementById('in-'+key);
+  const val = input.value.trim(); if (!val) return;
+  if (!S.profile[key]) S.profile[key] = [];
+  if (!S.profile[key].includes(val)) { S.profile[key].push(val); renderTags(key); }
+  input.value = ''; persist();
+}
+function removeTag(key, i) {
+  S.profile[key].splice(i,1); renderTags(key); persist();
+}
+function loadProfile() {
+  ['name','email','phone','loc','li','resume'].forEach(f => {
+    const el = document.getElementById('p-'+f); if(el) el.value = S.profile[f]||'';
+  });
+  document.getElementById('p-visa').checked = S.profile.visa||false;
+  ['roles','locs','skills'].forEach(k => renderTags(k));
+}
+function saveProfile() {
+  ['name','email','phone','loc','li','resume'].forEach(f => {
+    const el = document.getElementById('p-'+f); if(el) S.profile[f]=el.value;
+  });
+  S.profile.visa = document.getElementById('p-visa').checked;
+  persist(); toast('Profile saved', '👤');
+}
+
+// ─────────────────────────────────────────────
+// SETTINGS
+// ─────────────────────────────────────────────
+function loadSettings() {
+  document.getElementById('api-input').value = S.key||'';
+  document.getElementById('s-score').value = S.prefs.minScore||60;
+  document.getElementById('s-max').value   = S.prefs.maxPerDay||10;
+}
+function saveSettings() {
+  S.prefs.minScore  = parseInt(document.getElementById('s-score').value)||60;
+  S.prefs.maxPerDay = parseInt(document.getElementById('s-max').value)||10;
+  persist(); toast('Settings saved', '⚙️');
+}
+
+// ─────────────────────────────────────────────
+// DASHBOARD
+// ─────────────────────────────────────────────
+function renderDash() {
+  const apps = S.apps;
+  document.getElementById('s-found').textContent     = S.jobs.length;
+  document.getElementById('s-applied').textContent   = apps.length;
+  const interviews = apps.filter(a=>['Interview Scheduled','Interview Done','Offer Received'].includes(a.status)).length;
+  document.getElementById('s-interviews').textContent = interviews;
+  document.getElementById('s-rate').textContent = apps.length ? Math.round(interviews/apps.length*100)+'%' : '—';
+
+  const recent = document.getElementById('dash-recent');
+  if (!apps.length) {
+    recent.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><div class="empty-title">No applications yet</div></div>';
+  } else {
+    const SC = {'Applied':'var(--gray-400)','Interview Scheduled':'var(--brand)','Interview Done':'var(--purple)','Offer Received':'var(--green)','Rejected':'var(--red)'};
+    recent.innerHTML = apps.slice(0,5).map(a=>`
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:13px;color:var(--gray-900);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.title}</div>
+          <div style="font-size:11.5px;color:var(--gray-400)">${a.company} · ${a.platform}</div>
+        </div>
+        <span style="font-size:12px;font-weight:600;color:${SC[a.status]||'var(--gray-400)'};flex-shrink:0">${a.status}</span>
+      </div>`).join('');
+  }
+
+  const src = document.getElementById('dash-sources');
+  if (!apps.length) { src.innerHTML='<div class="empty"><div class="empty-icon">📊</div><div class="empty-title">No data yet</div></div>'; return; }
+  const counts = {};
+  apps.forEach(a => counts[a.platform] = (counts[a.platform]||0)+1);
+  const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  src.innerHTML = sorted.map(([p,c])=>`
+    <div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px">
+        <span style="color:var(--gray-700);font-weight:500">${p}</span>
+        <span style="color:var(--gray-400)">${c} (${Math.round(c/apps.length*100)}%)</span>
+      </div>
+      <div class="progress"><div class="progress-fill" style="width:${Math.round(c/apps.length*100)}%;background:var(--brand)"></div></div>
+    </div>`).join('');
+}
+
+// ─────────────────────────────────────────────
+// BADGES
+// ─────────────────────────────────────────────
+function updateBadges() {
+  const bs = document.getElementById('badge-search');
+  const ba = document.getElementById('badge-apps');
+  bs.textContent = S.jobs.length;
+  ba.textContent = S.apps.length;
+  bs.className = 'nav-badge' + (S.jobs.length ? '' : ' zero');
+  ba.className = 'nav-badge' + (S.apps.length ? '' : ' zero');
+}
+
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+function exportData() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}));
+  a.download = 'hiretrack_data.json'; a.click();
+  toast('Exported', '⬇');
+}
+function importData() {
+  const input = document.createElement('input');
+  input.type='file'; input.accept='.json';
+  input.onchange = e => {
+    const r = new FileReader();
+    r.onload = ev => {
+      try { Object.assign(S, JSON.parse(ev.target.result)); persist(); location.reload(); }
+      catch { toast('Invalid file', '✗'); }
+    };
+    r.readAsText(e.target.files[0]);
+  };
+  input.click();
+}
+function wipeData() {
+  if (!confirm('Wipe all HireTrackAI data? This cannot be undone.')) return;
+  localStorage.removeItem('htai2'); location.reload();
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+(function init() {
+  restore();
+  updateApiStatus();
+  updateBadges();
+  renderDash();
+  renderSavedJobs();
+  document.getElementById('ma-date').value = new Date().toISOString().split('T')[0];
+})();
+</script>
+</body>
+</html>
