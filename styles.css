@@ -245,12 +245,7 @@ select.input{cursor:pointer}
 .footer-bottom a{color:rgba(255,255,255,.3)}
 .footer-bottom a:hover{color:var(--gold)}
 
-/* ── ANIMATIONS ──────────────────────────── */
-.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
-.reveal.vis{opacity:1;transform:translateY(0)}
-.d1{transition-delay:.07s}.d2{transition-delay:.14s}
-.d3{transition-delay:.21s}.d4{transition-delay:.28s}
-
+/* animations removed */
 /* ── RESPONSIVE ──────────────────────────── */
 @media(max-width:768px){
   .nav-links{display:none}
