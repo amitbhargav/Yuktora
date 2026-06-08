@@ -751,32 +751,6 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header"><div class="card-title">Filters</div></div>
-        <div class="card-body">
-          <div class="field">
-            <label class="field-label">Min match score: <strong id="min-score-lbl">60</strong>%</label>
-            <input type="range" min="0" max="100" value="60" id="min-score"
-              oninput="document.getElementById('min-score-lbl').textContent=this.value">
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label class="field-label">Visa filter</label>
-              <select class="input" id="f-visa">
-                <option value="">All jobs</option>
-                <option value="visa">Visa sponsored only 🌍</option>
-                <option value="india">India only 🇮🇳</option>
-              </select>
-            </div>
-            <div class="field">
-              <label class="field-label">Type</label>
-              <select class="input" id="f-type">
-                <option>All</option><option>Full-time</option><option>Contract</option><option>Remote</option><option>Hybrid</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div style="display:flex;flex-direction:column;gap:14px">
@@ -1352,6 +1326,68 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// ─────────────────────────────────────────────
+// DETERMINISTIC MATCH SCORING
+// Same job + same profile always produces the same score — no randomness.
+// ─────────────────────────────────────────────
+const STOP = new Set(['the','and','for','with','our','your','you','are','will','this','that','have','has','from','job','role','team','work','years','year','plus','etc','an','to','of','in','on','at','as','is','be','or','we','us','it','its','by','per','via','senior','lead']);
+
+function tokenize(str) {
+  return (str||'').toLowerCase()
+    .replace(/[^a-z0-9+#. ]/g,' ')
+    .split(/\s+/)
+    .filter(w => w.length > 2 && !STOP.has(w));
+}
+
+// The candidate's intent: target roles + skills (falls back to the searched role)
+function buildIntent(searchedRole) {
+  const roles = (S.profile.roles && S.profile.roles.length)
+    ? S.profile.roles.slice()
+    : (searchedRole ? [searchedRole] : []);
+  const skills = (S.profile.skills && S.profile.skills.length) ? S.profile.skills.slice() : [];
+  return { roles, skills };
+}
+
+// Deterministic, explainable score for one job. Returns { score, matched, missing }.
+function scoreJob(job, intent) {
+  const jobText = ((job.title||'') + ' ' + (job.jd||'')).toLowerCase();
+  const titleTokens = new Set(tokenize(job.title||''));
+
+  // 1) Title alignment — an off-domain title (e.g. Engagement Manager for a TPM) scores low here.
+  let titleScore = 0;
+  (intent.roles||[]).forEach(r => {
+    const rt = tokenize(r);
+    if (!rt.length) return;
+    const hit = rt.filter(t => titleTokens.has(t)).length / rt.length;
+    if (hit > titleScore) titleScore = hit;
+  });
+
+  // 2) Skill overlap — how many of the candidate's skills appear in the posting.
+  const skills = (intent.skills||[]).map(s => s.toLowerCase().trim()).filter(Boolean);
+  const matched = [], missing = [];
+  skills.forEach(s => { (jobText.includes(s) ? matched : missing).push(s); });
+  const target = Math.max(4, Math.ceil(skills.length * 0.4)); // matching ~40% (min 4) = full marks
+  const skillScore = skills.length ? Math.min(1, matched.length / target) : 0;
+
+  if (!intent.roles.length && !skills.length) return { score: 60, matched: [], missing: [] };
+
+  let raw;
+  if (!skills.length)             raw = titleScore;
+  else if (!intent.roles.length)  raw = skillScore;
+  else                            raw = 0.5 * titleScore + 0.5 * skillScore;
+
+  return { score: Math.round(Math.min(100, Math.max(0, raw * 100))), matched, missing };
+}
+
+// Readable breakdown shown in the analysis box — makes the score credible.
+function matchBreakdown(matched, missing) {
+  const m = matched.length ? matched.slice(0,6).join(', ') : '—';
+  const g = missing.length ? missing.slice(0,4).join(', ') : 'none flagged';
+  return `MATCH BREAKDOWN (instant heuristic)\n▸ Skills matched in posting: ${m}\n▸ Skills not found: ${g}\n\nClick "Analyse & score with AI" on the Paste JD tab for a full Claude report.`;
+}
+
+function jobKey(j) { return ((j.title||'') + '|' + (j.company||'')).toLowerCase().trim(); }
+
 // --- SMART DUAL-MODE FETCH JOBS ---
 async function fetchLiveJobs() {
   const role = document.getElementById('search-role').value.trim();
@@ -1390,23 +1426,32 @@ async function fetchLiveJobs() {
         return;
       }
 
-      const fetchedJobs = data.data.map(job => ({
-        id: Date.now() + Math.random(),
-        title: job.job_title,
-        company: job.employer_name,
-        loc: job.job_city ? `${job.job_city}, ${job.job_country}` : loc,
-        src: job.job_publisher || 'Web',
-        visa: (job.job_description || '').toLowerCase().includes('visa'),
-        score: Math.floor(Math.random() * (95 - 65 + 1) + 65), 
-        jd: job.job_description || 'No description provided.',
-        url: job.job_apply_link || job.job_google_link || '#',
-        analysis: 'Live match found. Click "Analyse & score with AI" on the Paste JD tab to get a full Claude report.',
-        date: new Date().toISOString()
-      }));
+      const intent = buildIntent(role);
+      let fetchedJobs = data.data.map(job => {
+        const base = {
+          id: Date.now() + Math.random(),
+          title: job.job_title,
+          company: job.employer_name,
+          loc: job.job_city ? `${job.job_city}, ${job.job_country}` : loc,
+          src: job.job_publisher || 'Web',
+          visa: (job.job_description || '').toLowerCase().includes('visa'),
+          jd: job.job_description || 'No description provided.',
+          url: job.job_apply_link || job.job_google_link || '#',
+          date: new Date().toISOString()
+        };
+        const { score, matched, missing } = scoreJob(base, intent);
+        base.score = score;
+        base.analysis = matchBreakdown(matched, missing);
+        return base;
+      });
+
+      // De-dupe against jobs already in the list so re-fetching is stable (no churn / duplicates)
+      const seen = new Set(S.jobs.map(jobKey));
+      fetchedJobs = fetchedJobs.filter(j => { const k = jobKey(j); if (seen.has(k)) return false; seen.add(k); return true; });
 
       S.jobs = [...fetchedJobs, ...S.jobs];
       persist(); renderSavedJobs(); updateBadges();
-      toast(`Fetched ${fetchedJobs.length} real jobs!`, '✅');
+      toast(`Fetched ${fetchedJobs.length} new jobs`, '✅');
 
     } catch (error) {
       console.error(error);
@@ -1423,28 +1468,34 @@ async function fetchLiveJobs() {
     toast('Demo Mode: Fetching simulated jobs...', '🔄');
     
     setTimeout(() => {
+      const intent = buildIntent(role);
       const mockJobs = [
         {
           id: Date.now() + 1, title: `Senior ${role}`, company: 'DemoCorp Inc.', loc: loc || 'Bangalore',
-          src: 'LinkedIn', visa: false, score: 88, url: '#',
+          src: 'LinkedIn', visa: false, url: '#',
           jd: 'Looking for an experienced professional to lead cross-functional teams. Must have strong stakeholder management skills.',
-          analysis: 'Strong match based on role title and location. Click "Tailor Resume" to align your bullets to this JD.', date: new Date().toISOString()
+          date: new Date().toISOString()
         },
         {
           id: Date.now() + 2, title: `Staff ${role} - Global`, company: 'TechNova', loc: 'Remote',
-          src: 'Naukri', visa: true, score: 74, url: '#',
+          src: 'Naukri', visa: true, url: '#',
           jd: 'Seeking a Staff level leader with heavy infrastructure experience. Visa sponsorship available for the right candidate.',
-          analysis: 'Good match. Infrastructure experience is highly relevant. Visa sponsorship flagged.', date: new Date().toISOString()
+          date: new Date().toISOString()
         },
         {
           id: Date.now() + 3, title: `${role} (AI Platforms)`, company: 'Innovate AI', loc: loc || 'Bangalore',
-          src: 'Indeed', visa: false, score: 92, url: '#',
+          src: 'Indeed', visa: false, url: '#',
           jd: 'Drive delivery of enterprise AI models. Require rigorous tracking and delivery predictability.',
-          analysis: 'Excellent match! Your AI and execution background aligns perfectly.', date: new Date().toISOString()
+          date: new Date().toISOString()
         }
-      ];
+      ].map(job => {
+        const { score, matched, missing } = scoreJob(job, intent);
+        return { ...job, score, analysis: matchBreakdown(matched, missing) };
+      });
 
-      S.jobs = [...mockJobs, ...S.jobs];
+      const seen = new Set(S.jobs.map(jobKey));
+      const fresh = mockJobs.filter(j => { const k = jobKey(j); if (seen.has(k)) return false; seen.add(k); return true; });
+      S.jobs = [...fresh, ...S.jobs];
       persist(); renderSavedJobs(); updateBadges();
       
       btn.textContent = '🔍 Fetch Jobs';
@@ -1563,15 +1614,28 @@ function applyNow() {
 }
 function clearJobs() { S.jobs = []; persist(); renderSavedJobs(); toast('Cleared'); }
 
+const MATCH_FLOOR = 90;
 function renderSavedJobs() {
   const list  = document.getElementById('jobs-list');
   const count = document.getElementById('jobs-count');
-  count.textContent = S.jobs.length ? S.jobs.length + ' analysed' : 'None yet';
   if (!S.jobs.length) {
-    list.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">No jobs yet</div><div class="empty-sub">Paste a JD above and click Analyse</div></div>';
+    count.textContent = 'None yet';
+    list.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">No jobs yet</div><div class="empty-sub">Fetch jobs or paste a JD to see strong matches</div></div>';
     return;
   }
-  list.innerHTML = S.jobs.slice(0,15).map(j => `
+  // Default view = strong matches only (90%+), sorted high → low so order is stable every render.
+  const sorted = [...S.jobs].sort((a,b) => (b.score||0) - (a.score||0));
+  let shown = sorted.filter(j => (j.score||0) >= MATCH_FLOOR);
+
+  if (shown.length) {
+    count.textContent = `${shown.length} strong match${shown.length>1?'es':''} (${MATCH_FLOOR}%+) · ${S.jobs.length} analysed`;
+  } else {
+    // Graceful fallback — never show an empty list. Surface the closest matches instead.
+    shown = sorted.slice(0, 5);
+    count.textContent = `No ${MATCH_FLOOR}%+ matches yet — showing your ${shown.length} closest`;
+  }
+
+  list.innerHTML = shown.map(j => `
     <div class="job-card${S.curJob?.id===j.id?' sel':''}" onclick="selectJob(${j.id})">
       <div class="job-initials">${(j.company||'?').slice(0,2).toUpperCase()}</div>
       <div class="job-info">
