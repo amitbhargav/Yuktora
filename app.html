@@ -1060,22 +1060,6 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
         <button class="btn btn-primary btn-sm" onclick="saveRapidKey()">Save Search Key</button>
       </div>
     </div> 
-    <div class="card">
-      <div class="card-header"><div class="card-title">Preferences</div></div>
-      <div class="card-body">
-        <div class="field-row">
-          <div class="field">
-            <label class="field-label">Min match score (%)</label>
-            <input type="number" class="input" id="s-score" value="60" min="0" max="100">
-          </div>
-          <div class="field">
-            <label class="field-label">Max applications / day</label>
-            <input type="number" class="input" id="s-max" value="10" min="1" max="50">
-          </div>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="saveSettings()">Save</button>
-      </div>
-    </div>
 
     <div class="card">
       <div class="card-header"><div class="card-title">Risks & limitations</div></div>
@@ -1898,13 +1882,6 @@ function saveProfile() {
 // ─────────────────────────────────────────────
 function loadSettings() {
   document.getElementById('api-input').value = S.key||'';
-  document.getElementById('s-score').value = S.prefs.minScore||60;
-  document.getElementById('s-max').value   = S.prefs.maxPerDay||10;
-}
-function saveSettings() {
-  S.prefs.minScore  = parseInt(document.getElementById('s-score').value)||60;
-  S.prefs.maxPerDay = parseInt(document.getElementById('s-max').value)||10;
-  persist(); toast('Settings saved', '⚙️');
 }
 
 // ─────────────────────────────────────────────
