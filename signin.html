@@ -1,138 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign In — Yuktora</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
-<style>
-.signin-page{
-  min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(160deg,var(--cream) 0%,var(--blush) 60%,var(--cream-2) 100%);
-  padding:80px 24px 40px;position:relative;overflow:hidden;
-}
-.signin-page::before{
-  content:'';position:absolute;top:-80px;right:-60px;
-  width:400px;height:400px;border-radius:50%;
-  background:radial-gradient(circle,var(--burg-soft),transparent 65%);
-  pointer-events:none;
-}
-.signin-page::after{
-  content:'';position:absolute;bottom:-60px;left:-40px;
-  width:280px;height:280px;border-radius:50%;
-  background:radial-gradient(circle,rgba(245, 158, 11, 0.07),transparent 65%);
-  pointer-events:none;
-}
-.signin-card{
-  background:#fff;border:1.5px solid var(--border);
-  border-radius:var(--r-xl);padding:44px 40px;
-  width:100%;max-width:440px;
-  box-shadow:var(--shadow-lg);
-  position:relative;overflow:hidden;
-  z-index:1;
-}
-.signin-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--burg),var(--gold),var(--burg-light));
-}
-.signin-logo{
-  display:flex;align-items:center;gap:10px;justify-content:center;
-  font-family:var(--font-display);font-weight:800;font-size:1.3rem;
-  color:var(--ink);margin-bottom:8px;
-}
-.signin-logo-mark{
-  width:36px;height:36px;border-radius:9px;
-  background:var(--burg);display:flex;align-items:center;
-  justify-content:center;font-size:18px;font-style:normal;color:#fff;
-}
-.signin-tagline{
-  text-align:center;font-size:.85rem;font-weight:500;color:var(--ink-3);
-  margin-bottom:32px;
-}
-.signin-divider{
-  display:flex;align-items:center;gap:12px;
-  margin:20px 0;font-size:.8rem;font-weight:600;color:var(--ink-4);
-}
-.signin-divider::before,.signin-divider::after{
-  content:'';flex:1;height:1px;background:var(--border);
-}
-.signin-heading{
-  font-family:var(--font-display);font-size:1.8rem;font-weight:700;
-  color:var(--ink);text-align:center;margin-bottom:6px;
-}
-.signin-sub{font-size:.85rem;font-weight:500;color:var(--ink-3);text-align:center;margin-bottom:28px;}
-.form-group{margin-bottom:16px}
-.form-label{display:block;font-size:.8rem;font-weight:700;color:var(--ink-2);margin-bottom:5px;}
-.btn-signin{
-  width:100%;padding:13px;background:var(--burg);color:#fff;
-  border:none;border-radius:var(--r);font-family:var(--font-body);
-  font-size:.95rem;font-weight:700;cursor:pointer;
-  box-shadow:var(--shadow-burg);transition:all .18s;
-  margin-top:4px;letter-spacing:.02em;
-}
-.btn-signin:hover{background:var(--burg-2);transform:translateY(-1px)}
-.signin-api-note{
-  background:var(--burg-soft);border:1px solid var(--burg-mid);
-  border-radius:var(--r);padding:14px;margin-top:20px;
-  font-size:.8rem;font-weight:500;color:var(--ink-2);line-height:1.6;
-}
-.signin-api-note strong{color:var(--burg);font-weight:700;}
-.signin-api-note a{color:var(--burg);text-decoration:underline;font-weight:600;}
-.signin-footer-link{
-  text-align:center;margin-top:20px;
-  font-size:.85rem;font-weight:500;color:var(--ink-3);
-}
-.signin-footer-link a{color:var(--burg);font-weight:700;}
-.btn-launch{
-  width:100%;padding:13px;background:#fff;color:var(--burg);
-  border:2px solid var(--burg);border-radius:var(--r);font-family:var(--font-body);
-  font-size:.95rem;font-weight:700;cursor:pointer;transition:all .18s;
-  letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:8px;
-}
-.btn-launch:hover{background:var(--burg-soft);transform:translateY(-1px)}
-.or-text{text-align:center;font-size:.8rem;font-weight:600;color:var(--ink-4);margin:16px 0}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — Yuktora</title>
+  <link href="https://googleapis.com" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body style="background: #f9fafb; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: 'Outfit', sans-serif;">
 
-<nav class="site-nav">
-  <div class="nav-wrap">
-    <a href="/" class="nav-logo">
-      <div class="nav-logo-mark">🎯</div>
-      Yuktora
-    </a>
-    <div class="nav-links">
-      <a href="/#features">Features</a>
-      <a href="/#how-it-works">How it works</a>
-      <a href="/#platforms">Platforms</a>
-      <a href="/pricing">Pricing</a>
-      <a href="/blog">Resources</a>
+  <div id="auth-signin-layer" style="background: white; border: 1px solid var(--border, #e5e7eb); padding: 32px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center;">
+    <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700; color: #111827;">Welcome to Yuktora</h2>
+    <p style="color: #666; font-size: 0.875rem; margin: 0 0 24px 0;">Secure passwordless cloud sync via Supabase.</p>
+    
+    <div style="text-align: left; margin-bottom: 16px;">
+      <label for="magic-email" style="display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; color: #374151;">Work Email Address</label>
+      <input type="email" id="magic-email" placeholder="you@company.com" style="width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 6px; box-sizing: border-box; font-size: 0.875rem;">
     </div>
-    <div class="nav-right">
-      <a href="/app" class="btn btn-burg btn-sm">Launch App →</a>
+
+    <!-- DPDP Compliance Checkbox Block -->
+    <div style="display: flex; align-items: flex-start; text-align: left; margin-bottom: 20px;">
+      <input type="checkbox" id="auth-consent-check" onchange="toggleMagicLinkBtn()" style="margin-top: 3px; margin-right: 8px; cursor: pointer;">
+      <label for="auth-consent-check" style="font-size: 0.75rem; color: #4b5563; line-height: 1.4; cursor: pointer;">
+        I agree to the processing of my email profile under the terms of the 
+        <a href="privacy.html" target="_blank" style="color: #0070f3; text-decoration: underline;">Privacy Policy</a>.
+      </label>
     </div>
+
+    <button id="btn-magic-link" onclick="sendSupabaseMagicLink()" disabled style="width: 100%; padding: 12px; background: #0070f3; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 0.875rem; opacity: 0.45; cursor: not-allowed; transition: all 0.2s ease; width: 100%;">
+      Send Magic Link
+    </button>
   </div>
-</nav>
 
-<div class="signin-page">
-  <div class="signin-card">
-    <div class="signin-logo">
-      <div class="signin-logo-mark">🎯</div>
-      Yuktora
-    </div>
-    <p class="signin-tagline">Your AI job search co-pilot</p>
+  <script src="https://jsdelivr.net"></script>
+  <script>
+    // Initialize Safe Client-Side Supabase Parameters
+    const SUPABASE_URL = "https://qflgxfqoldrxvchogkkj.supabase.co"; 
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbGd4ZnFvbGRyeHZjaG9na2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMDEzODAsImV4cCI6MjA5OTc3NzM4MH0.WjMe3xxzIs9xLgDrT20oBTdRcjZzh169gr8x-LkUz9M";
+    
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    <div class="signin-heading">Welcome back</div>
-    <p class="signin-sub">Yuktora stores all your data securely in your browser — no account needed to get started.</p>
+    // Compliance Checkbox Modifier
+    function toggleMagicLinkBtn() {
+      const checked = document.getElementById('auth-consent-check')?.checked;
+      const btn = document.getElementById('btn-magic-link');
+      if (!btn) return;
+      btn.disabled = !checked;
+      btn.style.opacity = checked ? '1' : '0.45';
+      btn.style.cursor = checked ? 'pointer' : 'not-allowed';
+    }
 
-    <a href="/app" class="btn-launch">
-      🚀 Open My Dashboard →
-    </a>
-  </div>
-</div>
+    // Issue Supabase Passwordless Login Event
+    async function sendSupabaseMagicLink() {
+      const emailInput = document.getElementById('magic-email')?.value;
+      const checkbox = document.getElementById('auth-consent-check');
+      if (!checkbox || !checkbox.checked) return alert("You must agree to the privacy policy first.");
+      if (!emailInput) return alert("Please type a valid email address.");
 
+      const btn = document.getElementById('btn-magic-link');
+      btn.textContent = "Sending Link...";
+      btn.disabled = true;
+
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email: emailInput,
+        options: { emailRedirectTo: window.location.origin + '/app.html' }
+      });
+
+      if (error) {
+        alert("Authentication Error: " + error.message);
+        btn.textContent = "Send Magic Link";
+        btn.disabled = false;
+      } else {
+        alert("Magic link issued! Check your email inbox to log in securely.");
+      }
+    }
+
+    // If a user visits signin but already has a valid cloud session, route them to the dashboard automatically
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        window.location.href = '/app.html';
+      }
+    });
+  </script>
 </body>
 </html>

@@ -3897,6 +3897,18 @@ Be direct and specific. Reference actual content.`;
         if (shell) shell.style.display = 'none';
       }
     });
+
+    // Route Guard Protection Layer
+if (typeof supabaseClient !== 'undefined' && supabaseClient.auth) {
+  supabaseClient.auth.getSession().then(({ data: { session } }) => {
+    if (!session) {
+      // Force exit if unauthenticated access is detected
+      window.location.href = '/signin.html';
+    }
+  });
+}
+
+
   </script>
 </body>
 
