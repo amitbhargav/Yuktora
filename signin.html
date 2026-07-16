@@ -32,13 +32,15 @@
     </button>
   </div>
 
-  <script src="https://jsdelivr.net"></script>
+  <!-- FIXED: Replaced broken jsdelivr layout reference with official Supabase CDN -->
+  <script src="https://unpkg.com"></script>
   <script>
     // Initialize Safe Client-Side Supabase Parameters
     const SUPABASE_URL = "https://qflgxfqoldrxvchogkkj.supabase.co"; 
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbGd4ZnFvbGRyeHZjaG9na2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMDEzODAsImV4cCI6MjA5OTc3NzM4MH0.WjMe3xxzIs9xLgDrT20oBTdRcjZzh169gr8x-LkUz9M";
     
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // FIXED: Formally instantiation declared cleanly so functions below do not crash
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Compliance Checkbox Modifier
     function toggleMagicLinkBtn() {
