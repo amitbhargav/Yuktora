@@ -19,23 +19,16 @@ module.exports = async function handler(req, res) {
   const supabaseUrl     = process.env.SUPABASE_URL      || '';
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
 
-  // Replace the exact fallback strings written into app.html lines 1169–1170
-  if (supabaseUrl) {
-    html = html.replace(
-      "'https://your-project-id.supabase.co'",
-      `'${supabaseUrl}'`
-    ).replace(
-      "'https://supabase.co'",
-      `'${supabaseUrl}'`
-    );
-  }
+  // Inject credentials via a <script> block prepended to <head>.
+  // This sets window.ENV_SUPABASE_URL and window.ENV_SUPABASE_ANON_KEY before
+  // any other script runs, so the supabase.createClient() call in app.html
+  // always picks up the real values regardless of placeholder string format.
+  const injectedScript = `<script>
+  window.ENV_SUPABASE_URL = '${supabaseUrl}';
+  window.ENV_SUPABASE_ANON_KEY = '${supabaseAnonKey}';
+<\/script>`;
 
-  if (supabaseAnonKey) {
-    html = html.replace(
-      "'your-anon-key-here'",
-      `'${supabaseAnonKey}'`
-    );
-  }
+  html = html.replace('<head>', `<head>\n${injectedScript}`);
 
   // ── Return the modified HTML ─────────────────────────────────────────────
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
