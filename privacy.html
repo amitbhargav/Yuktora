@@ -1,28 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Privacy Notice - Yuktora</title>
-    <style>body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #333; }</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Notice - Yuktora</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: #1e293b; max-width: 760px; margin: 0 auto; padding: 40px 20px; background-color: #f8fafc; }
+    .policy-container { background: #ffffff; padding: 40px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    h1 { font-size: 2rem; color: #0f172a; margin-bottom: 8px; }
+    h4 { font-size: 1.2rem; color: #0f172a; margin-top: 28px; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }
+    p, li { font-size: 0.95rem; color: #334155; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 8px; }
+    a { color: #2563eb; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .meta-date { font-size: 0.875rem; color: #64748b; margin-bottom: 32px; }
+  </style>
 </head>
 <body>
-    <h1>Digital Personal Data Protection (DPDP) Privacy Notice</h1>
-    <p><strong>Last Updated:</strong> July 2026</p>
-    <p>Yuktora ("we", "our") collects and processes your personal data in strict compliance with India's Digital Personal Data Protection Act (DPDP).</p>
+
+  <div class="policy-container">
+    <h1>Privacy Notice</h1>
+    <div class="meta-date">Effective Date: July 17, 2026 | Compliant with DPDP Act (India)</div>
     
-    <h3>1. Data We Collect & Specific Purpose</h3>
-    <ul>
-        <li><strong>Email Address:</strong> Collected solely to issue secure Passwordless Magic Link authentication tokens and manage account access.</li>
-        <li><strong>Job Application Data & Resumes:</strong> Processed exclusively to compute match metrics, conduct keyword gap analyses, and generate resume optimizations via our AI Match Engine.</li>
-    </ul>
+    <p>
+      Yuktora ("we", "our", or "us") values your privacy. This Privacy Notice describes how we collect, use, process, 
+      and protect your personal data when you use our web platform located at yuktora.vercel.app. By logging into the 
+      service and checking our verification notice, you consent to the processing frameworks detailed below.
+    </p>
 
-    <h3>2. Data Retention & Erasure</h3>
-    <p>Your data is stored securely using encrypted Supabase cloud instances. We retain your personal data only as long as your account remains active. You hold the absolute right to erasure; deleting your account instantly executes a cascade deletion of all user profiles and tracked job data across our servers.</p>
+    <!-- SECTION 1: DATA WE COLLECT & PROCESSING PARTNERS -->
+    <div class="policy-section">
+      <h4>1. Personal Data Collected and Processing Ecosystem</h4>
+      <p>To provide AI-driven resume optimization, Yuktora processes the following personal data points:</p>
+      <ul>
+        <li><strong>Account Identity:</strong> Email address (processed via Supabase Auth).</li>
+        <li><strong>Core Profile Metrics:</strong> Full name, telephone number, geographic location, and LinkedIn URL.</li>
+        <li><strong>Professional Attributes:</strong> Target job roles, explicitly stated technical and soft skills, and raw resume text.</li>
+        <li><strong>Job Application Target:</strong> External job descriptions, titles, and company metadata.</li>
+      </ul>
+      
+      <p><strong>Third-Party Processing & Cross-Border Transfer Disclosure:</strong></p>
+      <p>
+        Yuktora operates using a zero-silo integration model. Your profile name and contact information stay secure inside our live 
+        Supabase instances (Mumbai, India region). However, to generate match analytics, raw resume text and targeted job 
+        descriptions are securely processed via API by our artificial intelligence provider, 
+        <a href="https://www.anthropic.com" target="_blank" rel="noopener noreferrer">Anthropic, PBC</a> (Claude Engine). 
+        This processing occurs on infrastructure hosted outside of India (primarily the United States). By submitting your data, you 
+        explicitly acknowledge this cross-border transfer for optimization purposes. Anthropic does not use your submitted text to train public baseline models.
+      </p>
+    </div>
 
-    <h3>3. Absolute Data Protection & XSS Sanitization</h3>
-    <p>We do not sell, rent, or trade your personal data. All user-supplied text (resumes and job descriptions) is sanitized strictly as raw textual data tokens before processing to prevent cross-site scripting (XSS) and accidental data exfiltration.</p>
+    <!-- SECTION 2: SECURITY BOUNDARIES & DATA PRINCIPAL RIGHTS -->
+    <div class="policy-section">
+      <h4>2. Data Security Framework & Technical Commitments</h4>
+      <p>
+        We implement transport-layer encryption (HTTPS) across all network calls. While we apply standard sanitization routines on text fields 
+        prior to rendering them inside our dashboard framework, users are strongly advised not to paste unencrypted, highly sensitive data 
+        (such as passwords, health metrics, or financial identifiers) directly into resume field text areas.
+      </p>
 
-    <h3>4. Grievance Redressal Officer</h3>
-    <p>In accordance with the DPDP Act, for any privacy inquiries, consent withdrawals, or grievances, you may contact our designated Grievance Officer at: <strong>privacy@yuktora.vercel.app</strong>. We pledge to acknowledge and resolve all valid requests within the statutory timeline.</p>
+      <h4>3. Your Legal Rights Under DPDP Act</h4>
+      <p>As a Data Principal, you maintain absolute control over your digital footprint. You may exercise the following rights directly:</p>
+      <ul>
+        <li><strong>Right to Access & Correction:</strong> Review your stored profile data inside your application dashboard or submit an accuracy correction request.</li>
+        <li><strong>Right to Erasure:</strong> Delete your account data instantly through your account profile interface.</li>
+        <li><strong>Right to Nominating a Representative:</strong> Designate an authorized individual to manage your profile rights in the event of unforeseen incapacity.</li>
+        <li><strong>Grievance Redressal:</strong> For any processing inquiries, data disputes, or immediate escalation, you may directly message our designated Grievance Officer at <a href="mailto:support@yuktora.vercel.app">support@yuktora.vercel.app</a>. We resolve all registered complaints within regulatory timeframes.</li>
+      </ul>
+    </div>
+
+    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
+      <a href="/signin.html" style="font-size: 0.875rem; font-weight: 500;">&larr; Return to Sign In</a>
+    </div>
+  </div>
+
 </body>
 </html>
