@@ -967,9 +967,34 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
       <div class="card">
         <div class="card-header"><div class="card-title">Basic info</div></div>
         <div class="card-body">
+
+          <!-- ── Magic Link Auth Block ──────────────────────────────────── -->
+          <div id="auth-block" style="margin-bottom:18px;padding:14px 16px;background:var(--gray-50);border:1px solid var(--border);border-radius:8px;">
+            <div id="auth-signed-out">
+              <div style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:4px;">🔐 Secure Sign-In</div>
+              <div style="font-size:12px;font-weight:500;color:var(--gray-500);margin-bottom:12px;">Enter your email to receive a Magic Link. Your data is tied to your verified identity — no password needed.</div>
+              <div style="display:flex;gap:8px;">
+                <input type="email" class="input" id="auth-email-input" placeholder="you@email.com" style="flex:1">
+                <button class="btn btn-primary btn-sm" onclick="sendMagicLink()">Send Magic Link</button>
+              </div>
+              <div id="auth-msg" style="display:none;margin-top:10px;font-size:12.5px;font-weight:600;color:var(--green);"></div>
+            </div>
+            <div id="auth-signed-in" style="display:none;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:18px;">✅</span>
+                <div>
+                  <div style="font-size:13px;font-weight:700;color:var(--gray-800);">Signed in as <span id="auth-user-email" style="color:var(--brand)"></span></div>
+                  <div style="font-size:12px;font-weight:500;color:var(--gray-500);">Your data syncs securely to this identity.</div>
+                </div>
+                <button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="signOut()">Sign out</button>
+              </div>
+            </div>
+          </div>
+          <!-- ── End Auth Block ─────────────────────────────────────────── -->
+
           <div class="field-row">
             <div class="field"><label class="field-label">Name</label><input type="text" class="input" id="p-name" placeholder="Amit Bhargav KA"></div>
-            <div class="field"><label class="field-label">Email</label><input type="email" class="input" id="p-email" placeholder="you@email.com"></div>
+            <div class="field"><label class="field-label">Email</label><input type="email" class="input" id="p-email" placeholder="you@email.com" readonly style="background:var(--gray-50);color:var(--gray-500);cursor:not-allowed;" title="Email is set automatically from your verified sign-in"></div>
           </div>
           <div class="field-row">
             <div class="field"><label class="field-label">Phone</label><input type="text" class="input" id="p-phone" placeholder="+91 98765 43210"></div>
@@ -2153,7 +2178,101 @@ async function fetchFromSupabase(email) {
   }
 }
 
+// ─────────────────────────────────────────────
+// MAGIC LINK AUTHENTICATION
+// ─────────────────────────────────────────────
+
+// Update the auth UI to reflect the current session state.
+function _updateAuthUI(session) {
+  const signedOut = document.getElementById('auth-signed-out');
+  const signedIn  = document.getElementById('auth-signed-in');
+  const emailSpan = document.getElementById('auth-user-email');
+  if (!signedOut || !signedIn) return;
+
+  if (session && session.user) {
+    signedOut.style.display = 'none';
+    signedIn.style.display  = 'block';
+    if (emailSpan) emailSpan.textContent = session.user.email;
+  } else {
+    signedOut.style.display = 'block';
+    signedIn.style.display  = 'none';
+  }
+}
+
+// Send a Magic Link OTP to the entered email address.
+async function sendMagicLink() {
+  const emailInput = document.getElementById('auth-email-input');
+  const msgEl      = document.getElementById('auth-msg');
+  const email      = (emailInput?.value || '').trim();
+
+  if (!email || !email.includes('@')) {
+    toast('Enter a valid email address', '⚠️');
+    return;
+  }
+
+  const btn = document.querySelector('#auth-signed-out .btn-primary');
+  const origText = btn.textContent;
+  btn.textContent = '⏳ Sending…';
+  btn.disabled = true;
+
+  try {
+    const { error } = await supabaseClient.auth.signInWithOtp({ email });
+    if (error) throw error;
+
+    // Show confirmation message inside the auth block
+    if (msgEl) {
+      msgEl.textContent = `✅ Magic Link sent to ${email} — check your inbox and click the link to sign in.`;
+      msgEl.style.display = 'block';
+    }
+    toast('Magic Link sent — check your inbox!', '📧');
+  } catch (err) {
+    console.error('[sendMagicLink]', err);
+    toast('Failed to send Magic Link: ' + (err.message || err), '✗');
+  } finally {
+    btn.textContent = origText;
+    btn.disabled = false;
+  }
+}
+
+// Sign the current user out and reset the auth UI.
+async function signOut() {
+  await supabaseClient.auth.signOut();
+  S.profile.email = '';
+  persist();
+  _updateAuthUI(null);
+  const emailEl = document.getElementById('p-email');
+  if (emailEl) emailEl.value = '';
+  toast('Signed out', '👋');
+}
+
+// ── Auth state listener — fires on page load and after Magic Link click ───────
+// When a verified session exists, the email is extracted from session.user.email
+// (not from any text field) and fetchFromSupabase() is triggered automatically.
+supabaseClient.auth.onAuthStateChange(async (event, session) => {
+  _updateAuthUI(session);
+
+  if (session && session.user) {
+    const verifiedEmail = session.user.email;
+
+    // Write the verified email into S.profile so all cloud functions use it
+    S.profile.email = verifiedEmail;
+    persist();
+
+    // Reflect the verified email in the (now read-only) profile email field
+    const emailEl = document.getElementById('p-email');
+    if (emailEl) emailEl.value = verifiedEmail;
+
+    // Auto-load cloud data on sign-in or token refresh
+    if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      toast(`Signed in as ${verifiedEmail} — loading your data…`, '🔐');
+      await fetchFromSupabase(verifiedEmail);
+    }
+  }
+});
+
 // ── Button wrappers called from the topbar ───────────────────────────────────
+// cloudSave() reads the verified email from S.profile (set by onAuthStateChange).
+// cloudLoad() does the same — no manual text-field input required.
 async function cloudSave() {
   const email = _getEmail(); if (!email) return;
   await saveToSupabase(email);
