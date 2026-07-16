@@ -19,16 +19,17 @@ module.exports = async function handler(req, res) {
   const supabaseUrl     = process.env.SUPABASE_URL      || '';
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
 
-  // Inject credentials via a <script> block prepended to <head>.
-  // This sets window.ENV_SUPABASE_URL and window.ENV_SUPABASE_ANON_KEY before
-  // any other script runs, so the supabase.createClient() call in app.html
-  // always picks up the real values regardless of placeholder string format.
-  const injectedScript = `<script>
-  window.ENV_SUPABASE_URL = '${supabaseUrl}';
-  window.ENV_SUPABASE_ANON_KEY = '${supabaseAnonKey}';
+  // Inject credentials via a <script> block that replaces the opening <head> tag.
+  // window.ENV_SUPABASE_URL and window.ENV_SUPABASE_ANON_KEY are set before any
+  // other script runs, so supabase.createClient() in app.html always gets the
+  // real values from Vercel environment variables.
+  const scriptInjection = `<head>
+<script>
+  window.ENV_SUPABASE_URL = "${process.env.SUPABASE_URL}";
+  window.ENV_SUPABASE_ANON_KEY = "${process.env.SUPABASE_ANON_KEY}";
 <\/script>`;
 
-  html = html.replace('<head>', `<head>\n${injectedScript}`);
+  html = html.replace('<head>', scriptInjection);
 
   // ── Return the modified HTML ─────────────────────────────────────────────
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
