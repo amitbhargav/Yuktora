@@ -24,6 +24,9 @@ module.exports = async function handler(req, res) {
     html = html.replace(
       "'https://your-project-id.supabase.co'",
       `'${supabaseUrl}'`
+    ).replace(
+      "'https://supabase.co'",
+      `'${supabaseUrl}'`
     );
   }
 
