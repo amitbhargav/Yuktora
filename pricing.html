@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -158,7 +158,7 @@
         <div class="pf"><span class="pf-y">✓</span>Full job application dashboard</div>
         <div class="pf"><span class="pf-y">✓</span>Works across 10+ platforms</div>
         <div class="pf"><span class="pf-y">✓</span>Visa sponsorship detection</div>
-        <div class="pf"><span class="pf-n">○</span>AI requires your own API key</div>
+        <div class="pf"><span class="pf-n">○</span>5 Free AI uses included</div>
         <div class="plan-spacer"></div>
       </div>
 
@@ -170,8 +170,8 @@
         <a href="/app" class="btn btn-burg plan-btn">Upgrade to Pro 🚀</a>
         <div class="plan-div"></div>
         <div class="pf"><span class="pf-y">✓</span>Everything in Starter</div>
-        <div class="pf"><span class="pf-y">✓</span>No API key required</div>
-        <div class="pf"><span class="pf-y">✓</span>Unlimited AI resume tailoring</div>
+        <div class="pf"><span class="pf-y">✓</span>Unlimited AI generations</div>
+        <div class="pf"><span class="pf-y">✓</span>Unlimited resume tailoring</div>
         <div class="pf"><span class="pf-y">✓</span>Smart rejection analysis</div>
         <div class="pf"><span class="pf-y">✓</span>AI job matching (better fit roles)</div>
         <div class="pf"><span class="pf-y">✓</span>Priority support</div>
@@ -221,7 +221,7 @@
     <div class="faq-grid">
       <div class="faq-item">
         <div class="faq-q">Do I need an API key?</div>
-        <div class="faq-a">No for Pro users. Free users can optionally bring their own key for AI features at ~₹0.25 per resume tailor.</div>
+        <div class="faq-a">No. You get 5 free AI generations instantly to test out the features. After that, upgrade to Pro for unlimited AI tailoring and matching.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Will this help me get more interviews?</div>
@@ -229,7 +229,7 @@
       </div>
       <div class="faq-item">
         <div class="faq-q">Is my data secure?</div>
-        <div class="faq-a">Your data stays in your browser. We only process AI requests securely via Anthropic's API. Nothing is stored on our servers.</div>
+        <div class="faq-a">Your data stays entirely in your browser. We securely proxy your AI requests via our Vercel backend to Claude. No resumes or application histories are stored on our servers.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q">Can I cancel anytime?</div>
@@ -272,4 +272,10 @@
 let yearly = false;
 function toggleBilling() {
   yearly = !yearly;
-  document.getElementById('pro-price').textContent = yearly ? '₹3,499' : 
+  document.getElementById('pro-price').textContent = yearly ? '₹3,499' : '₹499';
+  document.getElementById('pro-cadence').textContent = yearly ? 'per year · save 30%' : 'per month · cancel anytime';
+}
+</script>
+
+</body>
+</html>

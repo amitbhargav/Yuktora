@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign In — HireTrackAI</title>
+<title>Sign In — Yuktora</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -102,7 +102,7 @@
   <div class="nav-wrap">
     <a href="/" class="nav-logo">
       <div class="nav-logo-mark">🎯</div>
-      HireTrackAI
+      Yuktora
     </a>
     <div class="nav-links">
       <a href="/#features">Features</a>
@@ -121,59 +121,18 @@
   <div class="signin-card">
     <div class="signin-logo">
       <div class="signin-logo-mark">🎯</div>
-      HireTrackAI
+      Yuktora
     </div>
     <p class="signin-tagline">Your AI job search co-pilot</p>
 
     <div class="signin-heading">Welcome back</div>
-    <p class="signin-sub">HireTrackAI stores all your data securely in your browser — no account needed to get started.</p>
+    <p class="signin-sub">Yuktora stores all your data securely in your browser — no account needed to get started.</p>
 
     <a href="/app" class="btn-launch">
       🚀 Open My Dashboard →
     </a>
-
-    <div class="or-text">— or set up your API key first —</div>
-
-    <div class="form-group">
-      <label class="form-label">Anthropic API Key</label>
-      <input class="input" id="api-key-input" type="password" placeholder="sk-ant-api03-..." autocomplete="off">
-    </div>
-    <button class="btn-signin" onclick="saveAndLaunch()">Save Key &amp; Open Dashboard →</button>
-
-    <div class="signin-api-note">
-      <strong>What is this?</strong> HireTrackAI uses Claude AI to score jobs and tailor your resume. On the free plan, you provide your own key — it costs ~₹0.25 per resume tailor.<br><br>
-      Get a free key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> (no credit card needed for the free tier).
-    </div>
-
-    <div class="signin-footer-link">
-      New here? <a href="/app">Launch the app free →</a> — no key needed to track jobs.
-    </div>
   </div>
 </div>
-
-<script>
-function saveAndLaunch() {
-  const key = document.getElementById('api-key-input').value.trim();
-  if (!key) {
-    alert('Please enter your API key, or click "Open My Dashboard" to launch without one.');
-    return;
-  }
-  try {
-    const state = JSON.parse(localStorage.getItem('htai2') || '{}');
-    state.apiKey = key;
-    localStorage.setItem('htai2', JSON.stringify(state));
-  } catch(e) {
-    localStorage.setItem('htai_apikey', key);
-  }
-  window.location.href = '/app';
-}
-try {
-  const state = JSON.parse(localStorage.getItem('htai2') || '{}');
-  if (state.apiKey) {
-    document.getElementById('api-key-input').value = state.apiKey;
-  }
-} catch(e) {}
-</script>
 
 </body>
 </html>

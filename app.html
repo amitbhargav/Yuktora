@@ -6,6 +6,9 @@
 <title>Yuktora — AI Job Search Co-pilot</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- ── Supabase JS SDK (CDN) ─────────────────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 /* ─────────────────────────────────────────────
    DESIGN TOKENS - LIGHT & BRIGHT SAAS THEME
@@ -588,6 +591,8 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
   <div class="topbar-right">
     <a href="/" class="btn btn-ghost btn-sm" style="margin-right:12px;">← Back to Home</a>
     <button class="btn btn-secondary btn-sm" onclick="exportData()">Export data</button>
+    <button class="btn btn-secondary btn-sm" id="btn-load-cloud" onclick="cloudLoad()" title="Load your saved data from Supabase">🔄 Load Data</button>
+    <button class="btn btn-green btn-sm" id="btn-save-cloud" onclick="cloudSave()" title="Save your profile & applications to Supabase">💾 Save to Cloud</button>
     <button class="btn btn-primary btn-sm" onclick="nav('search')">+ Add job</button>
   </div>
 </header>
@@ -596,11 +601,11 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 <div class="page-body">
 
   <div id="dash-setup-banner" class="banner banner-blue" style="display:none">
-    <span class="banner-icon">🔑</span>
-    <div style="flex:1">
-      <strong>Set your Anthropic API key</strong> to unlock AI scoring, resume tailoring, and rejection analysis.
+    <span class="banner-icon">✨</span>
+    <div style="flex:1" id="usage-banner-text">
+      <strong>Free tier:</strong> You have 5 AI uses remaining.
     </div>
-    <button class="btn btn-primary btn-sm" onclick="nav('settings')">Set key →</button>
+    <a href="/pricing" class="btn btn-primary btn-sm">Upgrade to Pro →</a>
   </div>
 
   <div class="stats-grid">
@@ -1025,23 +1030,21 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
   <div style="display:flex;flex-direction:column;gap:14px">
 
     <div class="card">
-      <div class="card-header"><div class="card-title">Anthropic API key</div></div>
+      <div class="card-header"><div class="card-title">Yuktora Pro</div></div>
       <div class="card-body">
-        <div class="banner banner-amber" style="margin-bottom:14px">
-          <span class="banner-icon">⚠️</span>
-          <div><strong>Security note:</strong> Your key is stored in browser localStorage. Do not use Yuktora on shared or public computers.</div>
+        <div class="banner banner-blue" style="margin-bottom:14px">
+          <span class="banner-icon">🚀</span>
+          <div><strong>Status:</strong> <span id="pro-status-text">Free Plan (5 uses left)</span></div>
         </div>
         <div class="field">
-          <label class="field-label">API key</label>
-          <input type="password" class="input" id="api-input" placeholder="sk-ant-api03-...">
-          <div class="field-hint">Get your free key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--brand)">console.anthropic.com</a> — ~₹0.25 per resume tailor</div>
+          <label class="field-label">Pro License Key</label>
+          <input type="password" class="input" id="api-input" placeholder="Enter your Yuktora Pro key...">
+          <div class="field-hint">Upgrade at <a href="/pricing" style="color:var(--brand)" target="_blank">yuktora.vercel.app/pricing</a> to get unlimited AI.</div>
         </div>
         <div class="flex-row">
-          <button class="btn btn-primary btn-sm" onclick="saveKey()">Save key</button>
-          <button class="btn btn-secondary btn-sm" onclick="testKey()">Test connection</button>
+          <button class="btn btn-primary btn-sm" onclick="saveKey()">Save License</button>
           <button class="btn btn-ghost btn-sm" onclick="clearKey()">Clear</button>
         </div>
-        <div id="key-result" class="mt-8" style="font-size:12px;font-weight:600"></div>
       </div>
     </div>
 
@@ -1157,6 +1160,35 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
 
 <script>
 // ─────────────────────────────────────────────
+// SUPABASE CLIENT INITIALISATION
+// Replace the placeholder values below with your real project credentials.
+// In production, inject these via a server-rendered <script> block or
+// Vercel Edge Config so the keys are never hard-coded in source control.
+//
+// window.ENV_SUPABASE_URL     → your project URL  (e.g. https://xxxx.supabase.co)
+// window.ENV_SUPABASE_ANON_KEY → your anon/public key from the Supabase dashboard
+// ─────────────────────────────────────────────
+const SUPABASE_URL      = window.ENV_SUPABASE_URL      || 'https://your-project-id.supabase.co';
+const SUPABASE_ANON_KEY = window.ENV_SUPABASE_ANON_KEY || 'your-anon-key-here';
+
+// supabase is exposed globally by the CDN script loaded in <head>
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ─────────────────────────────────────────────
+// USER DATA THAT WILL BE PERSISTED TO SUPABASE
+// (currently stored in localStorage via persist() / restore())
+//
+//  S.profile.resume  → base resume text (Profile page, #p-resume textarea)
+//  S.profile.*       → name, email, phone, loc, roles, skills, etc.
+//  S.jobs            → analysed job listings (Job Search page)
+//  S.apps            → tracked applications (Applications tracker)
+//  S.rejs            → rejection analyses (Rejection AI page)
+//
+// Future: replace persist() / restore() calls with supabaseClient
+// .from('profiles').upsert(...) / .select() to sync across devices.
+// ─────────────────────────────────────────────
+
+// ─────────────────────────────────────────────
 // STATE
 // ─────────────────────────────────────────────
 const S = {
@@ -1231,51 +1263,77 @@ document.getElementById('modal-add').addEventListener('click', e => {
 // ─────────────────────────────────────────────
 // API
 // ─────────────────────────────────────────────
+const FREE_LIMIT = 5;
+
 function updateApiStatus() {
   const led = document.getElementById('api-led');
   const txt = document.getElementById('api-txt');
   const banner = document.getElementById('dash-setup-banner');
-  if (S.key) {
+  const uses = parseInt(localStorage.getItem('yuktora_ai_uses') || '0');
+  const isPro = S.key && S.key.startsWith('pro_'); // Validates a mock format like "pro_12345"
+
+  if (isPro) {
     led.classList.add('on');
-    txt.textContent = 'AI ready';
+    txt.textContent = 'Pro Active';
     if (banner) banner.style.display = 'none';
+    if (document.getElementById('pro-status-text')) document.getElementById('pro-status-text').textContent = 'Pro Plan (Unlimited)';
   } else {
     led.classList.remove('on');
-    txt.textContent = 'API key not set';
-    if (banner) banner.style.display = 'flex';
+    const left = Math.max(0, FREE_LIMIT - uses);
+    txt.textContent = `${left} Free Uses Left`;
+    
+    if (banner) {
+      banner.style.display = left <= 2 ? 'flex' : 'none'; // Only pester them when running low
+      if (document.getElementById('usage-banner-text')) {
+        document.getElementById('usage-banner-text').innerHTML = left > 0 ? `<strong>Free tier:</strong> You have ${left} AI uses remaining.` : `<strong>Free limit reached:</strong> Upgrade to Pro to continue using AI features.`;
+      }
+    }
+    if (document.getElementById('pro-status-text')) document.getElementById('pro-status-text').textContent = `Free Plan (${left} uses left)`;
   }
 }
+
 function saveKey() {
   const k = document.getElementById('api-input').value.trim();
-  if (!k) { toast('Enter your API key first', '⚠️'); return; }
-  S.key = k; persist(); updateApiStatus(); toast('API key saved', '🔑');
+  if (!k) { toast('Enter your Pro License key first', '⚠️'); return; }
+  S.key = k; persist(); updateApiStatus(); toast('License saved', '🔑');
 }
 function clearKey() {
   S.key = ''; document.getElementById('api-input').value = '';
-  persist(); updateApiStatus(); toast('Key cleared');
-}
-async function testKey() {
-  const k = S.key || document.getElementById('api-input').value.trim();
-  if (!k) { toast('Enter a key first', '⚠️'); return; }
-  const el = document.getElementById('key-result');
-  el.style.color = 'var(--gray-400)'; el.textContent = 'Testing...';
-  try {
-    const r = await claude('Say "Connected" and nothing else.', k);
-    el.style.color = 'var(--green)'; el.textContent = '✓ Connected — ' + r.slice(0,40);
-    S.key = k; persist(); updateApiStatus();
-  } catch(e) {
-    el.style.color = 'var(--red)'; el.textContent = '✗ ' + e.message;
-  }
+  persist(); updateApiStatus(); toast('License cleared');
 }
 async function claude(prompt, key) {
-  const k = key || S.key;
-  if (!k) throw new Error('No API key. Go to Settings.');
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type':'application/json', 'x-api-key':k, 'anthropic-version':'2023-06-01' },
-    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:2000, messages:[{role:'user',content:prompt}] })
-  });
-  if (!res.ok) { const e = await res.json(); throw new Error(e.error?.message || 'API error'); }
+  const uses = parseInt(localStorage.getItem('yuktora_ai_uses') || '0');
+  const isPro = S.key && S.key.startsWith('pro_');
+  
+  if (!isPro && uses >= FREE_LIMIT) {
+    toast('Free limit reached. Upgrade to Pro.', '⚠️');
+    throw new Error('Free AI limit reached. Please upgrade to Pro in Settings to continue.');
+  }
+
+  // Now fetching from our own secure Vercel backend proxy
+  // No more exposing keys or asking the user for one!
+  let res;
+  try {
+    res = await fetch('/api/anthropic', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify({ messages:[{role:'user',content:prompt}] })
+    });
+  } catch (err) {
+    throw new Error('Network error: Could not reach the AI backend. Check that your Vercel server is running and ad-blockers are disabled.');
+  }
+  
+  if (!res.ok) { 
+    const e = await res.json().catch(() => ({})); 
+    throw new Error(e.error?.message || e.error || e.message || 'API error: ' + res.status); 
+  }
+  
+  // Increment usage for free users
+  if (!isPro) {
+    localStorage.setItem('yuktora_ai_uses', (uses + 1).toString());
+    updateApiStatus();
+  }
+  
   return (await res.json()).content[0].text;
 }
 
@@ -1935,6 +1993,174 @@ function updateBadges() {
   ba.textContent = S.apps.length;
   bs.className = 'nav-badge' + (S.jobs.length ? '' : ' zero');
   ba.className = 'nav-badge' + (S.apps.length ? '' : ' zero');
+}
+
+// ─────────────────────────────────────────────
+// SUPABASE CLOUD SYNC
+// ─────────────────────────────────────────────
+
+// Helper: get the user's email from S.profile (set on the Profile page).
+// Both cloud functions require an email to use as the row key.
+function _getEmail() {
+  const email = (S.profile.email || '').trim();
+  if (!email) {
+    toast('Add your email on the Profile page first', '⚠️');
+    return null;
+  }
+  return email;
+}
+
+// ── saveToSupabase(email) ────────────────────────────────────────────────────
+// Upserts the user's resume string into `user_profiles` and maps every entry
+// in S.apps into individual rows inside `tracked_jobs`.
+//
+// Expected Supabase table schemas:
+//   user_profiles  (email text PK, resume text, profile_json jsonb, updated_at timestamptz)
+//   tracked_jobs   (id bigint PK, email text, title text, company text, loc text,
+//                   platform text, status text, score int, url text, visa bool,
+//                   notes text, date text, created_at timestamptz)
+// ─────────────────────────────────────────────
+async function saveToSupabase(email) {
+  const btn = document.getElementById('btn-save-cloud');
+  const orig = btn.textContent;
+  btn.textContent = '⏳ Saving…';
+  btn.disabled = true;
+
+  try {
+    // 1) Upsert the user profile row (resume + full profile JSON)
+    const { error: profileErr } = await supabaseClient
+      .from('user_profiles')
+      .upsert({
+        email,
+        resume:       S.profile.resume || '',
+        profile_json: S.profile,
+        updated_at:   new Date().toISOString()
+      }, { onConflict: 'email' });
+
+    if (profileErr) throw profileErr;
+
+    // 2) Delete existing tracked_jobs rows for this email, then re-insert fresh
+    const { error: delErr } = await supabaseClient
+      .from('tracked_jobs')
+      .delete()
+      .eq('email', email);
+
+    if (delErr) throw delErr;
+
+    if (S.apps.length) {
+      const rows = S.apps.map(a => ({
+        id:       a.id,
+        email,
+        title:    a.title    || '',
+        company:  a.company  || '',
+        loc:      a.loc      || '',
+        platform: a.platform || 'Other',
+        status:   a.status   || 'Applied',
+        score:    a.score    ?? null,
+        url:      a.url      || '',
+        visa:     a.visa     || false,
+        notes:    a.notes    || '',
+        date:     a.date     || new Date().toISOString().split('T')[0]
+      }));
+
+      const { error: insertErr } = await supabaseClient
+        .from('tracked_jobs')
+        .insert(rows);
+
+      if (insertErr) throw insertErr;
+    }
+
+    toast(`Saved to cloud ✓ (${S.apps.length} applications)`, '☁️');
+  } catch (err) {
+    console.error('[saveToSupabase]', err);
+    toast('Cloud save failed: ' + (err.message || err), '✗');
+  } finally {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }
+}
+
+// ── fetchFromSupabase(email) ─────────────────────────────────────────────────
+// Pulls the saved resume + application pipeline from Supabase, overwrites the
+// local S state object, persists to localStorage, and re-renders the UI.
+// ─────────────────────────────────────────────
+async function fetchFromSupabase(email) {
+  const btn = document.getElementById('btn-load-cloud');
+  const orig = btn.textContent;
+  btn.textContent = '⏳ Loading…';
+  btn.disabled = true;
+
+  try {
+    // 1) Fetch the user profile row
+    const { data: profileData, error: profileErr } = await supabaseClient
+      .from('user_profiles')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (profileErr) throw profileErr;
+
+    if (!profileData) {
+      toast('No cloud data found for this email', '⚠️');
+      return;
+    }
+
+    // Merge saved profile fields back into S.profile
+    if (profileData.profile_json) {
+      Object.assign(S.profile, profileData.profile_json);
+    } else if (profileData.resume) {
+      S.profile.resume = profileData.resume;
+    }
+
+    // 2) Fetch tracked jobs for this email
+    const { data: jobsData, error: jobsErr } = await supabaseClient
+      .from('tracked_jobs')
+      .select('*')
+      .eq('email', email)
+      .order('date', { ascending: false });
+
+    if (jobsErr) throw jobsErr;
+
+    // Map DB rows back to the S.apps shape
+    S.apps = (jobsData || []).map(row => ({
+      id:       row.id,
+      title:    row.title,
+      company:  row.company,
+      loc:      row.loc,
+      platform: row.platform,
+      status:   row.status,
+      score:    row.score,
+      url:      row.url,
+      visa:     row.visa,
+      notes:    row.notes,
+      date:     row.date
+    }));
+
+    // Persist merged state to localStorage and re-render all affected views
+    persist();
+    updateBadges();
+    renderDash();
+    renderTracker();
+    loadProfile();
+
+    toast(`Loaded from cloud ✓ (${S.apps.length} applications)`, '🔄');
+  } catch (err) {
+    console.error('[fetchFromSupabase]', err);
+    toast('Cloud load failed: ' + (err.message || err), '✗');
+  } finally {
+    btn.textContent = orig;
+    btn.disabled = false;
+  }
+}
+
+// ── Button wrappers called from the topbar ───────────────────────────────────
+async function cloudSave() {
+  const email = _getEmail(); if (!email) return;
+  await saveToSupabase(email);
+}
+async function cloudLoad() {
+  const email = _getEmail(); if (!email) return;
+  await fetchFromSupabase(email);
 }
 
 // ─────────────────────────────────────────────
