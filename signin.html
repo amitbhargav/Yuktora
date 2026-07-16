@@ -32,15 +32,39 @@
     </button>
   </div>
 
-  <!-- FIXED: Replaced broken jsdelivr layout reference with official Supabase CDN -->
-  <script src="https://unpkg.com"></script>
+  <!-- CDN Dependency loaded first explicitly -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  
   <script>
-    // Initialize Safe Client-Side Supabase Parameters
+    // Configuration parameters
     const SUPABASE_URL = "https://qflgxfqoldrxvchogkkj.supabase.co"; 
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbGd4ZnFvbGRyeHZjaG9na2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMDEzODAsImV4cCI6MjA5OTc3NzM4MH0.WjMe3xxzIs9xLgDrT20oBTdRcjZzh169gr8x-LkUz9M";
     
-    // FIXED: Formally instantiation declared cleanly so functions below do not crash
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Declared global pointer container to avoid ReferenceErrors
+    let supabaseClient = null;
+
+    // Safety initialization wrapped inside window lifecycle sequence
+    function initSupabaseClient() {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Wire active session event tracking once context is verified
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+          if (session) {
+            window.location.href = '/app.html';
+          }
+        });
+      } else {
+        console.error("Supabase CDN failed to instantiate global namespace objects.");
+      }
+    }
+
+    // Run verification instantly 
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+      initSupabaseClient();
+    } else {
+      window.addEventListener("DOMContentLoaded", initSupabaseClient);
+    }
 
     // Compliance Checkbox Modifier
     function toggleMagicLinkBtn() {
@@ -54,6 +78,10 @@
 
     // Issue Supabase Passwordless Login Event
     async function sendSupabaseMagicLink() {
+      if (!supabaseClient) {
+        return alert("Connection Error: The authorization engine is still loading. Please wait a second and retry.");
+      }
+
       const emailInput = document.getElementById('magic-email')?.value;
       const checkbox = document.getElementById('auth-consent-check');
       if (!checkbox || !checkbox.checked) return alert("You must agree to the privacy policy first.");
@@ -63,26 +91,25 @@
       btn.textContent = "Sending Link...";
       btn.disabled = true;
 
-      const { error } = await supabaseClient.auth.signInWithOtp({
-        email: emailInput,
-        options: { emailRedirectTo: window.location.origin + '/app.html' }
-      });
+      try {
+        const { error } = await supabaseClient.auth.signInWithOtp({
+          email: emailInput,
+          options: { emailRedirectTo: window.location.origin + '/app.html' }
+        });
 
-      if (error) {
-        alert("Authentication Error: " + error.message);
+        if (error) {
+          alert("Authentication Error: " + error.message);
+          btn.textContent = "Send Magic Link";
+          btn.disabled = false;
+        } else {
+          alert("Magic link issued! Check your email inbox to log in securely.");
+        }
+      } catch (err) {
+        console.error("Unhandled network execution error:", err);
         btn.textContent = "Send Magic Link";
         btn.disabled = false;
-      } else {
-        alert("Magic link issued! Check your email inbox to log in securely.");
       }
     }
-
-    // If a user visits signin but already has a valid cloud session, route them to the dashboard automatically
-    supabaseClient.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        window.location.href = '/app.html';
-      }
-    });
   </script>
 </body>
 </html>
