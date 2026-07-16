@@ -975,8 +975,12 @@ input[type=range] { width: 100%; accent-color: var(--brand); }
               <div style="font-size:12px;font-weight:500;color:var(--gray-500);margin-bottom:12px;">Enter your email to receive a Magic Link. Your data is tied to your verified identity — no password needed.</div>
               <div style="display:flex;gap:8px;">
                 <input type="email" class="input" id="auth-email-input" placeholder="you@email.com" style="flex:1">
-                <button class="btn btn-primary btn-sm" onclick="sendMagicLink()">Send Magic Link</button>
+                <button class="btn btn-primary btn-sm" id="btn-magic-link" onclick="sendMagicLink()" disabled style="opacity:0.45;cursor:not-allowed;">Send Magic Link</button>
               </div>
+              <label style="display:flex;align-items:flex-start;gap:9px;margin-top:12px;cursor:pointer;padding:10px 12px;background:var(--white);border:1px solid var(--border);border-radius:6px;">
+                <input type="checkbox" id="auth-consent-check" onchange="toggleMagicLinkBtn()" style="margin-top:2px;flex-shrink:0;width:15px;height:15px;accent-color:var(--brand);cursor:pointer;">
+                <span style="font-size:12px;font-weight:500;color:var(--gray-600);line-height:1.55;">I agree to the <a href="/privacy" target="_blank" style="color:var(--brand);font-weight:700;text-decoration:underline;">Privacy Policy</a> and authorize Yuktora to securely parse and store my resume details for workflow optimization.</span>
+              </label>
               <div id="auth-msg" style="display:none;margin-top:10px;font-size:12.5px;font-weight:600;color:var(--green);"></div>
             </div>
             <div id="auth-signed-in" style="display:none;">
@@ -2197,6 +2201,16 @@ function _updateAuthUI(session) {
     signedOut.style.display = 'block';
     signedIn.style.display  = 'none';
   }
+}
+
+// Toggle the Send Magic Link button based on consent checkbox state.
+function toggleMagicLinkBtn() {
+  const checked = document.getElementById('auth-consent-check')?.checked;
+  const btn     = document.getElementById('btn-magic-link');
+  if (!btn) return;
+  btn.disabled = !checked;
+  btn.style.opacity  = checked ? '1'   : '0.45';
+  btn.style.cursor   = checked ? 'pointer' : 'not-allowed';
 }
 
 // Send a Magic Link OTP to the entered email address.
