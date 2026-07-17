@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,39 +8,47 @@
   <link href="https://googleapis.com" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body style="background: #f9fafb; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: 'Outfit', sans-serif;">
 
-  <div id="auth-signin-layer" style="background: white; border: 1px solid var(--border, #e5e7eb); padding: 32px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center;">
+<body
+  style="background: #f9fafb; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: 'Outfit', sans-serif;">
+
+  <div id="auth-signin-layer"
+    style="background: white; border: 1px solid var(--border, #e5e7eb); padding: 32px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center;">
     <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700; color: #111827;">Welcome to Yuktora</h2>
     <p style="color: #666; font-size: 0.875rem; margin: 0 0 24px 0;">Secure passwordless sign-in</p>
-    
+
     <div style="text-align: left; margin-bottom: 16px;">
-      <label for="magic-email" style="display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; color: #374151;">Work Email Address</label>
-      <input type="email" id="magic-email" placeholder="you@company.com" style="width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 6px; box-sizing: border-box; font-size: 0.875rem;">
+      <label for="magic-email"
+        style="display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; color: #374151;">Work
+        Email Address</label>
+      <input type="email" id="magic-email" placeholder="you@company.com"
+        style="width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 6px; box-sizing: border-box; font-size: 0.875rem;">
     </div>
 
     <!-- DPDP Compliance Checkbox Block -->
     <div style="display: flex; align-items: flex-start; text-align: left; margin-bottom: 20px;">
-      <input type="checkbox" id="auth-consent-check" onchange="toggleMagicLinkBtn()" style="margin-top: 3px; margin-right: 8px; cursor: pointer;">
+      <input type="checkbox" id="auth-consent-check" onchange="toggleMagicLinkBtn()"
+        style="margin-top: 3px; margin-right: 8px; cursor: pointer;">
       <label for="auth-consent-check" style="font-size: 0.75rem; color: #4b5563; line-height: 1.4; cursor: pointer;">
-        I agree to the processing of my email profile under the terms of the 
+        I agree to the processing of my email profile under the terms of the
         <a href="privacy.html" target="_blank" style="color: #0070f3; text-decoration: underline;">Privacy Policy</a>.
       </label>
     </div>
 
-    <button id="btn-magic-link" onclick="sendSupabaseMagicLink()" disabled style="width: 100%; padding: 12px; background: #0070f3; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 0.875rem; opacity: 0.45; cursor: not-allowed; transition: all 0.2s ease; width: 100%;">
+    <button id="btn-magic-link" onclick="sendSupabaseMagicLink()" disabled
+      style="width: 100%; padding: 12px; background: #0070f3; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 0.875rem; opacity: 0.45; cursor: not-allowed; transition: all 0.2s ease; width: 100%;">
       Send Magic Link
     </button>
   </div>
 
   <!-- CDN Dependency loaded first explicitly -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  
+
   <script>
     // Configuration parameters
-    const SUPABASE_URL = "https://qflgxfqoldrxvchogkkj.supabase.co"; 
+    const SUPABASE_URL = "https://qflgxfqoldrxvchogkkj.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbGd4ZnFvbGRyeHZjaG9na2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMDEzODAsImV4cCI6MjA5OTc3NzM4MH0.WjMe3xxzIs9xLgDrT20oBTdRcjZzh169gr8x-LkUz9M";
-    
+
     // Declared global pointer container to avoid ReferenceErrors
     let supabaseClient = null;
 
@@ -47,7 +56,7 @@
     function initSupabaseClient() {
       if (window.supabase && typeof window.supabase.createClient === 'function') {
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        
+
         // Wire active session event tracking once context is verified
         supabaseClient.auth.onAuthStateChange((event, session) => {
           if (session) {
@@ -82,6 +91,37 @@
         return alert("Connection Error: The authorization engine is still loading. Please wait a second and retry.");
       }
 
+      async function handleSignIn() {
+        const btn = document.getElementById('submit-btn'); // Or your button ID
+        btn.disabled = true;
+        btn.textContent = 'Sending Link...';
+
+        try {
+          const { error } = await supabase.auth.signInWithOtp({
+            email: emailInput.value,
+            options: { emailRedirectTo: window.location.origin + '/app' }
+          });
+
+          if (error) throw error;
+
+          toast('Magic Link Sent! Check your inbox.', '✅');
+        } catch (err) {
+          console.error('Sign-in failed:', err);
+
+          // Catch-guard: Re-enable the interface elements so the user can try again
+          btn.disabled = false;
+          btn.textContent = 'Send Magic Link';
+
+          // Inform the user clearly about the rate limit or error
+          if (err.status === 429 || err.message?.includes('rate limit')) {
+            toast('Too many requests. Please wait 1 minute before retrying.', '⚠️');
+          } else {
+            toast(err.message || 'An error occurred during authentication.', '❌');
+          }
+        }
+      }
+
+
       const emailInput = document.getElementById('magic-email')?.value;
       const checkbox = document.getElementById('auth-consent-check');
       if (!checkbox || !checkbox.checked) return alert("You must agree to the privacy policy first.");
@@ -112,4 +152,5 @@
     }
   </script>
 </body>
+
 </html>
