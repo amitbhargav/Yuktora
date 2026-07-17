@@ -3998,11 +3998,6 @@ Be direct and specific. Reference actual content.`;
     const scoreDisplay = document.getElementById('metrics-score-display');
     const chipsContainer = document.getElementById('missing-keywords-chips');
 
-    function escapeHTML(str) {
-      if (!str) return '';
-      return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
-    }
-
     async function handleJobMatchOptimization() {
       const jobText = jobInput.value.trim();
       if (!jobText) return alert("Please paste an operational job description string to analyze.");
