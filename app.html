@@ -2731,6 +2731,24 @@
       curJob: null
     };
 
+    function sanitizeApplyURL(urlString) {
+      if (!urlString) return '#';
+      try {
+        const parsed = new URL(urlString.trim());
+        // Strictly whitelist secure protocols
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+          return parsed.href;
+        }
+      } catch (e) {
+        // Fallback: If it's a valid domain format without a protocol, fix it
+        if (/^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,}/i.test(urlString.trim())) {
+          return `https://${urlString.trim()}`;
+        }
+      }
+      return '#'; // Block javascript:, data:, vbscript: with a safe hash fallback
+    }
+
+
     function persist() { try { localStorage.setItem('htai2', JSON.stringify(S)); } catch (e) { } }
     function restore() {
       try {
@@ -3180,10 +3198,33 @@ KEYWORDS: [8 top keywords from JD to add to resume, comma-separated]`;
       nav('tailor');
     }
     function applyNow() {
-      const url = S.curJob?.url;
-      if (url) window.open(url, '_blank');
-      else toast('No apply URL — open the job listing manually', '⚠️');
+      let url = S.curJob?.url;
+      if (!url) {
+        toast('No apply URL — open the job listing manually', '⚠️');
+        return;
+      }
+
+      url = url.trim();
+
+      try {
+        const parsed = new URL(url);
+        // Explicitly enforce secure schemas to completely drop javascript:, data:, and vbscript: threats
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+          window.open(parsed.href, '_blank', 'noopener,noreferrer');
+          return;
+        }
+      } catch (e) {
+        // Check if it's just a raw naked domain missing the schema (e.g. "://google.com")
+        if (/^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,}/i.test(url)) {
+          window.open(`https://${url}`, '_blank', 'noopener,noreferrer');
+          return;
+        }
+      }
+
+      // Malicious/dangerous protocol detected
+      toast('Blocked potentially unsafe or invalid URL schema.', '❌');
     }
+
     function clearJobs() { S.jobs = []; persist(); renderSavedJobs(); toast('Cleared'); }
 
     const MATCH_FLOOR = 90;
