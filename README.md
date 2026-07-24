@@ -81,4 +81,14 @@ Environment variables (set in Vercel, not committed):
 
 ---
 
+## 🎯 Immediate Launch Action Plan (To-Do)
+
+1. [ ] **Secure `/api/anthropic`** — Verify Supabase JWT server-side before proxying Claude requests.
+2. [ ] **Usage Limits** — Enforce Free tier quotas in Supabase to protect your API budget.
+3. [ ] **Payment Gateway** — Connect Razorpay/Cashfree webhooks to handle `pro` and `lifetime` upgrades.
+4. [ ] **Legal/Trust Pages** — Add Terms of Service and Refund Policy pages for gateway KYC.
+5. [ ] **Demo Mode** — Ship `/app?demo=1` for friction-free visitor testing.
+
+---
+
 Built by [Amit Bhargav](https://linkedin.com/in/amitbhargav) — Senior TPM & AI Builder · Bengaluru 🇮🇳
