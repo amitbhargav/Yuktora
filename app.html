@@ -1619,6 +1619,11 @@
           <button class="btn btn-green btn-sm" id="btn-save-cloud" onclick="cloudSave()"
             title="Save your profile & applications to Supabase">💾 Save to Cloud</button>
           <button class="btn btn-primary btn-sm" onclick="nav('search')">+ Add job</button>
+          <!-- ── User menu: signed-in email + sign out ── -->
+          <div style="display:flex;align-items:center;gap:8px;margin-left:4px;padding-left:12px;border-left:1px solid var(--border);">
+            <span id="topbar-user-email" style="font-size:12px;font-weight:600;color:var(--gray-500);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title=""></span>
+            <button class="btn btn-danger btn-sm" onclick="signOutAndRedirect()" title="Sign out">Sign out</button>
+          </div>
         </div>
       </header>
 
@@ -2529,7 +2534,6 @@
                     <div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Signed in as</div>
                     <div id="settings-user-email" style="font-size:13px;font-weight:700;color:var(--brand);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</div>
                   </div>
-                  <button class="btn btn-danger btn-sm" onclick="signOutAndRedirect()">Sign out</button>
                 </div>
                 <div class="field-hint">Signing out will redirect you to the sign-in page. Your locally-stored data is preserved.</div>
               </div>
@@ -3854,9 +3858,14 @@ Be direct and specific. Reference actual content.`;
       S.profile.email = session.user.email;
       persist();
 
-      // Update the account info display in Settings
+      // Update the account info display in Settings and topbar
       const settingsEmailEl = document.getElementById('settings-user-email');
       if (settingsEmailEl) settingsEmailEl.textContent = session.user.email;
+      const topbarEmailEl = document.getElementById('topbar-user-email');
+      if (topbarEmailEl) {
+        topbarEmailEl.textContent = session.user.email;
+        topbarEmailEl.title = session.user.email;
+      }
 
       // Boot the UI
       updateApiStatus();

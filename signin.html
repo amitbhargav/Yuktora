@@ -40,6 +40,20 @@
       style="width: 100%; padding: 12px; background: #0070f3; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 0.875rem; opacity: 0.45; cursor: not-allowed; transition: all 0.2s ease; width: 100%;">
       Send Magic Link
     </button>
+
+    <!-- Success confirmation block — hidden until magic link is sent successfully -->
+    <div id="magic-link-success" style="display:none; margin-top: 16px; padding: 14px 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; text-align: left;">
+      <div style="font-size: 0.875rem; font-weight: 600; color: #166534; margin-bottom: 6px;">✓ Check your email</div>
+      <div style="font-size: 0.8125rem; color: #15803d; line-height: 1.5;">
+        We sent a sign-in link to <strong id="magic-link-sent-email"></strong>. Click the link to continue.
+      </div>
+      <div style="margin-top: 10px; font-size: 0.8125rem; color: #4b5563;">
+        Didn't get it? <a href="#" id="magic-link-resend" onclick="resendMagicLink(event)" style="color: #0070f3; font-weight: 600; text-decoration: underline;">Resend</a>
+      </div>
+    </div>
+
+    <!-- Error message block — hidden until an error occurs -->
+    <div id="magic-link-error" style="display:none; margin-top: 12px; padding: 10px 14px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; font-size: 0.8125rem; color: #dc2626; font-weight: 500;"></div>
   </div>
 
   <!-- CDN Dependency loaded first explicitly -->
@@ -137,16 +151,52 @@
         });
 
         if (error) {
-          alert("Authentication Error: " + error.message);
+          // Show inline error, reset button
+          const errEl = document.getElementById('magic-link-error');
+          if (errEl) {
+            errEl.textContent = error.message;
+            errEl.style.display = 'block';
+          }
           btn.textContent = "Send Magic Link";
           btn.disabled = false;
         } else {
-          alert("Magic link issued! Check your email inbox to log in securely.");
+          // Hide button, show success confirmation block
+          btn.style.display = 'none';
+          const successEl = document.getElementById('magic-link-success');
+          const sentEmailEl = document.getElementById('magic-link-sent-email');
+          const errEl = document.getElementById('magic-link-error');
+          if (errEl) errEl.style.display = 'none';
+          if (sentEmailEl) sentEmailEl.textContent = emailInput;
+          if (successEl) successEl.style.display = 'block';
         }
       } catch (err) {
         console.error("Unhandled network execution error:", err);
+        const errEl = document.getElementById('magic-link-error');
+        if (errEl) {
+          errEl.textContent = 'Network error — please check your connection and try again.';
+          errEl.style.display = 'block';
+        }
         btn.textContent = "Send Magic Link";
         btn.disabled = false;
+      }
+    }
+
+    // Resend: re-show the button and reset state so the user can send again
+    function resendMagicLink(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-magic-link');
+      const successEl = document.getElementById('magic-link-success');
+      const errEl = document.getElementById('magic-link-error');
+      if (successEl) successEl.style.display = 'none';
+      if (errEl) errEl.style.display = 'none';
+      if (btn) {
+        btn.style.display = '';
+        btn.textContent = 'Send Magic Link';
+        // Re-evaluate disabled state based on checkbox
+        const checked = document.getElementById('auth-consent-check')?.checked;
+        btn.disabled = !checked;
+        btn.style.opacity = checked ? '1' : '0.45';
+        btn.style.cursor = checked ? 'pointer' : 'not-allowed';
       }
     }
   </script>
