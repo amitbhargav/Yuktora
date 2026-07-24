@@ -2656,6 +2656,19 @@
     const SUPABASE_URL = 'https://qflgxfqoldrxvchogkkj.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbGd4ZnFvbGRyeHZjaG9na2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMDEzODAsImV4cCI6MjA5OTc3NzM4MH0.WjMe3xxzIs9xLgDrT20oBTdRcjZzh169gr8x-LkUz9M';
 
+
+    // --- PUBLIC DEMO MODE INTERCEPTOR ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const isDemoMode = urlParams.get('demo') === '1';
+
+    if (isDemoMode) {
+      console.log("🚀 Yuktora running in Public Demo Mode");
+      const banner = document.createElement('div');
+      banner.style.cssText = "background: #2563eb; color: #fff; text-align: center; padding: 8px; font-size: 0.85rem; font-weight: 500; position: sticky; top: 0; z-index: 1000;";
+      banner.innerHTML = `Viewing Yuktora Public Demo Mode — <a href="/signin.html" style="color: #fff; text-decoration: underline; margin-left: 8px;">Sign in to save your own jobs</a>`;
+      document.body.prepend(banner);
+    }
+
     // supabase is exposed globally by the CDN script loaded in <head>
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
