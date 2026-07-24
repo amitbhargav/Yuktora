@@ -2925,6 +2925,11 @@
     // ─────────────────────────────────────────────
     // SUPABASE CLIENT & DEMO MODE INITIALISATION
     // ─────────────────────────────────────────────
+    // Public anon key — safe to commit, intentionally hardcoded for a zero-build
+    // static deployment (matches the same constants declared in signin.html).
+    const SUPABASE_URL = "https://qflgxfqoldrxvchogkkj.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbGd4ZnFvbGRyeHZjaG9na2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMDEzODAsImV4cCI6MjA5OTc3NzM4MH0.WjMe3xxzIs9xLgDrT20oBTdRcjZzh169gr8x-LkUz9M";
+
     const urlParams = new URLSearchParams(window.location.search);
     const isDemoMode = urlParams.get('demo') === '1';
 
