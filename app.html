@@ -3271,7 +3271,16 @@
             }
           });
 
-          if (!response.ok) throw new Error('API Error - Check your key or quota');
+          if (!response.ok) {
+            let detail = `HTTP ${response.status}`;
+            try {
+              const errBody = await response.json();
+              detail = errBody.message || errBody.error || detail;
+            } catch (e) { /* body wasn't JSON — keep the HTTP status */ }
+            if (response.status === 401 || response.status === 403) detail = 'Invalid API key. ' + detail;
+            else if (response.status === 429) detail = 'Rate limit or quota exceeded. ' + detail;
+            throw new Error(detail);
+          }
           const data = await response.json();
 
           if (!data.data || data.data.length === 0) {
@@ -3310,7 +3319,7 @@
 
         } catch (error) {
           console.error(error);
-          toast('Failed to fetch jobs. Check API key.', '❌');
+          toast(`Live search failed: ${error.message}`, '❌');
         } finally {
           btn.textContent = '🔍 Fetch Jobs';
           btn.style.opacity = '1';

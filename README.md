@@ -61,6 +61,11 @@ Live: https://yuktora.vercel.app
 * **Fixed Missing Dependency Manifest (root cause of the 500s):** the repo had no `package.json` anywhere in its history, so Vercel had nothing to install `@supabase/supabase-js` from — every `/api/anthropic` call crashed with `500 FUNCTION_INVOCATION_FAILED` at module load, before the JWT logic ever ran. Added `package.json` + `package-lock.json` declaring the dependency; verified via `npm install` and a live `curl` test (clean `401`s instead of a crash).
 * **Graceful Demo Fallback:** Demo mode (`?demo=1`) has no real session, so AI calls now short-circuit client-side with a "Sign in to use AI features" toast instead of a raw network error, by design — demo visitors can explore the UI but can't spend the Anthropic budget.
 
+### Phase 3.10: Search Live Error Surfacing (Shipped)
+* **Real JSearch Errors Surfaced:** `fetchLiveJobs()` previously threw a hardcoded `"API Error - Check your key or quota"` on any failed live search and showed the same generic toast regardless of cause. Now parses the actual JSearch/RapidAPI error body and distinguishes invalid-key (401/403) from rate-limit/quota (429) from other failures, so the toast tells you what actually went wrong.
+* **"localStorage naming mismatch" claim retired:** audited the full git history of the `rapid_key` storage key used by `saveRapidKey()` and `fetchLiveJobs()` — it has been consistently named in every commit that ever touched it. The originally-roadmapped "reconcile localStorage key naming" bug does not reproduce in the current code; removed from the roadmap rather than carried forward.
+* **Apply button URL validation confirmed already in place:** `applyNow()` already validates the URL protocol via `new URL()`, whitelists `http:`/`https:`, and shows a friendly toast on anything else — the roadmapped "prevent Chrome's Blocked URL schema error" concern was already handled by existing code. No change needed.
+
 ---
 
 ## 🔮 Upcoming Roadmap
@@ -71,15 +76,13 @@ Live: https://yuktora.vercel.app
 3. **Retire BYOK for Anthropic** — remove the Settings API key input once metering is live. Keep the JSearch/RapidAPI input (that one is genuinely user-owned).
 
 ### Phase 5: Growth & Reliability
-4. **Search Live fix** — reconcile localStorage key naming between Settings save and Search Live read; surface real JSearch API errors instead of silent demo fallback.
-5. **Apply button URL validation** — prevent Chrome's "Blocked URL schema" error on demo/malformed job cards.
-6. **Custom SMTP (Resend)** — replace default 2/hour Supabase mailer with production SMTP on a verified domain. Branded magic-link template. (Hit this limit firsthand while testing Phase 3.9 — worth prioritizing.)
-7. **Error tracking** — Sentry free tier for post-launch monitoring.
-8. **Theme polish pass** — resolve remaining sidebar wordmark and demo banner specificity issues, "+ Add job" button contrast check.
+4. **Custom SMTP (Resend)** — replace default 2/hour Supabase mailer with production SMTP on a verified domain. Branded magic-link template. (Hit this limit firsthand while testing Phase 3.9 — worth prioritizing.)
+5. **Error tracking** — Sentry free tier for post-launch monitoring.
+6. **Theme polish pass** — resolve remaining sidebar wordmark and demo banner specificity issues, "+ Add job" button contrast check.
 
 ### Phase 6: Trust & Compliance
-9. **Terms of Service + Refund Policy** pages — required by Indian payment gateway KYC.
-10. **Complete DPDP consent audit** — verify checkbox, `escapeHTML`, and data-export/deletion flows meet requirements before scale.
+7. **Terms of Service + Refund Policy** pages — required by Indian payment gateway KYC.
+8. **Complete DPDP consent audit** — verify checkbox, `escapeHTML`, and data-export/deletion flows meet requirements before scale.
 
 ---
 
