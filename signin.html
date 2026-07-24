@@ -1,7 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<style>
+<!-- ═══════════════════════════════════════════════════════════════════
+     MOCHA MARBLE THEME — Phase 3.8 visual polish
+     Paste at the end of <style>. Order matters: this must come AFTER
+     existing rules to override cleanly.
+     ═══════════════════════════════════════════════════════════════════ -->
+
+:root {
+  --page-bg: #efe8dd;
+  --card-bg: #ffffff;
+  --border: #d9c8ab;
+  --text-primary: #2b1e14;
+  --text-secondary: #6b5540;
+  --brand: #4a2c1a;
+  --brand-hover: #3a1f10;
+  --brand-text: #efe8dd;
+  --eyebrow-bg: #e3d5bc;
+  --eyebrow-text: #6b3d1a;
+  --eyebrow-dot: #a8683a;
+  --success-bg: #e5efdb;
+  --success-text: #3d6a3d;
+  --divider: #ede2ca;
+  --shadow-warm: 0 1px 2px rgba(74, 44, 26, 0.04), 0 8px 24px rgba(74, 44, 26, 0.06);
+  --font-heading: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter Tight', system-ui, -apple-system, sans-serif;
+}
+
+/* Base surface */
+html, body {
+  background: var(--page-bg) !important;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+/* Headings — serif with tight tracking */
+h1, h2, h3, h4,
+.hero-title, .page-title, .section-title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+}
+
+/* Italic phrases inside headings (e.g. "unfair advantage") */
+h1 em, h2 em, h3 em,
+.hero-title em, .page-title em {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Body text default */
+p, li, span, label, input, textarea, select, button {
+  font-family: var(--font-body);
+}
+
+/* Eyebrow pill — "BUILT WITH YUKTORA INTELLIGENCE" style */
+.eyebrow, .badge-eyebrow, [class*="eyebrow"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--eyebrow-bg);
+  color: var(--eyebrow-text);
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.eyebrow::before, .badge-eyebrow::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--eyebrow-dot);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Cards — white on mocha, warm-tinted shadow */
+.card, .feature-card, .risk-item, .pricing-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-warm);
+}
+
+/* Primary CTA — deep chocolate */
+.btn-primary, .cta-primary, button[type="submit"].primary {
+  background: var(--brand);
+  color: var(--brand-text);
+  border: none;
+  border-radius: 8px;
+  padding: 11px 18px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-primary:hover, .cta-primary:hover {
+  background: var(--brand-hover);
+}
+
+/* Ghost / secondary CTA */
+.btn-ghost, .btn-secondary, .cta-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 18px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-ghost:hover, .btn-secondary:hover {
+  background: var(--eyebrow-bg);
+}
+
+/* Score / match badges */
+.score-badge, .match-score, .score-chip {
+  background: var(--success-bg);
+  color: var(--success-text);
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+/* Form inputs on mocha background */
+input[type="email"], input[type="text"], input[type="password"], textarea {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(74, 44, 26, 0.08);
+}
+
+/* Secondary text — captions, meta, subtitles */
+.subtitle, .caption, .meta, .text-muted {
+  color: var(--text-secondary);
+}
+
+/* Dividers */
+hr, .divider {
+  border: none;
+  border-top: 1px solid var(--divider);
+}
+</style>
+
 <head>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter+Tight:wght@400;500;600&display=swap">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign In — Yuktora</title>
@@ -42,18 +213,22 @@
     </button>
 
     <!-- Success confirmation block — hidden until magic link is sent successfully -->
-    <div id="magic-link-success" style="display:none; margin-top: 16px; padding: 14px 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; text-align: left;">
+    <div id="magic-link-success"
+      style="display:none; margin-top: 16px; padding: 14px 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; text-align: left;">
       <div style="font-size: 0.875rem; font-weight: 600; color: #166534; margin-bottom: 6px;">✓ Check your email</div>
       <div style="font-size: 0.8125rem; color: #15803d; line-height: 1.5;">
         We sent a sign-in link to <strong id="magic-link-sent-email"></strong>. Click the link to continue.
       </div>
       <div style="margin-top: 10px; font-size: 0.8125rem; color: #4b5563;">
-        Didn't get it? <a href="#" id="magic-link-resend" onclick="resendMagicLink(event)" style="color: #0070f3; font-weight: 600; text-decoration: underline;">Resend</a>
+        Didn't get it? <a href="#" id="magic-link-resend" onclick="resendMagicLink(event)"
+          style="color: #0070f3; font-weight: 600; text-decoration: underline;">Resend</a>
       </div>
     </div>
 
     <!-- Error message block — hidden until an error occurs -->
-    <div id="magic-link-error" style="display:none; margin-top: 12px; padding: 10px 14px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; font-size: 0.8125rem; color: #dc2626; font-weight: 500;"></div>
+    <div id="magic-link-error"
+      style="display:none; margin-top: 12px; padding: 10px 14px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; font-size: 0.8125rem; color: #dc2626; font-weight: 500;">
+    </div>
   </div>
 
   <!-- CDN Dependency loaded first explicitly -->
