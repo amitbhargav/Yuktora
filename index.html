@@ -1107,7 +1107,6 @@
       border-top: 1px solid var(--divider);
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 
 <body>
@@ -1123,7 +1122,6 @@
         <a href="#features">Features</a>
         <a href="#how-it-works">How it works</a>
         <a href="/pricing">Pricing</a>
-        <a href="#hire">For Recruiters</a>
       </div>
       <div class="nav-right">
         <a href="/app?demo=1" class="btn btn-ghost btn-sm">Try Demo</a>
@@ -1378,82 +1376,9 @@
     </div>
   </section>
 
-  <!-- ═══ FOR RECRUITERS ══════════════════════════════ -->
-  <section class="recruiters" id="hire">
-    <div class="container">
-      <div class="rec-inner">
-        <div>
-          <div class="rec-eyebrow">👔 For Recruiters & Hiring Managers</div>
-          <h2>Hiring senior TPM, PM,<br>or AI engineering talent?</h2>
-          <p style="margin-top:10px;font-size:1rem;max-width:420px">Yuktora is used by senior tech professionals
-            actively searching. Post your opportunity and we'll surface it to matched, qualified candidates.</p>
-          <div class="rec-perks">
-            <div class="rec-perk">
-              <div class="pchk">✓</div>Reach Senior TPMs, AI PMs and Staff engineers actively searching
-            </div>
-            <div class="rec-perk">
-              <div class="pchk">✓</div>AI-matched — only relevant profiles see your role
-            </div>
-            <div class="rec-perk">
-              <div class="pchk">✓</div>Visa sponsorship roles highlighted to international candidates
-            </div>
-            <div class="rec-perk">
-              <div class="pchk">✓</div>Founding recruiter pricing — early access while in beta
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="rec-form">
-            <h3>Get early access</h3>
-            <p class="rec-sub">Tell us about your role — we'll reach out within 24 hours.</p>
-            <form id="rf" onsubmit="submitRecruiter(event)">
-              <div class="frow">
-                <div class="fg"><label class="fl">Your name *</label><input class="input" id="rf-name" type="text"
-                    placeholder="Priya Sharma" required></div>
-                <div class="fg"><label class="fl">Work email *</label><input class="input" id="rf-email" type="email"
-                    placeholder="priya@company.com" required></div>
-              </div>
-              <div class="frow">
-                <div class="fg"><label class="fl">Company *</label><input class="input" id="rf-company" type="text"
-                    placeholder="Amazon, Flipkart..." required></div>
-                <div class="fg"><label class="fl">Role hiring for *</label><input class="input" id="rf-role" type="text"
-                    placeholder="Senior TPM, AI PM..." required></div>
-              </div>
-              <div class="fg">
-                <label class="fl">Location & visa sponsorship?</label>
-                <select class="input" id="rf-loc">
-                  <option>Bangalore, India</option>
-                  <option>Mumbai, India</option>
-                  <option>Delhi/NCR, India</option>
-                  <option>Hyderabad, India</option>
-                  <option>Remote (India)</option>
-                  <option>USA — H1B Sponsored</option>
-                  <option>UK — Visa Sponsored</option>
-                  <option>Canada — PR Pathway</option>
-                  <option>Singapore</option>
-                  <option>Other International</option>
-                </select>
-              </div>
-              <div class="fg"><label class="fl">Brief about the role (optional)</label><textarea class="input"
-                  id="rf-notes" rows="2" placeholder="Key requirements, team size, salary range..."></textarea></div>
-              <button type="submit" class="fsub-btn">Submit — Get Early Access →</button>
-              <p style="font-size: 0.75rem; margin-top: 8px; color: #666; text-align: center;">
-                By submitting, you agree to the processing of your data under our
-                <a href="privacy.html" target="_blank" style="color: #0070f3; text-decoration: underline;">Privacy
-                  Policy</a>.
-              </p>
-              <p class="fnote">🔒 No spam. We'll only contact you about your role.</p>
-            </form>
-            <div class="fsuccess" id="fsuccess">
-              <div class="fsuccess-ic">🎉</div>
-              <h4>We'll be in touch!</h4>
-              <p>Our team will reach out within 24 hours to get your role in front of matched candidates.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- ═══ FOR RECRUITERS — hidden pending manual validation of recruiter-side demand,
+       see README Phase 3.14/4.5. Full markup preserved in git history (search
+       "FOR RECRUITERS" in prior commits) — restore from there if/when revisited. ═══ -->
 
   <!-- ═══ CTA ═════════════════════════════════════════ -->
   <div class="cta-band">
@@ -1499,7 +1424,6 @@
         </div>
         <div class="footer-col">
           <h4>Company</h4>
-          <a href="#hire">For Recruiters</a>
           <a href="mailto:amitbhargav.sunny@gmail.com?subject=Yuktora%20Enquiry">Contact Us →</a>
           <a href="/privacy">Privacy Policy</a>
           <a href="/terms">Terms of Service</a>
@@ -1512,43 +1436,6 @@
       </div>
     </div>
   </footer>
-
-  <script>
-    // Public anon key — safe to commit, same pattern as signin.html/app.html.
-    const SUPABASE_URL = "https://qflgxfqoldrxvchogkkj.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbGd4ZnFvbGRyeHZjaG9na2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMDEzODAsImV4cCI6MjA5OTc3NzM4MH0.WjMe3xxzIs9xLgDrT20oBTdRcjZzh169gr8x-LkUz9M";
-    const leadsClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    async function submitRecruiter(e) {
-      e.preventDefault();
-      const btn = e.target.querySelector('.fsub-btn');
-      const origText = btn ? btn.textContent : '';
-      if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
-      const d = {
-        name: document.getElementById('rf-name').value,
-        email: document.getElementById('rf-email').value,
-        company: document.getElementById('rf-company').value,
-        role: document.getElementById('rf-role').value,
-        location: document.getElementById('rf-loc').value,
-        notes: document.getElementById('rf-notes').value
-      };
-
-      const { error } = await leadsClient.from('recruiter_leads').insert({
-        name: d.name, email: d.email, company: d.company,
-        role: d.role, location: d.location, notes: d.notes
-      });
-
-      if (error) {
-        console.error('[submitRecruiter]', error);
-        if (btn) { btn.textContent = origText; btn.disabled = false; }
-        alert('Something went wrong submitting your request. Please email amitbhargav.sunny@gmail.com directly instead — sorry about that.');
-        return;
-      }
-
-      document.getElementById('rf').style.display = 'none';
-      document.getElementById('fsuccess').style.display = 'block';
-    }
-  </script>
 
 </body>
 
