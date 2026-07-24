@@ -21,6 +21,15 @@
    DESIGN TOKENS - LIGHT & BRIGHT SAAS THEME
 ───────────────────────────────────────────── */
     :root {
+      /* Redefine existing legacy tokens to Mocha palette */
+      --cream: #efe8dd;
+      --white: #ffffff;
+      --gray-50: #f4ede0;
+      --gray-100: #ede2ca;
+      --gray-200: #d9c8ab;
+      --gray-500: #6b5540;
+      --gray-800: #2b1e14;
+      --gray-900: #1a120a;
       --sans: 'Outfit', sans-serif;
       --mono: 'DM Mono', monospace;
       --display: 'Outfit', sans-serif;
@@ -1815,31 +1824,6 @@
     header.topbar {
       background: var(--page-bg);
       border-bottom: 1px solid var(--border);
-    }
-
-    /* Nuclear background override — catches any wrapper that hijacks bg */
-    body,
-    body>*,
-    main,
-    .container,
-    .wrapper,
-    .page,
-    .landing,
-    .hero,
-    .hero-section,
-    section.hero,
-    div.hero {
-      background-color: var(--page-bg) !important;
-    }
-
-    /* But keep cards and specific islands as white */
-    .card,
-    .feature-card,
-    .risk-item,
-    .pricing-card,
-    .dashboard-preview,
-    .dashboard-mock {
-      background: var(--card-bg) !important;
     }
   </style>
 </head>

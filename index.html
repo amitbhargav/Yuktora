@@ -899,7 +899,17 @@
       }
     }
 
-    < !-- ═══════════════════════════════════════════════════════════════════ MOCHA MARBLE THEME — Phase 3.8 visual polish Paste at the end of <style>. Order matters: this must come AFTER existing rules to override cleanly. ═══════════════════════════════════════════════════════════════════ -->:root {
+    <!-- ═══════════════════════════════════════════════════════════════════ MOCHA MARBLE THEME — Phase 3.8 visual polish Paste at the end of <style>. Order matters: this must come AFTER existing rules to override cleanly. ═══════════════════════════════════════════════════════════════════ -->
+    :root {
+      /* Redefine existing legacy tokens to Mocha palette */
+      --cream: #efe8dd;
+      --white: #ffffff;
+      --gray-50: #f4ede0;
+      --gray-100: #ede2ca;
+      --gray-200: #d9c8ab;
+      --gray-500: #6b5540;
+      --gray-800: #2b1e14;
+      --gray-900: #1a120a;
       --page-bg: #efe8dd;
       --card-bg: #ffffff;
       --border: #d9c8ab;
@@ -1094,31 +1104,6 @@
     .divider {
       border: none;
       border-top: 1px solid var(--divider);
-    }
-
-    /* Nuclear background override — catches any wrapper that hijacks bg */
-    body,
-    body>*,
-    main,
-    .container,
-    .wrapper,
-    .page,
-    .landing,
-    .hero,
-    .hero-section,
-    section.hero,
-    div.hero {
-      background-color: var(--page-bg) !important;
-    }
-
-    /* But keep cards and specific islands as white */
-    .card,
-    .feature-card,
-    .risk-item,
-    .pricing-card,
-    .dashboard-preview,
-    .dashboard-mock {
-      background: var(--card-bg) !important;
     }
   </style>
 </head>
