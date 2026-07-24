@@ -1107,6 +1107,7 @@
       border-top: 1px solid var(--divider);
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 
 <body>
@@ -1125,6 +1126,7 @@
         <a href="#hire">For Recruiters</a>
       </div>
       <div class="nav-right">
+        <a href="/app?demo=1" class="btn btn-ghost btn-sm">Try Demo</a>
         <a href="/signin" class="btn btn-ghost btn-sm">Sign in</a>
         <a href="/app" class="btn btn-burg btn-sm">Launch App →</a>
       </div>
@@ -1512,9 +1514,15 @@
   </footer>
 
   <script>
+    // Public anon key — safe to commit, same pattern as signin.html/app.html.
+    const SUPABASE_URL = "https://qflgxfqoldrxvchogkkj.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbGd4ZnFvbGRyeHZjaG9na2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMDEzODAsImV4cCI6MjA5OTc3NzM4MH0.WjMe3xxzIs9xLgDrT20oBTdRcjZzh169gr8x-LkUz9M";
+    const leadsClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     async function submitRecruiter(e) {
       e.preventDefault();
       const btn = e.target.querySelector('.fsub-btn');
+      const origText = btn ? btn.textContent : '';
       if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
       const d = {
         name: document.getElementById('rf-name').value,
@@ -1524,21 +1532,19 @@
         location: document.getElementById('rf-loc').value,
         notes: document.getElementById('rf-notes').value
       };
-      try {
-        const leads = JSON.parse(localStorage.getItem('ht_leads') || '[]');
-        leads.push({ ...d, ts: new Date().toISOString() });
-        localStorage.setItem('ht_leads', JSON.stringify(leads));
-      } catch (err) { }
-      try {
-        await fetch('https://formspree.io/f/xpwzgnjv', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({
-            name: d.name, email: d.email, _replyto: d.email,
-            message: 'Company: ' + d.company + '\nRole: ' + d.role + '\nLocation: ' + d.location + '\nNotes: ' + d.notes
-          })
-        });
-      } catch (err) { }
+
+      const { error } = await leadsClient.from('recruiter_leads').insert({
+        name: d.name, email: d.email, company: d.company,
+        role: d.role, location: d.location, notes: d.notes
+      });
+
+      if (error) {
+        console.error('[submitRecruiter]', error);
+        if (btn) { btn.textContent = origText; btn.disabled = false; }
+        alert('Something went wrong submitting your request. Please email amitbhargav.sunny@gmail.com directly instead — sorry about that.');
+        return;
+      }
+
       document.getElementById('rf').style.display = 'none';
       document.getElementById('fsuccess').style.display = 'block';
     }

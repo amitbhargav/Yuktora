@@ -144,6 +144,29 @@ CREATE POLICY "Users can insert their own usage logs"
 CREATE POLICY "Users can view their own usage logs"
   ON public.ai_usage_logs FOR SELECT
   USING (auth.uid() = user_id);
+
+-- Recruiter Lead Capture — public "For Recruiters" form on index.html posts here
+-- directly with the anon key (no auth — visitors aren't signed in). Anyone can
+-- insert (that's the point, it's a public lead form) but nobody can read/list
+-- via the API — only visible to you via Supabase's Table Editor, which uses the
+-- dashboard's elevated access and bypasses RLS. Replaces a Formspree integration
+-- that silently 404'd on every submission while the UI always showed success.
+CREATE TABLE public.recruiter_leads (
+  id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  name       TEXT NOT NULL,
+  email      TEXT NOT NULL,
+  company    TEXT,
+  role       TEXT,
+  location   TEXT,
+  notes      TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.recruiter_leads ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Anyone can submit a recruiter lead"
+  ON public.recruiter_leads FOR INSERT
+  WITH CHECK (true);
 ```
 
 ---

@@ -84,22 +84,31 @@ Live: https://yuktora.vercel.app
 * **"+Add job" button checked, not touched:** `.btn-primary` already has correct dark-background/white-text contrast — the roadmap concern didn't reproduce.
 * Note for future theme work: `styles.css`'s `.sidebar`/`.demo-banner`/`aside` rules are still dead code as far as `app.html` is concerned — harmless, still styles the marketing pages, but don't debug dashboard contrast there.
 
+### Phase 3.14: Site-Wide Audit — Recruiter Leads, Dead Links, Pricing Honesty (Shipped)
+* **Recruiter lead form was silently losing every submission (critical, pre-existing):** `submitRecruiter()` posted to a Formspree endpoint that 404s — that form doesn't exist. The error was caught and swallowed, and the success message showed unconditionally regardless of whether anything was actually sent. The only other write was to the *visitor's own* `localStorage`, invisible to us. Replaced with a direct Supabase insert into a new `recruiter_leads` table (public insert-only RLS policy — visible to us via the Table Editor, not readable via the API). On failure, the form now shows a real error with a `mailto:` fallback instead of a fake success. **Needs the same one-time SQL step as `ai_usage_logs`** — see `AGENTS.md`.
+* **Removed the dead "Platforms" nav link** (`pricing.html`, `blog.html`) — pointed at `/#platforms`, a section that has never existed on `index.html`.
+* **Removed the false "Secure via Cashfree" trust badge** on the pricing page — Cashfree/Razorpay isn't integrated yet (see Phase 4.3 below); the badge was claiming a live capability that doesn't exist. Replaced with "Cancel anytime · No hidden fees."
+* **Added a "Try Demo" nav link** (`/app?demo=1`) alongside Sign in / Launch App on `index.html`, `pricing.html`, and `blog.html` — previously every CTA required a real account before a visitor could see the product.
+* **Confirmed, not fixed — pricing plans are currently non-functional:** "Get Started Free," "Upgrade to Pro," and "Get Lifetime" all link to the same `/app` with zero differentiation. The only Free/Pro gate anywhere in the code is a client-side, lifetime (not daily) 5-use counter — trivially reset by clearing browser storage — and there is currently no way to actually obtain a `pro_` license key. "AI job matching (better fit roles)" listed as Pro-exclusive isn't actually differentiated in code; matching runs identically for everyone. This is what Phase 4.1–4.3 below need to actually resolve.
+* **Also noticed, not fixed:** the yearly Pro price (₹3,499) is ~42% off monthly (₹499×12=₹5,988), not the "Save 30%" the toggle badge claims. Left as-is pending a decision on which number is authoritative — flagging here so it doesn't get missed.
+
 ---
 
 ## 🔮 Upcoming Roadmap
 
 ### Phase 4: Monetization & Backend Hardening
-1. **Run the `ai_usage_logs` migration** — the audit-log code shipped in Phase 3.11, but the table itself still needs to be created via Supabase's SQL Editor (see `AGENTS.md`). Quick, one-time, GUI step.
+1. **Run the `ai_usage_logs` and `recruiter_leads` migrations** — both shipped in code (Phase 3.11, 3.14) but need their tables created via Supabase's SQL Editor (see `AGENTS.md`). Quick, one-time, GUI step, two tables now instead of one.
 2. **Free-tier quota enforcement at the proxy layer** — once `ai_usage_logs` exists and has data, enforce the daily AI-call limit server-side instead of relying on the client-side `localStorage` counter alone (which a user can bypass by clearing storage). *Blocked on: item 3 below — real enforcement needs a server-verifiable Free/Pro distinction, which doesn't exist until the payment webhook writes `user_profiles.plan`.*
-3. **Cashfree/Razorpay checkout** — wire Pro (₹499/mo) and Lifetime (₹6,999) buttons to actual payment flow; webhook updates `user_profiles.plan`. *Blocked on: a real KYC-verified merchant account and live API credentials.*
+3. **Razorpay checkout** — wire Pro (₹499/mo) and Lifetime (₹6,999) buttons to an actual payment flow; webhook updates `user_profiles.plan`. Chosen over Cashfree for stronger Node.js docs/ecosystem and a mature Subscriptions API that maps directly to the recurring Pro plan. *Blocked on: Test Mode API keys (no KYC needed for sandbox — just signup), then full KYC before going live.*
 4. **Retire BYOK for Anthropic** — remove the Settings API key input once metering is live. Keep the JSearch/RapidAPI input (that one is genuinely user-owned). *Blocked on: items 2 and 3.*
+5. **Decide the real feature split** — before or alongside the checkout build, settle what's *actually* different about Pro/Lifetime (today: only the AI-use cap) so the pricing page stops overpromising. Candidates already flagged above: real AI job-matching differentiation, correcting the yearly discount math.
 
 ### Phase 5: Growth & Reliability
-5. **Custom SMTP (Resend)** — replace default 2/hour Supabase mailer with production SMTP on a verified domain. Branded magic-link template. (Hit this limit firsthand while testing Phase 3.9 — worth prioritizing.) *Blocked on: Resend account signup + domain DNS verification.*
-6. **Error tracking** — Sentry free tier for post-launch monitoring. *Blocked on: Sentry account signup + DSN.*
+6. **Custom SMTP (Resend)** — replace default 2/hour Supabase mailer with production SMTP on a verified domain. Branded magic-link template. (Hit this limit firsthand while testing Phase 3.9 — worth prioritizing.) *Blocked on: Resend account signup + domain DNS verification.*
+7. **Error tracking** — Sentry free tier for post-launch monitoring. *Blocked on: Sentry account signup + DSN.*
 
 ### Phase 6: Trust & Compliance
-7. **DPDP data-export flow** — the escapeHTML and data-erasure gaps from the original audit item are fixed (Phase 3.12); still open is a proper data-*export* flow (the existing "Export" button dumps local `S` state as JSON, not a formal Supabase-backed export) if that's required for compliance at scale.
+8. **DPDP data-export flow** — the escapeHTML and data-erasure gaps from the original audit item are fixed (Phase 3.12); still open is a proper data-*export* flow (the existing "Export" button dumps local `S` state as JSON, not a formal Supabase-backed export) if that's required for compliance at scale.
 
 ---
 
