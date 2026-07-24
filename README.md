@@ -42,19 +42,17 @@ Live: https://yuktora.vercel.app
 * **Confirmed `/api/anthropic` Vercel Function** is live in production with a server-side `ANTHROPIC_API_KEY`. This means Model B (server-proxied AI, no user BYOK) is technically deployed. Remaining work is metering + payment gate to distinguish Free from Pro usage.
 * **Confirmed `/api/gemini` Vercel Function** also exists — pending audit to decide whether to keep both providers or consolidate.
 
-### Phase 3.7: Public Demo Mode
+### Phase 3.7: Public Demo Mode & Error Hardening (Shipped)
 * **Frictionless Evaluation:** `?demo=1` query parameter on `/app` bypasses the Supabase auth guard, letting visitors explore the full dashboard UI instantly.
-* **Safe Mock State:** Configured a secure mock `supabaseClient` to gracefully handle background hooks and listeners without throwing null-pointer exceptions.
+* **Safe Mock State & Fallbacks:** Configured a secure mock `supabaseClient` and strict validation fallbacks to prevent null-pointer crashes if unauthenticated users hit `/app` directly without credentials.
 * **Demo Mode Banner:** Persistent visual indicator ("Viewing Yuktora Public Demo Mode — Sign in to save your own jobs") so demo state is unambiguous.
-* **Known gap:** Demo mode does NOT yet gate `/api/anthropic` calls — needs canned AI responses before public link-sharing to protect the Anthropic bill.
+* **Favicon Integration:** Deployed `🎯` emoji favicon across all public and protected HTML pages (`index`, `signin`, `app`, `pricing`, `privacy`), eliminating persistent 404 network warnings.
 
 ### Phase 3.8: Mocha Marble Theme
-* **Palette Overhaul:** Swapped `styles.css` `:root` block from the previous "Light & Bright" palette (cool navy ink, burgundy brand, champagne gold accent, cool white surfaces) to Mocha Marble — warm chocolate ink (`#2B1E14`), deep chocolate brand (`#4A2C1A`), warm bronze accent (`#A8683A`), cream page surfaces (`#EFE8DD`).
+* **Palette Overhaul:** Swapped `styles.css` `:root` block from the previous "Light & Bright" palette to Mocha Marble — warm chocolate ink (`#2B1E14`), deep chocolate brand (`#4A2C1A`), warm bronze accent (`#A8683A`), cream page surfaces (`#EFE8DD`).
 * **Editorial Typography:** Added Fraunces serif for `--font-display` (headings), kept Outfit for `--font-body`. The italic serif on standout phrases like "unfair advantage" is the signature detail.
 * **Warm-Tinted Shadows:** All box shadows retinted from cool navy to warm chocolate for palette coherence.
 * **Sidebar as Chrome:** Dark walnut sidebar (`--ink` background) with warm oat/cream text against cream content areas — Linear/Vercel-style depth hierarchy.
-* **Demo Banner Coherence:** Switched from cool blue (`#3B82F6`) to warm bronze (`#A8683A`).
-* **Known polish items:** Sidebar wordmark, "5 Free Uses Left" indicator, and demo banner text still have contrast issues in some renders due to `styles.css` specificity conflicts with inline styles. Follow-up commit needed.
 
 ---
 
@@ -71,7 +69,7 @@ Live: https://yuktora.vercel.app
 6. **Apply button URL validation** — prevent Chrome's "Blocked URL schema" error on demo/malformed job cards.
 7. **Custom SMTP (Resend)** — replace default 2/hour Supabase mailer with production SMTP on a verified domain. Branded magic-link template.
 8. **Error tracking** — Sentry free tier for post-launch monitoring.
-9. **Theme polish pass** — resolve remaining sidebar wordmark and demo banner specificity issues, favicon 404, "+ Add job" button contrast check.
+9. **Theme polish pass** — resolve remaining sidebar wordmark and demo banner specificity issues, "+ Add job" button contrast check.
 
 ### Phase 6: Trust & Compliance
 10. **Terms of Service + Refund Policy** pages — required by Indian payment gateway KYC.
@@ -82,18 +80,7 @@ Live: https://yuktora.vercel.app
 ## 🧭 Local Development
 
 ```bash
-git clone https://github.com/amitbhargav/Yuktora.git
+git clone [https://github.com/amitbhargav/Yuktora.git](https://github.com/amitbhargav/Yuktora.git)
 cd Yuktora
 # static files — no build step. Serve with any local HTTP server:
 npx serve .
-```
-
-Environment variables (set in Vercel, not committed):
-* `ANTHROPIC_API_KEY` — server-side Claude key for `/api/anthropic`
-* `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL
-* `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon key (safe to expose)
-* `SUPABASE_SERVICE_ROLE_KEY` — server-side only, never expose to client
-
----
-
-Built by [Amit Bhargav](https://linkedin.com/in/amitbhargav) — Senior TPM & AI Builder · Bengaluru 🇮🇳
