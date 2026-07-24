@@ -2644,18 +2644,14 @@
 
   <script>
     const escapeHTML = str => (str || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+
     // ─────────────────────────────────────────────
-    // SUPABASE CLIENT INITIALISATION
-    // Replace the placeholder values below with your real project credentials.
-    // In production, inject these via a server-rendered <script> block or
-    // Vercel Edge Config so the keys are never hard-coded in source control.
-    //
-    // window.ENV_SUPABASE_URL     → your project URL  (e.g. https://xxxx.supabase.co)
-    // window.ENV_SUPABASE_ANON_KEY → your anon/public key from the Supabase dashboard
+    // SUPABASE CLIENT & DEMO MODE INITIALISATION
     // ─────────────────────────────────────────────
-    // Check for demo mode FIRST
     const urlParams = new URLSearchParams(window.location.search);
     const isDemoMode = urlParams.get('demo') === '1';
+
+    let supabaseClient = null;
 
     if (isDemoMode) {
       console.log("🚀 Demo mode active — bypassing auth guard");
@@ -2664,46 +2660,106 @@
       banner.innerHTML = `Viewing Yuktora Public Demo Mode — <a href="/signin.html" style="color: #fff; text-decoration: underline; margin-left: 8px;">Sign in to save your own jobs</a>`;
       document.body.prepend(banner);
     } else {
-      // Only run normal session checks if NOT in demo mode
-      // (Assuming your existing code further down already declares SUPABASE_URL, 
-      // so we just safely handle the session check here)
-      window.addEventListener('DOMContentLoaded', () => {
-        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+      // Only initialize Supabase and check session if NOT in demo mode
+      if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
           supabaseClient.auth.getSession().then(({ data: { session } }) => {
             if (!session) {
               window.location.href = '/signin.html';
             }
           });
-        }
-      });
-    }
-
-    // supabase is exposed globally by the CDN script loaded in <head>
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true
+        });
       }
-    });
+    }
 
     // ─────────────────────────────────────────────
     // USER DATA THAT WILL BE PERSISTED TO SUPABASE
     // (currently stored in localStorage via persist() / restore())
-    //
-    //  S.profile.resume  → base resume text (Profile page, #p-resume textarea)
-    //  S.profile.*       → name, email, phone, loc, roles, skills, etc.
-    //  S.jobs            → analysed job listings (Job Search page)
-    //  S.apps            → tracked applications (Applications tracker)
-    //  S.rejs            → rejection analyses (Rejection AI page)
-    //
-    // Future: replace persist() / restore() calls with supabaseClient
-    // .from('profiles').upsert(...) / .select() to sync across devices.
     // ─────────────────────────────────────────────
 
     // ─────────────────────────────────────────────
     // STATE
     // ─────────────────────────────────────────────
+    const S = {
+      key: '',
+      profile: { name: '', email: '', phone: '', loc: '', li: '', roles: [], locs: [], skills: [], resume: '', visa: false },
+      prefs: { minScore: 60, maxPerDay: 10 },
+      jobs: [],
+      apps: [],
+      rejs: [],
+      curJob: null
+    };
+
+    function sanitizeApplyURL(urlString) {
+      if (!urlString) return '#';
+      try {
+        const parsed = new URL(urlString.trim());
+        // Strictly whitelist secure protocols
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+          return parsed.href;
+        }
+      } catch (e) {
+        // Fallback: If it's a valid domain format without a protocol, fix it
+        if (/^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,}/i.test(urlString.trim())) {
+          return `https://${urlString.trim()}`;
+        }
+      }
+      return '#'; // Block javascript:, data:, vbscript: with a safe hash fallback
+    }
+
+
+    function persist() { try { localStorage.setItem('htai2', JSON.stringify(S)); } catch (e) { } }
+    function restore() {
+      try {
+        const d = localStorage.getItem('htai2');
+        if (d) { const p = JSON.parse(d); Object.assign(S, p); }
+      } catch (e) { }
+    }
+
+    // ─────────────────────────────────────────────
+    // NAVIGATION
+    // ─────────────────────────────────────────────
+    const PAGE_TITLES = {
+      dashboard: 'Dashboard', search: 'Job search', tailor: 'Resume tailor',
+      tracker: 'Applications', rejection: 'Rejection AI',
+      profile: 'My profile', settings: 'Settings'
+    };
+    function nav(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('page-' + id).classList.add('active');
+      document.querySelector(`.nav-item[data-page="${id}"]`)?.classList.add('active');
+      document.getElementById('page-title').textContent = PAGE_TITLES[id] || 'Yuktora';
+      if (id === 'dashboard') renderDash();
+      if (id === 'tracker') renderTracker();
+      if (id === 'profile') loadProfile();
+      if (id === 'settings') loadSettings();
+      if (id === 'tailor') loadTailorDefaults();
+      if (id === 'rejection') renderRejections();
+    }
+    document.querySelectorAll('.nav-item').forEach(el => {
+      el.addEventListener('click', () => nav(el.dataset.page));
+    });
+
+    // ─────────────────────────────────────────────
+    // TOAST
+    // ─────────────────────────────────────────────
+    let toastTimer;
+    function toast(msg, icon = '✓') {
+      clearTimeout(toastTimer);
+      document.getElementById('toast-msg').textContent = msg;
+      document.getElementById('toast-icon').textContent = icon;
+      document.getElementById('toast').classList.add('show');
+      toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
+    }
     const S = {
       key: '',
       profile: { name: '', email: '', phone: '', loc: '', li: '', roles: [], locs: [], skills: [], resume: '', visa: false },
