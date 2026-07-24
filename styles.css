@@ -683,3 +683,73 @@ aside {
   text-decoration: underline;
   font-weight: 600;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Sidebar-specific overrides — targeting real Yuktora class names
+   Sidebar bg is dark chocolate (--ink), so text needs to invert.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Yuktora wordmark in top-left */
+.sidebar .brand-name,
+.sidebar-brand .brand-name,
+.brand-name {
+  color: #EFE8DD !important;
+}
+
+/* "5 Free Uses Left" plan indicator at bottom */
+.sidebar-foot .api-pill,
+.sidebar-foot #api-txt,
+.sidebar-foot #api-led,
+.api-pill,
+.api-pill #api-txt {
+  color: #C4B090 !important;
+}
+
+.api-pill #api-led {
+  background: #A8683A !important;   /* bronze status dot */
+}
+
+/* Sidebar nav items — Dashboard, Job Search, etc. */
+.sidebar-nav a,
+.sidebar-nav .nav-item,
+.sidebar-nav li {
+  color: #C4B090 !important;
+}
+
+.sidebar-nav a.active,
+.sidebar-nav a:hover,
+.sidebar-nav .nav-item.active,
+.sidebar-nav .nav-item:hover {
+  color: #EFE8DD !important;
+  background: rgba(168, 104, 58, 0.10) !important;
+}
+
+/* Section labels: OVERVIEW, SEARCH, TRACK, ACCOUNT */
+.sidebar-nav .section-title,
+.sidebar-nav h3,
+.sidebar-nav h4,
+.sidebar-nav [class*="section"] {
+  color: #A08975 !important;
+}
+
+/* Small count badges next to nav items (the "0" or "3" circles) */
+.sidebar-nav .badge,
+.sidebar-nav .count,
+.sidebar-nav .nav-count {
+  background: rgba(168, 104, 58, 0.20) !important;
+  color: #EFE8DD !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Demo banner — replace blue with warm bronze (real class targeting)
+   ═══════════════════════════════════════════════════════════════════ */
+
+[class*="demo"] [class*="banner"],
+.demo-mode-banner,
+.public-demo-banner,
+div[style*="background:#3B82F6"],
+div[style*="background: #3B82F6"] {
+  background: #A8683A !important;
+  color: #EFE8DD !important;
+  border-bottom: 1px solid #8A5624 !important;
+}
