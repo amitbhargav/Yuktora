@@ -616,3 +616,70 @@ aside .brand,
 aside [class*="logo"] {
   color: #EFE8DD !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   Sidebar polish — logo, footer indicator, and other stragglers
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Yuktora wordmark / brand name at top of sidebar */
+.sidebar .brand,
+.sidebar .brand-name,
+.sidebar .logo-text,
+.sidebar h1,
+.sidebar h2,
+aside .brand,
+aside h1,
+aside h2,
+[class*="sidebar"] [class*="brand"],
+[class*="sidebar"] [class*="logo"] {
+  color: #EFE8DD !important;
+}
+
+/* Free uses / plan indicator at bottom of sidebar */
+.sidebar-footer,
+.sidebar .plan-indicator,
+.sidebar .usage-indicator,
+.sidebar [class*="usage"],
+.sidebar [class*="free-uses"],
+aside .footer,
+aside [class*="plan"] {
+  color: #C4B090 !important;
+}
+
+.sidebar-footer strong,
+.sidebar-footer b,
+aside .footer strong {
+  color: #EFE8DD !important;
+}
+
+/* Catch-all: any remaining dark text inside sidebar */
+.sidebar *,
+aside * {
+  color: inherit;
+}
+
+.sidebar,
+aside {
+  color: #C4B090;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Demo mode banner — replace blue with warm bronze
+   ═══════════════════════════════════════════════════════════════════ */
+
+.demo-banner,
+[class*="demo-banner"],
+[class*="demo-mode"],
+.public-demo-banner {
+  background: #A8683A !important;
+  /* warm bronze */
+  color: #EFE8DD !important;
+  border-bottom: 1px solid #8A5624 !important;
+}
+
+.demo-banner a,
+[class*="demo-banner"] a {
+  color: #EFE8DD !important;
+  text-decoration: underline;
+  font-weight: 600;
+}
