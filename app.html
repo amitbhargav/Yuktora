@@ -3109,11 +3109,22 @@
 
       // Now fetching from our own secure Vercel backend proxy
       // No more exposing keys or asking the user for one!
+      // The backend requires a valid Supabase session JWT — demo mode has none,
+      // so AI calls are intentionally unavailable there (see api/anthropic.js gate).
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) {
+        toast('Sign in to use AI features', '🔒');
+        throw new Error('AI features require a signed-in account. Demo mode does not include live AI access.');
+      }
+
       let res;
       try {
         res = await fetch('/api/anthropic', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + session.access_token
+          },
           body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
         });
       } catch (err) {

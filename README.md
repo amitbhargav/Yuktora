@@ -54,15 +54,19 @@ Live: https://yuktora.vercel.app
 * **Warm-Tinted Shadows:** All box shadows retinted from cool navy to warm chocolate for palette coherence.
 * **Sidebar as Chrome:** Dark walnut sidebar (`--ink` background) with warm oat/cream text against cream content areas — Linear/Vercel-style depth hierarchy.
 
+### Phase 3.9: Secure AI Proxy (Shipped)
+* **Server-side JWT Gate:** `/api/anthropic` now verifies the caller's Supabase session JWT via `supabase.auth.getUser(token)` before proxying to Claude, closing the anonymous-call hole that public demo mode opened.
+* **Frontend Wired Up:** `app.html`'s `claude()` helper fetches the live Supabase session and sends it as `Authorization: Bearer <token>` on every `/api/anthropic` call — previously the backend gate was live but the frontend never attached a token, so all AI calls (including signed-in users) were silently failing with 401.
+* **Graceful Demo Fallback:** Demo mode (`?demo=1`) has no real session, so AI calls now short-circuit client-side with a "Sign in to use AI features" toast instead of a raw network error, by design — demo visitors can explore the UI but can't spend the Anthropic budget.
+
 ---
 
 ## 🔮 Upcoming Roadmap
 
 ### Phase 4: Monetization & Backend Hardening
-1. **Server-side auth on `/api/anthropic`** — verify Supabase JWT before proxying to Claude. Prevents anonymous calls draining the Anthropic bill (especially urgent given public demo mode is live).
-2. **Usage metering** — track AI calls per user in Supabase. Enforce Free tier limit (e.g. 3 tailors/day) at the proxy layer.
-3. **Cashfree/Razorpay checkout** — wire Pro (₹499/mo) and Lifetime (₹6,999) buttons to actual payment flow; webhook updates `user_profiles.plan`.
-4. **Retire BYOK for Anthropic** — remove the Settings API key input once metering is live. Keep the JSearch/RapidAPI input (that one is genuinely user-owned).
+1. **Usage metering** — track AI calls per user in Supabase. Enforce Free tier limit (e.g. 3 tailors/day) at the proxy layer.
+2. **Cashfree/Razorpay checkout** — wire Pro (₹499/mo) and Lifetime (₹6,999) buttons to actual payment flow; webhook updates `user_profiles.plan`.
+3. **Retire BYOK for Anthropic** — remove the Settings API key input once metering is live. Keep the JSearch/RapidAPI input (that one is genuinely user-owned).
 
 ### Phase 5: Growth & Reliability
 5. **Search Live fix** — reconcile localStorage key naming between Settings save and Search Live read; surface real JSearch API errors instead of silent demo fallback.
