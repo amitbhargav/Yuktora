@@ -2760,78 +2760,7 @@
       document.getElementById('toast').classList.add('show');
       toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
     }
-    const S = {
-      key: '',
-      profile: { name: '', email: '', phone: '', loc: '', li: '', roles: [], locs: [], skills: [], resume: '', visa: false },
-      prefs: { minScore: 60, maxPerDay: 10 },
-      jobs: [],
-      apps: [],
-      rejs: [],
-      curJob: null
-    };
 
-    function sanitizeApplyURL(urlString) {
-      if (!urlString) return '#';
-      try {
-        const parsed = new URL(urlString.trim());
-        // Strictly whitelist secure protocols
-        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
-          return parsed.href;
-        }
-      } catch (e) {
-        // Fallback: If it's a valid domain format without a protocol, fix it
-        if (/^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,}/i.test(urlString.trim())) {
-          return `https://${urlString.trim()}`;
-        }
-      }
-      return '#'; // Block javascript:, data:, vbscript: with a safe hash fallback
-    }
-
-
-    function persist() { try { localStorage.setItem('htai2', JSON.stringify(S)); } catch (e) { } }
-    function restore() {
-      try {
-        const d = localStorage.getItem('htai2');
-        if (d) { const p = JSON.parse(d); Object.assign(S, p); }
-      } catch (e) { }
-    }
-
-    // ─────────────────────────────────────────────
-    // NAVIGATION
-    // ─────────────────────────────────────────────
-    const PAGE_TITLES = {
-      dashboard: 'Dashboard', search: 'Job search', tailor: 'Resume tailor',
-      tracker: 'Applications', rejection: 'Rejection AI',
-      profile: 'My profile', settings: 'Settings'
-    };
-    function nav(id) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.getElementById('page-' + id).classList.add('active');
-      document.querySelector(`.nav-item[data-page="${id}"]`)?.classList.add('active');
-      document.getElementById('page-title').textContent = PAGE_TITLES[id] || 'Yuktora';
-      if (id === 'dashboard') renderDash();
-      if (id === 'tracker') renderTracker();
-      if (id === 'profile') loadProfile();
-      if (id === 'settings') loadSettings();
-      if (id === 'tailor') loadTailorDefaults();
-      if (id === 'rejection') renderRejections();
-    }
-    document.querySelectorAll('.nav-item').forEach(el => {
-      el.addEventListener('click', () => nav(el.dataset.page));
-    });
-
-    // ─────────────────────────────────────────────
-    // TOAST
-    // ─────────────────────────────────────────────
-    let toastTimer;
-    function toast(msg, icon = '✓') {
-      clearTimeout(toastTimer);
-      document.getElementById('toast-msg').textContent = msg;
-      document.getElementById('toast-icon').textContent = icon;
-      document.getElementById('toast').classList.add('show');
-      toastTimer = setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
-    }
 
     // ─────────────────────────────────────────────
     // MODAL
