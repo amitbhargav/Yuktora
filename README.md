@@ -41,6 +41,11 @@ Live: https://yuktora.vercel.app
 ### Phase 3.6: Discovery — Existing Infra
 * **Confirmed `/api/anthropic` Vercel Function** is live in production with a server-side `ANTHROPIC_API_KEY`. This means Model B (server-proxied AI, no user BYOK) is technically deployed. Remaining work is metering + payment gate to distinguish Free from Pro usage.
 
+### Phase 5 (Shipped): Public Demo Mode
+* **Frictionless Evaluation:** Implemented `?demo=1` query parameter routing in `app.html`. 
+* **Auth Guard & Session Bypass:** Added conditional checks to skip the standard Supabase authentication redirect when demo mode is active.
+* **Safe Mock State:** Configured a secure mock `supabaseClient` to gracefully handle background hooks and listeners without throwing null pointer exceptions, allowing visitors to instantly explore the dashboard UI.
+
 ---
 
 ## 🔮 Upcoming Roadmap
@@ -51,12 +56,12 @@ Live: https://yuktora.vercel.app
 3. **Cashfree/Razorpay checkout** — wire Pro (₹499/mo) and Lifetime (₹6,999) buttons to actual payment flow; webhook updates `user_profiles.plan`.
 4. **Retire BYOK for Anthropic** — remove the Settings API key input once metering is live. Keep the JSearch/RapidAPI input (that one is genuinely user-owned).
 
-### Phase 5: Growth & Reliability
-5. **Public demo mode** — `/app?demo=1` loads a curated fake dataset without auth. Canned AI responses instead of live proxy calls (protects Anthropic bill). Marketing homepage links to it.
-6. **Custom SMTP (Resend)** — replace default 2/hour Supabase mailer with production SMTP on a verified domain. Branded magic-link template.
-7. **Search Live fix** — reconcile localStorage key naming, surface real JSearch API errors instead of silent demo fallback.
-8. **Apply button URL validation** — prevent Chrome's "Blocked URL schema" error on demo/malformed job cards.
-9. **Error tracking** — Sentry free tier for post-launch monitoring.
+### Phase 5: Growth & Reliability (In Progress)
+5. [x] **Public demo mode** — `/app?demo=1` loads a curated view without mandatory authentication.
+6. [ ] **Custom SMTP (Resend)** — replace default 2/hour Supabase mailer with production SMTP on a verified domain. Branded magic-link template.
+7. [ ] **Search Live fix** — reconcile localStorage key naming, surface real JSearch API errors instead of silent demo fallback.
+8. [ ] **Apply button URL validation** — prevent Chrome's "Blocked URL schema" error on demo/malformed job cards.
+9. [ ] **Error tracking** — Sentry free tier for post-launch monitoring.
 
 ### Phase 6: Trust & Compliance
 10. **Terms of Service + Refund Policy** pages — required by Indian payment gateway KYC.
@@ -67,28 +72,7 @@ Live: https://yuktora.vercel.app
 ## 🧭 Local Development
 
 ```bash
-git clone https://github.com/amitbhargav/Yuktora.git
+git clone [https://github.com/amitbhargav/Yuktora.git](https://github.com/amitbhargav/Yuktora.git)
 cd Yuktora
 # static files — no build step. Serve with any local HTTP server:
 npx serve .
-```
-
-Environment variables (set in Vercel, not committed):
-* `ANTHROPIC_API_KEY` — server-side Claude key for `/api/anthropic`
-* `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL
-* `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon key (safe to expose)
-* `SUPABASE_SERVICE_ROLE_KEY` — server-side only, never expose to client
-
----
-
-## 🎯 Immediate Launch Action Plan (To-Do)
-
-1. [ ] **Secure `/api/anthropic`** — Verify Supabase JWT server-side before proxying Claude requests.
-2. [ ] **Usage Limits** — Enforce Free tier quotas in Supabase to protect your API budget.
-3. [ ] **Payment Gateway** — Connect Razorpay/Cashfree webhooks to handle `pro` and `lifetime` upgrades.
-4. [ ] **Legal/Trust Pages** — Add Terms of Service and Refund Policy pages for gateway KYC.
-5. [ ] **Demo Mode** — Ship `/app?demo=1` for friction-free visitor testing.
-
----
-
-Built by [Amit Bhargav](https://linkedin.com/in/amitbhargav) — Senior TPM & AI Builder · Bengaluru 🇮🇳
