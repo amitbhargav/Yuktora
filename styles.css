@@ -706,7 +706,8 @@ aside {
 }
 
 .api-pill #api-led {
-  background: #A8683A !important;   /* bronze status dot */
+  background: #A8683A !important;
+  /* bronze status dot */
 }
 
 /* Sidebar nav items — Dashboard, Job Search, etc. */
@@ -752,4 +753,17 @@ div[style*="background: #3B82F6"] {
   background: #A8683A !important;
   color: #EFE8DD !important;
   border-bottom: 1px solid #8A5624 !important;
+}
+
+body .sidebar span.brand-name,
+body #app-shell .brand-name,
+html body .brand-name {
+  color: #EFE8DD !important;
+}
+
+body .sidebar-foot .api-pill,
+body .sidebar-foot #api-txt,
+html body #api-txt,
+html body #api-led {
+  color: #C4B090 !important;
 }
