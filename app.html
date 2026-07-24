@@ -1620,8 +1620,11 @@
             title="Save your profile & applications to Supabase">💾 Save to Cloud</button>
           <button class="btn btn-primary btn-sm" onclick="nav('search')">+ Add job</button>
           <!-- ── User menu: signed-in email + sign out ── -->
-          <div style="display:flex;align-items:center;gap:8px;margin-left:4px;padding-left:12px;border-left:1px solid var(--border);">
-            <span id="topbar-user-email" style="font-size:12px;font-weight:600;color:var(--gray-500);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title=""></span>
+          <div
+            style="display:flex;align-items:center;gap:8px;margin-left:4px;padding-left:12px;border-left:1px solid var(--border);">
+            <span id="topbar-user-email"
+              style="font-size:12px;font-weight:600;color:var(--gray-500);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+              title=""></span>
             <button class="btn btn-danger btn-sm" onclick="signOutAndRedirect()" title="Sign out">Sign out</button>
           </div>
         </div>
@@ -2490,10 +2493,9 @@
                 </div>
                 <div class="risk-item">
                   <div class="risk-dot" style="background:var(--amber)"></div>
-                  <div><strong style="font-size:13px;color:var(--gray-800)">API key stored locally</strong><br><span
-                      style="font-size:12px;font-weight:500;color:var(--gray-500)">Your Anthropic key is in browser
-                      localStorage. Anyone with dev tools access on your machine can see it. Don't use on shared
-                      devices.</span></div>
+                  <div><strong style="font-size:13px;color:var(--gray-800)">No API key required</strong><br><span
+                      style="font-size:12px;font-weight:500;color:var(--gray-500)">AI calls are proxied through our
+                      secure backend. You don't need to manage an Anthropic key locally.</span></div>
                 </div>
                 <div class="risk-item">
                   <div class="risk-dot" style="background:var(--red)"></div>
@@ -2505,10 +2507,10 @@
                 </div>
                 <div class="risk-item">
                   <div class="risk-dot" style="background:var(--green)"></div>
-                  <div><strong style="font-size:13px;color:var(--gray-800)">Your data never leaves your
-                      browser</strong><br><span style="font-size:12px;font-weight:500;color:var(--gray-500)">All jobs,
-                      applications, and profile data sit in localStorage. Only AI processing calls reach Anthropic's
-                      servers.</span></div>
+                  <div><strong style="font-size:13px;color:var(--gray-800)">Your data syncs to your
+                      account</strong><br><span style="font-size:12px;font-weight:500;color:var(--gray-500)">Jobs,
+                      applications, and profile data sync to your Supabase-backed account with row-level security. Only
+                      you can access it. AI calls are processed via our secure backend.</span></div>
                 </div>
                 <div class="risk-item">
                   <div class="risk-dot" style="background:var(--green)"></div>
@@ -2528,14 +2530,20 @@
                 </div>
               </div>
               <div class="card-body">
-                <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--gray-50);border:1px solid var(--border);border-radius:8px;margin-bottom:14px;">
+                <div
+                  style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--gray-50);border:1px solid var(--border);border-radius:8px;margin-bottom:14px;">
                   <span style="font-size:20px;">✅</span>
                   <div style="flex:1;min-width:0;">
-                    <div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Signed in as</div>
-                    <div id="settings-user-email" style="font-size:13px;font-weight:700;color:var(--brand);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</div>
+                    <div
+                      style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">
+                      Signed in as</div>
+                    <div id="settings-user-email"
+                      style="font-size:13px;font-weight:700;color:var(--brand);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                      —</div>
                   </div>
                 </div>
-                <div class="field-hint">Signing out will redirect you to the sign-in page. Your locally-stored data is preserved.</div>
+                <div class="field-hint">Signing out will redirect you to the sign-in page. Your locally-stored data is
+                  preserved.</div>
               </div>
             </div>
 
