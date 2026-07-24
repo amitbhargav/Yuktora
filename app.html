@@ -2653,20 +2653,24 @@
     // window.ENV_SUPABASE_URL     → your project URL  (e.g. https://xxxx.supabase.co)
     // window.ENV_SUPABASE_ANON_KEY → your anon/public key from the Supabase dashboard
     // ─────────────────────────────────────────────
-    const SUPABASE_URL = 'https://qflgxfqoldrxvchogkkj.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbGd4ZnFvbGRyeHZjaG9na2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMDEzODAsImV4cCI6MjA5OTc3NzM4MH0.WjMe3xxzIs9xLgDrT20oBTdRcjZzh169gr8x-LkUz9M';
-
-
-    // --- PUBLIC DEMO MODE INTERCEPTOR ---
+    // Check for demo mode FIRST
     const urlParams = new URLSearchParams(window.location.search);
     const isDemoMode = urlParams.get('demo') === '1';
 
     if (isDemoMode) {
-      console.log("🚀 Yuktora running in Public Demo Mode");
+      console.log("🚀 Demo mode active — bypassing auth guard");
+      // Inject your banner here
       const banner = document.createElement('div');
       banner.style.cssText = "background: #2563eb; color: #fff; text-align: center; padding: 8px; font-size: 0.85rem; font-weight: 500; position: sticky; top: 0; z-index: 1000;";
       banner.innerHTML = `Viewing Yuktora Public Demo Mode — <a href="/signin.html" style="color: #fff; text-decoration: underline; margin-left: 8px;">Sign in to save your own jobs</a>`;
       document.body.prepend(banner);
+    } else {
+      // ONLY run the auth check if we are NOT in demo mode!
+      supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        if (!session) {
+          window.location.href = '/signin.html';
+        }
+      });
     }
 
     // supabase is exposed globally by the CDN script loaded in <head>
