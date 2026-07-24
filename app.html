@@ -1816,6 +1816,31 @@
       background: var(--page-bg);
       border-bottom: 1px solid var(--border);
     }
+
+    /* Nuclear background override — catches any wrapper that hijacks bg */
+    body,
+    body>*,
+    main,
+    .container,
+    .wrapper,
+    .page,
+    .landing,
+    .hero,
+    .hero-section,
+    section.hero,
+    div.hero {
+      background-color: var(--page-bg) !important;
+    }
+
+    /* But keep cards and specific islands as white */
+    .card,
+    .feature-card,
+    .risk-item,
+    .pricing-card,
+    .dashboard-preview,
+    .dashboard-mock {
+      background: var(--card-bg) !important;
+    }
   </style>
 </head>
 
