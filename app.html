@@ -3861,10 +3861,7 @@ Be direct and specific. Reference actual content.`;
       const shell = document.getElementById('app-shell');
 
       // ── PUBLIC DEMO MODE BYPASS ──────────────────────────────────────────────
-      const urlParams = new URLSearchParams(window.location.search);
-      const isDemoMode = urlParams.get('demo') === '1';
-
-      if (isDemoMode) {
+      if (typeof isDemoMode !== 'undefined' && isDemoMode) {
         // Reveal the shell immediately for demo mode without checking Supabase auth
         shell.style.display = 'flex';
         console.log("🚀 Demo mode initialized successfully");
@@ -3916,15 +3913,6 @@ Be direct and specific. Reference actual content.`;
       const emailEl = document.getElementById('p-email');
       if (emailEl) emailEl.value = session.user.email;
     })();
-
-    // ── Runtime auth guard ────────────────────────────────────────────────────────
-    // Fires when the token refresh fails or the user signs out in another tab.
-    // Redirects to /signin so the user can re-authenticate.
-    supabaseClient.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT' || (!session && event !== 'INITIAL_SESSION')) {
-        window.location.replace('/signin');
-      }
-    });
 
     // START OF AI LOGIC CODE
     const jobInput = document.getElementById('job-description-input');
