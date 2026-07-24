@@ -76,24 +76,29 @@ Live: https://yuktora.vercel.app
 * **"Clear all data" now actually clears data:** `wipeData()` previously only cleared `localStorage`, leaving the Supabase-stored profile and tracked-jobs rows for that email fully intact — a right-to-erasure gap for a button that told the user their data was wiped. Now also deletes both tables' rows for the user's email before clearing local state.
 * **Consent checkbox verified, not touched:** `signin.html`'s mandatory privacy-policy checkbox (disables Send until checked, plus a hard block on submit) was re-checked and still functions correctly — no regression, no change needed.
 
+### Phase 3.13: Theme Polish — Found Where the Contrast Fixes Actually Belonged (Shipped)
+* **Root cause of the "remaining sidebar/demo banner" issue found:** `app.html` doesn't load `styles.css` at all — it has its own fully separate embedded `<style>` block. Every prior "fix(theme): sidebar wordmark, api-pill, contrast" commit (5+ of them) edited `styles.css`, which only affects the marketing pages (`index.html`, `pricing.html`, `blog.html`, `signin.html`); none of those fixes ever touched the actual dashboard. The dashboard bugs were never fixed — they were fixed in a file the dashboard doesn't read.
+* **Real bug, fixed in the right file:** `app.html`'s own `.brand-name` and `.api-pill` rules set `color: var(--white)`, and `.sidebar`'s background is *also* `var(--white)` — literal white-on-white invisible text for the "Yuktora" wordmark and the "N Free Uses Left" status pill. Changed to `var(--brand)` and `var(--gray-500)` respectively.
+* **Demo banner recolored:** the banner is generated in JS with a hardcoded inline `style.cssText`, so none of the `.demo-banner` CSS in `styles.css` could ever apply to it (inline styles aren't affected by an unloaded stylesheet, and that stylesheet's fallback selector guessed the wrong hex besides). Changed the inline style directly from hardcoded blue (`#2563eb`) to `var(--brand)`, matching the app's actual theme tokens.
+* **"+Add job" button checked, not touched:** `.btn-primary` already has correct dark-background/white-text contrast — the roadmap concern didn't reproduce.
+* Note for future theme work: `styles.css`'s `.sidebar`/`.demo-banner`/`aside` rules are dead code as far as `app.html` is concerned — left in place (harmless, still styles the marketing pages) but don't spend time debugging dashboard contrast there again.
+
 ---
 
 ## 🔮 Upcoming Roadmap
 
 ### Phase 4: Monetization & Backend Hardening
 1. **Run the `ai_usage_logs` migration** — the audit-log code shipped in Phase 3.11, but the table itself still needs to be created via Supabase's SQL Editor (see `AGENTS.md`). Quick, one-time, GUI step.
-2. **Free-tier quota enforcement at the proxy layer** — once `ai_usage_logs` exists and has data, enforce the daily AI-call limit server-side instead of relying on the client-side `localStorage` counter alone (which a user can bypass by clearing storage).
-3. **Cashfree/Razorpay checkout** — wire Pro (₹499/mo) and Lifetime (₹6,999) buttons to actual payment flow; webhook updates `user_profiles.plan`.
-4. **Retire BYOK for Anthropic** — remove the Settings API key input once metering is live. Keep the JSearch/RapidAPI input (that one is genuinely user-owned).
+2. **Free-tier quota enforcement at the proxy layer** — once `ai_usage_logs` exists and has data, enforce the daily AI-call limit server-side instead of relying on the client-side `localStorage` counter alone (which a user can bypass by clearing storage). *Blocked on: item 3 below — real enforcement needs a server-verifiable Free/Pro distinction, which doesn't exist until the payment webhook writes `user_profiles.plan`.*
+3. **Cashfree/Razorpay checkout** — wire Pro (₹499/mo) and Lifetime (₹6,999) buttons to actual payment flow; webhook updates `user_profiles.plan`. *Blocked on: a real KYC-verified merchant account and live API credentials.*
+4. **Retire BYOK for Anthropic** — remove the Settings API key input once metering is live. Keep the JSearch/RapidAPI input (that one is genuinely user-owned). *Blocked on: items 2 and 3.*
 
 ### Phase 5: Growth & Reliability
-5. **Custom SMTP (Resend)** — replace default 2/hour Supabase mailer with production SMTP on a verified domain. Branded magic-link template. (Hit this limit firsthand while testing Phase 3.9 — worth prioritizing.)
-6. **Error tracking** — Sentry free tier for post-launch monitoring.
-7. **Theme polish pass** — resolve remaining sidebar wordmark and demo banner specificity issues, "+ Add job" button contrast check.
+5. **Custom SMTP (Resend)** — replace default 2/hour Supabase mailer with production SMTP on a verified domain. Branded magic-link template. (Hit this limit firsthand while testing Phase 3.9 — worth prioritizing.) *Blocked on: Resend account signup + domain DNS verification.*
+6. **Error tracking** — Sentry free tier for post-launch monitoring. *Blocked on: Sentry account signup + DSN.*
 
 ### Phase 6: Trust & Compliance
-8. **Terms of Service + Refund Policy** pages — required by Indian payment gateway KYC.
-9. **DPDP data-export flow** — the escapeHTML and data-erasure gaps from the original audit item are fixed (Phase 3.12); still open is a proper data-*export* flow (the existing "Export" button dumps local `S` state as JSON, not a formal Supabase-backed export) if that's required for compliance at scale.
+7. **DPDP data-export flow** — the escapeHTML and data-erasure gaps from the original audit item are fixed (Phase 3.12); still open is a proper data-*export* flow (the existing "Export" button dumps local `S` state as JSON, not a formal Supabase-backed export) if that's required for compliance at scale.
 
 ---
 
