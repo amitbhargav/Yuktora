@@ -8,7 +8,7 @@ Live: https://yuktora.vercel.app
 ## 🛠️ System Architecture & Tech Stack
 * **Frontend:** Multi-page vanilla JS/HTML5/CSS3 (`index.html`, `signin.html`, `app.html`, `pricing.html`, `privacy.html`) with shared `styles.css`.
 * **Hosting:** Vercel — auto-deploy from `main`, with serverless functions under `/api`.
-* **AI Proxy:** `/api/anthropic` Vercel Function proxies Claude API calls using a server-side `ANTHROPIC_API_KEY`. Users don't need their own key. A `/api/gemini` function also exists — pending audit to decide whether to keep both providers or consolidate.
+* **AI Proxy:** `/api/anthropic` Vercel Function proxies Claude API calls using a server-side `ANTHROPIC_API_KEY`, gated behind a Supabase session JWT check. Users don't need their own key. Depends on `@supabase/supabase-js`, declared in `package.json`. A `/api/gemini` function also exists — pending audit to decide whether to keep both providers or consolidate.
 * **Database & Auth:** Supabase (Mumbai region) — passwordless magic-link sign-in with RLS-scoped `user_profiles` and `tracked_jobs` tables.
 * **Development:** VS Code + Cline extension.
 
@@ -54,9 +54,11 @@ Live: https://yuktora.vercel.app
 * **Warm-Tinted Shadows:** All box shadows retinted from cool navy to warm chocolate for palette coherence.
 * **Sidebar as Chrome:** Dark walnut sidebar (`--ink` background) with warm oat/cream text against cream content areas — Linear/Vercel-style depth hierarchy.
 
-### Phase 3.9: Secure AI Proxy (Shipped)
+### Phase 3.9: Secure AI Proxy — Full Auth Chain Fixed (Shipped)
 * **Server-side JWT Gate:** `/api/anthropic` now verifies the caller's Supabase session JWT via `supabase.auth.getUser(token)` before proxying to Claude, closing the anonymous-call hole that public demo mode opened.
 * **Frontend Wired Up:** `app.html`'s `claude()` helper fetches the live Supabase session and sends it as `Authorization: Bearer <token>` on every `/api/anthropic` call — previously the backend gate was live but the frontend never attached a token, so all AI calls (including signed-in users) were silently failing with 401.
+* **Fixed Missing Client Config (root cause of the sign-in loop):** `app.html` referenced `SUPABASE_URL`/`SUPABASE_ANON_KEY` but never declared them — only `signin.html` did. Every visit to `/app` silently failed the config check and redirected straight back to `/signin`, regardless of session validity, which looked like a broken magic link but wasn't. Declared the same public anon-key constants in `app.html`.
+* **Fixed Missing Dependency Manifest (root cause of the 500s):** the repo had no `package.json` anywhere in its history, so Vercel had nothing to install `@supabase/supabase-js` from — every `/api/anthropic` call crashed with `500 FUNCTION_INVOCATION_FAILED` at module load, before the JWT logic ever ran. Added `package.json` + `package-lock.json` declaring the dependency; verified via `npm install` and a live `curl` test (clean `401`s instead of a crash).
 * **Graceful Demo Fallback:** Demo mode (`?demo=1`) has no real session, so AI calls now short-circuit client-side with a "Sign in to use AI features" toast instead of a raw network error, by design — demo visitors can explore the UI but can't spend the Anthropic budget.
 
 ---
@@ -64,20 +66,20 @@ Live: https://yuktora.vercel.app
 ## 🔮 Upcoming Roadmap
 
 ### Phase 4: Monetization & Backend Hardening
-1. **Usage metering** — track AI calls per user in Supabase. Enforce Free tier limit (e.g. 3 tailors/day) at the proxy layer.
+1. **Usage metering & persistent audit log** — write a row to a new Supabase table (user, timestamp, success/failure) on every `/api/anthropic` call. Enforces the Free tier daily limit at the proxy layer and gives a queryable history beyond Vercel's short-lived function logs and Supabase's own auth logs (both exist today but expire quickly on the free tier).
 2. **Cashfree/Razorpay checkout** — wire Pro (₹499/mo) and Lifetime (₹6,999) buttons to actual payment flow; webhook updates `user_profiles.plan`.
 3. **Retire BYOK for Anthropic** — remove the Settings API key input once metering is live. Keep the JSearch/RapidAPI input (that one is genuinely user-owned).
 
 ### Phase 5: Growth & Reliability
-5. **Search Live fix** — reconcile localStorage key naming between Settings save and Search Live read; surface real JSearch API errors instead of silent demo fallback.
-6. **Apply button URL validation** — prevent Chrome's "Blocked URL schema" error on demo/malformed job cards.
-7. **Custom SMTP (Resend)** — replace default 2/hour Supabase mailer with production SMTP on a verified domain. Branded magic-link template.
-8. **Error tracking** — Sentry free tier for post-launch monitoring.
-9. **Theme polish pass** — resolve remaining sidebar wordmark and demo banner specificity issues, "+ Add job" button contrast check.
+4. **Search Live fix** — reconcile localStorage key naming between Settings save and Search Live read; surface real JSearch API errors instead of silent demo fallback.
+5. **Apply button URL validation** — prevent Chrome's "Blocked URL schema" error on demo/malformed job cards.
+6. **Custom SMTP (Resend)** — replace default 2/hour Supabase mailer with production SMTP on a verified domain. Branded magic-link template. (Hit this limit firsthand while testing Phase 3.9 — worth prioritizing.)
+7. **Error tracking** — Sentry free tier for post-launch monitoring.
+8. **Theme polish pass** — resolve remaining sidebar wordmark and demo banner specificity issues, "+ Add job" button contrast check.
 
 ### Phase 6: Trust & Compliance
-10. **Terms of Service + Refund Policy** pages — required by Indian payment gateway KYC.
-11. **Complete DPDP consent audit** — verify checkbox, `escapeHTML`, and data-export/deletion flows meet requirements before scale.
+9. **Terms of Service + Refund Policy** pages — required by Indian payment gateway KYC.
+10. **Complete DPDP consent audit** — verify checkbox, `escapeHTML`, and data-export/deletion flows meet requirements before scale.
 
 ---
 
