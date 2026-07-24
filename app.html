@@ -173,7 +173,7 @@
     .brand-name {
       font-size: 16px;
       font-weight: 800;
-      color: var(--brand);
+      color: var(--white);
       letter-spacing: -0.2px;
     }
 
@@ -254,7 +254,7 @@
       align-items: center;
       gap: 7px;
       font-size: 11.5px;
-      color: var(--gray-500);
+      color: var(--white);
       font-weight: 500;
     }
 
@@ -1564,7 +1564,10 @@
       }
     }
 
-    < !-- ═══════════════════════════════════════════════════════════════════ MOCHA MARBLE THEME — Phase 3.8 visual polish Paste at the end of <style>. Order matters: this must come AFTER existing rules to override cleanly. ═══════════════════════════════════════════════════════════════════ -->:root {
+    /* ═══════════════════════════════════════════════════════════════════
+       MOCHA MARBLE THEME — Phase 3.8 visual polish
+       ═══════════════════════════════════════════════════════════════════ */
+    :root {
       --page-bg: #efe8dd;
       --card-bg: #ffffff;
       --border: #d9c8ab;
@@ -1759,39 +1762,6 @@
     .divider {
       border: none;
       border-top: 1px solid var(--divider);
-    }
-
-    /* ─── app.html specific: dark walnut sidebar as chrome ─── */
-    .sidebar,
-    aside,
-    nav.sidebar,
-    .side-nav,
-    #sidebar {
-      background: #2b1e14 !important;
-      color: #f5ebd9;
-    }
-
-    .sidebar a,
-    .sidebar .nav-item,
-    aside a,
-    .side-nav a {
-      color: #b8a68d;
-    }
-
-    .sidebar a.active,
-    .sidebar .nav-item.active,
-    .sidebar a:hover,
-    .sidebar .nav-item:hover,
-    .side-nav a.active,
-    .side-nav a:hover {
-      color: #f5ebd9;
-      background: rgba(210, 161, 86, 0.08);
-    }
-
-    .topbar,
-    header.topbar {
-      background: var(--page-bg);
-      border-bottom: 1px solid var(--border);
     }
 
     /* ─── app.html specific: dark walnut sidebar as chrome ─── */
