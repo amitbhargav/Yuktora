@@ -12,8 +12,9 @@
 <body
   style="background: #f9fafb; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: 'Outfit', sans-serif;">
 
+  <!-- Form is hidden by default; shown only after the session check confirms no active session -->
   <div id="auth-signin-layer"
-    style="background: white; border: 1px solid var(--border, #e5e7eb); padding: 32px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center;">
+    style="display:none; background: white; border: 1px solid var(--border, #e5e7eb); padding: 32px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center;">
     <h2 style="margin: 0 0 8px 0; font-size: 1.5rem; font-weight: 700; color: #111827;">Welcome to Yuktora</h2>
     <p style="color: #666; font-size: 0.875rem; margin: 0 0 24px 0;">Secure passwordless sign-in</p>
 
@@ -52,23 +53,52 @@
     // Declared global pointer container to avoid ReferenceErrors
     let supabaseClient = null;
 
-    // Safety initialization wrapped inside window lifecycle sequence
-    function initSupabaseClient() {
-      if (window.supabase && typeof window.supabase.createClient === 'function') {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // Wire active session event tracking once context is verified
-        supabaseClient.auth.onAuthStateChange((event, session) => {
-          if (session) {
-            window.location.href = '/app.html';
-          }
-        });
-      } else {
+    // Safety initialization wrapped inside window lifecycle sequence.
+    // Must be async so we can await getSession() before showing any UI.
+    async function initSupabaseClient() {
+      if (!(window.supabase && typeof window.supabase.createClient === 'function')) {
         console.error("Supabase CDN failed to instantiate global namespace objects.");
+        return;
       }
+
+      // Initialise with persistence + URL-based session detection (required for magic links).
+      // persistSession and autoRefreshToken are Supabase defaults but are stated explicitly
+      // to ensure no override is accidentally introduced later.
+      // detectSessionInUrl: true lets the magic-link URL hash establish the session on landing.
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true
+        }
+      });
+
+      // ── Session check: redirect immediately if already authenticated ──────────
+      // This runs BEFORE any UI is shown so the form never flashes for logged-in users.
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) {
+        window.location.replace('/app');
+        return;
+      }
+
+      // No active session — reveal the sign-in form now.
+      const layer = document.getElementById('auth-signin-layer');
+      if (layer) layer.style.display = 'block';
+
+      // ── Auth state listener ───────────────────────────────────────────────────
+      // Handles the SIGNED_IN event that fires when the user clicks the magic link
+      // in their email (detectSessionInUrl picks up the token from the URL hash).
+      // Also handles SIGNED_OUT in another tab — nothing to do here since we're
+      // already on the sign-in page.
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+          window.location.replace('/app');
+        }
+        // SIGNED_OUT: already on signin page — no action needed.
+      });
     }
 
-    // Run verification instantly 
+    // Run verification instantly
     if (document.readyState === "complete" || document.readyState === "interactive") {
       initSupabaseClient();
     } else {
@@ -91,37 +121,6 @@
         return alert("Connection Error: The authorization engine is still loading. Please wait a second and retry.");
       }
 
-      async function handleSignIn() {
-        const btn = document.getElementById('submit-btn'); // Or your button ID
-        btn.disabled = true;
-        btn.textContent = 'Sending Link...';
-
-        try {
-          const { error } = await supabase.auth.signInWithOtp({
-            email: emailInput.value,
-            options: { emailRedirectTo: window.location.origin + '/app' }
-          });
-
-          if (error) throw error;
-
-          toast('Magic Link Sent! Check your inbox.', '✅');
-        } catch (err) {
-          console.error('Sign-in failed:', err);
-
-          // Catch-guard: Re-enable the interface elements so the user can try again
-          btn.disabled = false;
-          btn.textContent = 'Send Magic Link';
-
-          // Inform the user clearly about the rate limit or error
-          if (err.status === 429 || err.message?.includes('rate limit')) {
-            toast('Too many requests. Please wait 1 minute before retrying.', '⚠️');
-          } else {
-            toast(err.message || 'An error occurred during authentication.', '❌');
-          }
-        }
-      }
-
-
       const emailInput = document.getElementById('magic-email')?.value;
       const checkbox = document.getElementById('auth-consent-check');
       if (!checkbox || !checkbox.checked) return alert("You must agree to the privacy policy first.");
@@ -134,7 +133,7 @@
       try {
         const { error } = await supabaseClient.auth.signInWithOtp({
           email: emailInput,
-          options: { emailRedirectTo: window.location.origin + '/app.html' }
+          options: { emailRedirectTo: window.location.origin + '/app' }
         });
 
         if (error) {

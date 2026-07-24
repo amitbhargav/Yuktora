@@ -1558,84 +1558,6 @@
      AUTH GATE — shown when no Supabase session is active.
      The .shell (main app) is hidden until auth is confirmed.
 ══════════════════════════════════════════════════════════════ -->
-  <div id="auth-gate" style="
-  display:none;
-  position:fixed;inset:0;z-index:9999;
-  background:var(--bg);
-  align-items:center;justify-content:center;
-  flex-direction:column;
-  font-family:var(--sans);
-">
-    <div style="
-    background:var(--white);
-    border:1px solid var(--border);
-    border-radius:16px;
-    box-shadow:var(--shadow-lg);
-    padding:44px 40px;
-    width:92%;max-width:420px;
-    position:relative;overflow:hidden;
-    text-align:center;
-  ">
-      <!-- Top accent bar -->
-      <div
-        style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--brand),var(--gold),var(--brand-d))">
-      </div>
-
-      <!-- Logo -->
-      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;">
-        <div
-          style="width:36px;height:36px;border-radius:9px;background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;">
-          🎯</div>
-        <span style="font-size:1.3rem;font-weight:800;color:var(--gray-900);letter-spacing:-.3px;">Yuktora</span>
-      </div>
-      <p style="font-size:.85rem;font-weight:500;color:var(--gray-400);margin-bottom:28px;">Your AI job search co-pilot
-      </p>
-
-      <div style="font-size:1.5rem;font-weight:800;color:var(--gray-900);letter-spacing:-.4px;margin-bottom:6px;">Sign
-        in to continue</div>
-      <p style="font-size:.85rem;font-weight:500;color:var(--gray-500);margin-bottom:28px;line-height:1.6;">
-        Your data is securely synced to your verified identity via Supabase. Enter your email to receive a Magic Link —
-        no password needed.
-      </p>
-
-      <!-- Email input -->
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
-        <input type="email" id="gate-email" placeholder="you@email.com"
-          style="width:100%;padding:10px 13px;border:1.5px solid var(--border-strong);border-radius:8px;font-size:14px;font-weight:500;font-family:var(--sans);outline:none;transition:border-color .12s;"
-          oninput="document.getElementById('gate-send-btn').disabled=!this.value.includes('@');document.getElementById('gate-send-btn').style.opacity=this.value.includes('@')?'1':'0.5';"
-          onkeydown="if(event.key==='Enter')sendGateMagicLink()">
-        <button id="gate-send-btn" onclick="sendGateMagicLink()" disabled
-          style="width:100%;padding:12px;background:var(--brand);color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:.95rem;font-weight:700;cursor:pointer;opacity:0.5;transition:all .15s;letter-spacing:.02em;">
-          Send Magic Link →
-        </button>
-      </div>
-
-      <!-- Consent -->
-      <label
-        style="display:flex;align-items:flex-start;gap:9px;text-align:left;cursor:pointer;padding:10px 12px;background:var(--gray-50);border:1px solid var(--border);border-radius:6px;margin-bottom:14px;">
-        <input type="checkbox" id="gate-consent" onchange="
-        const btn=document.getElementById('gate-send-btn');
-        const hasEmail=document.getElementById('gate-email').value.includes('@');
-        btn.disabled=!(this.checked&&hasEmail);
-        btn.style.opacity=(this.checked&&hasEmail)?'1':'0.5';
-      " style="margin-top:2px;flex-shrink:0;width:14px;height:14px;accent-color:var(--brand);cursor:pointer;">
-        <span style="font-size:.78rem;font-weight:500;color:var(--gray-600);line-height:1.55;">I agree to the <a
-            href="/privacy" target="_blank"
-            style="color:var(--brand);font-weight:700;text-decoration:underline;">Privacy Policy</a> and authorize
-          Yuktora to securely store my data.</span>
-      </label>
-
-      <!-- Status message -->
-      <div id="gate-msg"
-        style="display:none;font-size:.82rem;font-weight:600;color:var(--green);padding:8px 12px;background:var(--green-l);border-radius:6px;margin-bottom:10px;">
-      </div>
-
-      <p style="font-size:.75rem;font-weight:500;color:var(--gray-400);margin-top:4px;">
-        🔐 Secured by Supabase · Your data syncs across devices
-      </p>
-    </div>
-  </div>
-
   <div class="shell" id="app-shell" style="display:none;">
 
     <nav class="sidebar">
@@ -2592,6 +2514,27 @@
               </div>
             </div>
 
+            <!-- ── Account card: shows signed-in email + sign-out button ── -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <div class="card-title">Account</div>
+                  <div class="card-sub">Signed-in identity for cloud sync</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--gray-50);border:1px solid var(--border);border-radius:8px;margin-bottom:14px;">
+                  <span style="font-size:20px;">✅</span>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">Signed in as</div>
+                    <div id="settings-user-email" style="font-size:13px;font-weight:700;color:var(--brand);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">—</div>
+                  </div>
+                  <button class="btn btn-danger btn-sm" onclick="signOutAndRedirect()">Sign out</button>
+                </div>
+                <div class="field-hint">Signing out will redirect you to the sign-in page. Your locally-stored data is preserved.</div>
+              </div>
+            </div>
+
             <div class="card">
               <div class="card-header">
                 <div class="card-title">Data management</div>
@@ -2702,7 +2645,13 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmbGd4ZnFvbGRyeHZjaG9na2tqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMDEzODAsImV4cCI6MjA5OTc3NzM4MH0.WjMe3xxzIs9xLgDrT20oBTdRcjZzh169gr8x-LkUz9M';
 
     // supabase is exposed globally by the CDN script loaded in <head>
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
 
     // ─────────────────────────────────────────────
     // USER DATA THAT WILL BE PERSISTED TO SUPABASE
@@ -3790,7 +3739,7 @@ Be direct and specific. Reference actual content.`;
       }
     }
 
-    // Sign the current user out and reset the auth UI.
+    // Sign the current user out and reset the auth UI (used by the Profile page auth block).
     async function signOut() {
       await supabaseClient.auth.signOut();
       S.profile.email = '';
@@ -3799,6 +3748,15 @@ Be direct and specific. Reference actual content.`;
       const emailEl = document.getElementById('p-email');
       if (emailEl) emailEl.value = '';
       toast('Signed out', '👋');
+    }
+
+    // Sign out and redirect to /signin — used by the Settings Account card.
+    // The runtime onAuthStateChange guard will also fire and redirect, but calling
+    // replace() here ensures the redirect happens immediately without waiting for
+    // the SIGNED_OUT event to propagate.
+    async function signOutAndRedirect() {
+      await supabaseClient.auth.signOut();
+      window.location.replace('/signin');
     }
 
     // ── Auth state listener — fires on page load and after Magic Link click ───────
@@ -3866,130 +3824,60 @@ Be direct and specific. Reference actual content.`;
     }
 
     // ─────────────────────────────────────────────
-    // INIT
-    // ─────────────────────────────────────────────
-    // ─────────────────────────────────────────────
-    // AUTH GATE — Magic Link helper for the gate overlay
-    // ─────────────────────────────────────────────
-    async function sendGateMagicLink() {
-      const emailInput = document.getElementById('gate-email');
-      const msgEl = document.getElementById('gate-msg');
-      const btn = document.getElementById('gate-send-btn');
-      const email = (emailInput?.value || '').trim();
-
-      if (!email || !email.includes('@')) {
-        toast('Enter a valid email address', '⚠️');
-        return;
-      }
-
-      const origText = btn.textContent;
-      btn.textContent = '⏳ Sending…';
-      btn.disabled = true;
-
-      try {
-        const { error } = await supabaseClient.auth.signInWithOtp({ email });
-        if (error) throw error;
-
-        if (msgEl) {
-          msgEl.textContent = `✅ Magic Link sent to ${email} — check your inbox and click the link to sign in.`;
-          msgEl.style.display = 'block';
-        }
-        toast('Magic Link sent — check your inbox!', '📧');
-      } catch (err) {
-        console.error('[sendGateMagicLink]', err);
-        toast('Failed to send Magic Link: ' + (err.message || err), '✗');
-        btn.textContent = origText;
-        btn.disabled = false;
-      }
-    }
-
-    // ─────────────────────────────────────────────
-    // INIT — Auth-gated startup
+    // INIT — Session-gated startup
     // ─────────────────────────────────────────────
     // The app shell is hidden by default (display:none).
-    // We ask Supabase for the current session:
-    //   • If a valid session exists  → show the shell, hide the gate, boot the app.
-    //   • If no session              → show the auth gate, keep the shell hidden.
-    // onAuthStateChange handles the SIGNED_IN event after a Magic Link click,
-    // which will also reveal the shell and load cloud data automatically.
+    // We call getSession() first:
+    //   • Valid session  → reveal the shell and boot the app.
+    //   • No session     → redirect to /signin (the single auth entry point).
+    // The onAuthStateChange listener below handles runtime sign-outs and
+    // token-refresh failures so multi-tab sign-out works correctly.
     // ─────────────────────────────────────────────
     (async function init() {
       restore();
 
-      const gate = document.getElementById('auth-gate');
       const shell = document.getElementById('app-shell');
 
-      // Check for an existing Supabase session (e.g. returning user with valid token)
+      // ── Explicit session check — runs BEFORE any UI is shown ─────────────────
       const { data: { session } } = await supabaseClient.auth.getSession();
 
-      if (session && session.user) {
-        // ── Authenticated path ──────────────────────────────────────────────────
-        // Reveal the app shell immediately; the onAuthStateChange listener will
-        // fire shortly after and trigger fetchFromSupabase() to hydrate from cloud.
-        shell.style.display = 'flex';
-        gate.style.display = 'none';
-
-        // Seed the verified email into state so cloud functions work right away
-        S.profile.email = session.user.email;
-        persist();
-
-        // Boot the UI
-        updateApiStatus();
-        updateBadges();
-        renderDash();
-        renderSavedJobs();
-        document.getElementById('ma-date').value = new Date().toISOString().split('T')[0];
-
-        // Reflect email in the (read-only) profile field
-        const emailEl = document.getElementById('p-email');
-        if (emailEl) emailEl.value = session.user.email;
-
-      } else {
-        // ── Unauthenticated path ────────────────────────────────────────────────
-        // Show the auth gate overlay; keep the shell hidden.
-        gate.style.display = 'flex';
-        shell.style.display = 'none';
+      if (!session) {
+        // No active session → send to /signin immediately.
+        window.location.replace('/signin');
+        return;
       }
+
+      // ── Authenticated path ────────────────────────────────────────────────────
+      shell.style.display = 'flex';
+
+      // Seed the verified email into state so cloud functions work right away
+      S.profile.email = session.user.email;
+      persist();
+
+      // Update the account info display in Settings
+      const settingsEmailEl = document.getElementById('settings-user-email');
+      if (settingsEmailEl) settingsEmailEl.textContent = session.user.email;
+
+      // Boot the UI
+      updateApiStatus();
+      updateBadges();
+      renderDash();
+      renderSavedJobs();
+      document.getElementById('ma-date').value = new Date().toISOString().split('T')[0];
+
+      // Reflect email in the (read-only) profile field
+      const emailEl = document.getElementById('p-email');
+      if (emailEl) emailEl.value = session.user.email;
     })();
 
-    // ── onAuthStateChange also handles the SIGNED_IN event after Magic Link click ─
-    // When the user clicks the link in their email, Supabase fires SIGNED_IN here.
-    // We reveal the shell, hide the gate, and load their cloud data.
-    // (This listener is registered earlier in the file; the block below is the
-    //  gate-specific reveal logic that runs in addition to the existing handler.)
-    const _origAuthHandler = supabaseClient.auth.onAuthStateChange;
-    supabaseClient.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session && session.user) {
-        const gate = document.getElementById('auth-gate');
-        const shell = document.getElementById('app-shell');
-        if (gate && gate.style.display !== 'none') gate.style.display = 'none';
-        if (shell && shell.style.display === 'none') {
-          shell.style.display = 'flex';
-          // Boot the UI if it hasn't been booted yet
-          updateApiStatus();
-          updateBadges();
-          renderDash();
-          renderSavedJobs();
-          document.getElementById('ma-date').value = new Date().toISOString().split('T')[0];
-        }
-      }
-      if (event === 'SIGNED_OUT') {
-        const gate = document.getElementById('auth-gate');
-        const shell = document.getElementById('app-shell');
-        if (gate) gate.style.display = 'flex';
-        if (shell) shell.style.display = 'none';
+    // ── Runtime auth guard ────────────────────────────────────────────────────────
+    // Fires when the token refresh fails or the user signs out in another tab.
+    // Redirects to /signin so the user can re-authenticate.
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || (!session && event !== 'INITIAL_SESSION')) {
+        window.location.replace('/signin');
       }
     });
-
-    // Route Guard Protection Layer
-    if (typeof supabaseClient !== 'undefined' && supabaseClient.auth) {
-      supabaseClient.auth.getSession().then(({ data: { session } }) => {
-        if (!session) {
-          // Force exit if unauthenticated access is detected
-          window.location.href = '/signin.html';
-        }
-      });
-    }
 
     // START OF AI LOGIC CODE
     const jobInput = document.getElementById('job-description-input');
