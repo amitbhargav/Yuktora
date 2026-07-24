@@ -3804,173 +3804,173 @@ Be direct and specific. Reference actual content.`;
           }
         }
       });
+    }
 
+    // ── Button wrappers called from the topbar ───────────────────────────────────
+    // cloudSave() reads the verified email from S.profile (set by onAuthStateChange).
+    // cloudLoad() does the same — no manual text-field input required.
+    async function cloudSave() {
+      const email = _getEmail(); if (!email) return;
+      await saveToSupabase(email);
+    }
+    async function cloudLoad() {
+      const email = _getEmail(); if (!email) return;
+      await fetchFromSupabase(email);
+    }
 
-      // ── Button wrappers called from the topbar ───────────────────────────────────
-      // cloudSave() reads the verified email from S.profile (set by onAuthStateChange).
-      // cloudLoad() does the same — no manual text-field input required.
-      async function cloudSave() {
-        const email = _getEmail(); if (!email) return;
-        await saveToSupabase(email);
-      }
-      async function cloudLoad() {
-        const email = _getEmail(); if (!email) return;
-        await fetchFromSupabase(email);
-      }
-
-      // ─────────────────────────────────────────────
-      // DATA
-      // ─────────────────────────────────────────────
-      function exportData() {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' }));
-        a.download = 'hiretrack_data.json'; a.click();
-        toast('Exported', '⬇');
-      }
-      function importData() {
-        const input = document.createElement('input');
-        input.type = 'file'; input.accept = '.json';
-        input.onchange = e => {
-          const r = new FileReader();
-          r.onload = ev => {
-            try { Object.assign(S, JSON.parse(ev.target.result)); persist(); location.reload(); }
-            catch { toast('Invalid file', '✗'); }
-          };
-          r.readAsText(e.target.files[0]);
+    // ─────────────────────────────────────────────
+    // DATA
+    // ─────────────────────────────────────────────
+    function exportData() {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' }));
+      a.download = 'hiretrack_data.json'; a.click();
+      toast('Exported', '⬇');
+    }
+    function importData() {
+      const input = document.createElement('input');
+      input.type = 'file'; input.accept = '.json';
+      input.onchange = e => {
+        const r = new FileReader();
+        r.onload = ev => {
+          try { Object.assign(S, JSON.parse(ev.target.result)); persist(); location.reload(); }
+          catch { toast('Invalid file', '✗'); }
         };
-        input.click();
+        r.readAsText(e.target.files[0]);
+      };
+      input.click();
+    }
+    function wipeData() {
+      if (!confirm('Wipe all Yuktora data? This cannot be undone.')) return;
+      localStorage.removeItem('htai2'); location.reload();
+    }
+
+    // ─────────────────────────────────────────────
+    // INIT — Session-gated startup
+    // ─────────────────────────────────────────────
+    // The app shell is hidden by default (display:none).
+    // We call getSession() first:
+    //   • Valid session  → reveal the shell and boot the app.
+    //   • No session     → redirect to /signin (the single auth entry point).
+    // The onAuthStateChange listener below handles runtime sign-outs and
+    // token-refresh failures so multi-tab sign-out works correctly.
+    // ─────────────────────────────────────────────
+    (async function init() {
+      restore();
+
+      const shell = document.getElementById('app-shell');
+
+      // ── Explicit session check — runs BEFORE any UI is shown ─────────────────
+      const { data: { session } } = await supabaseClient.auth.getSession();
+
+      if (!session) {
+        // No active session → send to /signin immediately.
+        window.location.replace('/signin');
+        return;
       }
-      function wipeData() {
-        if (!confirm('Wipe all Yuktora data? This cannot be undone.')) return;
-        localStorage.removeItem('htai2'); location.reload();
+
+      // ── Authenticated path ────────────────────────────────────────────────────
+      shell.style.display = 'flex';
+
+      // Seed the verified email into state so cloud functions work right away
+      S.profile.email = session.user.email;
+      persist();
+
+      // Update the account info display in Settings and topbar
+      const settingsEmailEl = document.getElementById('settings-user-email');
+      if (settingsEmailEl) settingsEmailEl.textContent = session.user.email;
+      const topbarEmailEl = document.getElementById('topbar-user-email');
+      if (topbarEmailEl) {
+        topbarEmailEl.textContent = session.user.email;
+        topbarEmailEl.title = session.user.email;
       }
 
-      // ─────────────────────────────────────────────
-      // INIT — Session-gated startup
-      // ─────────────────────────────────────────────
-      // The app shell is hidden by default (display:none).
-      // We call getSession() first:
-      //   • Valid session  → reveal the shell and boot the app.
-      //   • No session     → redirect to /signin (the single auth entry point).
-      // The onAuthStateChange listener below handles runtime sign-outs and
-      // token-refresh failures so multi-tab sign-out works correctly.
-      // ─────────────────────────────────────────────
-      (async function init() {
-        restore();
+      // Boot the UI
+      updateApiStatus();
+      updateBadges();
+      renderDash();
+      renderSavedJobs();
+      document.getElementById('ma-date').value = new Date().toISOString().split('T')[0];
 
-        const shell = document.getElementById('app-shell');
+      // Reflect email in the (read-only) profile field
+      const emailEl = document.getElementById('p-email');
+      if (emailEl) emailEl.value = session.user.email;
+    })();
 
-        // ── Explicit session check — runs BEFORE any UI is shown ─────────────────
-        const { data: { session } } = await supabaseClient.auth.getSession();
+    // ── Runtime auth guard ────────────────────────────────────────────────────────
+    // Fires when the token refresh fails or the user signs out in another tab.
+    // Redirects to /signin so the user can re-authenticate.
+    supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || (!session && event !== 'INITIAL_SESSION')) {
+        window.location.replace('/signin');
+      }
+    });
 
-        if (!session) {
-          // No active session → send to /signin immediately.
-          window.location.replace('/signin');
-          return;
-        }
+    // START OF AI LOGIC CODE
+    const jobInput = document.getElementById('job-description-input');
+    const analyzeBtn = document.getElementById('analyze-job-btn');
+    const resultsBox = document.getElementById('analysis-results-box');
+    const scoreDisplay = document.getElementById('metrics-score-display');
+    const chipsContainer = document.getElementById('missing-keywords-chips');
 
-        // ── Authenticated path ────────────────────────────────────────────────────
-        shell.style.display = 'flex';
+    async function handleJobMatchOptimization() {
+      const jobText = jobInput.value.trim();
+      if (!jobText) return alert("Please paste an operational job description string to analyze.");
 
-        // Seed the verified email into state so cloud functions work right away
-        S.profile.email = session.user.email;
-        persist();
+      try {
+        analyzeBtn.disabled = true;
+        analyzeBtn.style.opacity = "0.5";
+        analyzeBtn.style.cursor = "not-allowed";
+        analyzeBtn.textContent = "Analyzing with Claude...";
+        resultsBox.style.display = "none";
+        chipsContainer.innerHTML = "";
 
-        // Update the account info display in Settings and topbar
-        const settingsEmailEl = document.getElementById('settings-user-email');
-        if (settingsEmailEl) settingsEmailEl.textContent = session.user.email;
-        const topbarEmailEl = document.getElementById('topbar-user-email');
-        if (topbarEmailEl) {
-          topbarEmailEl.textContent = session.user.email;
-          topbarEmailEl.title = session.user.email;
-        }
+        // IMPORTANT: Make sure this variable matches your initialized Supabase client name (e.g., supabase or supabaseClient)
+        const activeClient = typeof supabaseClient !== 'undefined' ? supabaseClient : supabase;
 
-        // Boot the UI
-        updateApiStatus();
-        updateBadges();
-        renderDash();
-        renderSavedJobs();
-        document.getElementById('ma-date').value = new Date().toISOString().split('T')[0];
+        const { data: { session }, error: sessionError } = await activeClient.auth.getSession();
+        if (sessionError || !session) throw new Error("No authorized login session found. Please re-authenticate.");
 
-        // Reflect email in the (read-only) profile field
-        const emailEl = document.getElementById('p-email');
-        if (emailEl) emailEl.value = session.user.email;
-      })();
+        const { data, error } = await activeClient.functions.invoke('analyze-match', {
+          body: { jobDescription: jobText }
+        });
 
-      // ── Runtime auth guard ────────────────────────────────────────────────────────
-      // Fires when the token refresh fails or the user signs out in another tab.
-      // Redirects to /signin so the user can re-authenticate.
-      supabaseClient.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_OUT' || (!session && event !== 'INITIAL_SESSION')) {
-          window.location.replace('/signin');
-        }
-      });
+        if (error) throw error;
 
-      // START OF AI LOGIC CODE
-      const jobInput = document.getElementById('job-description-input');
-      const analyzeBtn = document.getElementById('analyze-job-btn');
-      const resultsBox = document.getElementById('analysis-results-box');
-      const scoreDisplay = document.getElementById('metrics-score-display');
-      const chipsContainer = document.getElementById('missing-keywords-chips');
+        const computedScore = parseInt(data.match_score, 10) || 0;
+        scoreDisplay.textContent = `${computedScore}%`;
 
-      async function handleJobMatchOptimization() {
-        const jobText = jobInput.value.trim();
-        if (!jobText) return alert("Please paste an operational job description string to analyze.");
+        if (computedScore >= 80) scoreDisplay.style.color = "#16a34a";
+        else if (computedScore >= 50) scoreDisplay.style.color = "#ea580c";
+        else scoreDisplay.style.color = "#dc2626";
 
-        try {
-          analyzeBtn.disabled = true;
-          analyzeBtn.style.opacity = "0.5";
-          analyzeBtn.style.cursor = "not-allowed";
-          analyzeBtn.textContent = "Analyzing with Claude...";
-          resultsBox.style.display = "none";
-          chipsContainer.innerHTML = "";
-
-          // IMPORTANT: Make sure this variable matches your initialized Supabase client name (e.g., supabase or supabaseClient)
-          const activeClient = typeof supabaseClient !== 'undefined' ? supabaseClient : supabase;
-
-          const { data: { session }, error: sessionError } = await activeClient.auth.getSession();
-          if (sessionError || !session) throw new Error("No authorized login session found. Please re-authenticate.");
-
-          const { data, error } = await activeClient.functions.invoke('analyze-match', {
-            body: { jobDescription: jobText }
+        if (data.missing_keywords && Array.isArray(data.missing_keywords) && data.missing_keywords.length > 0) {
+          data.missing_keywords.forEach(keyword => {
+            const chip = document.createElement('span');
+            chip.style.cssText = "background: #fee2e2; color: #991b1b; font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 9999px; border: 1px solid #fca5a5; font-family: monospace;";
+            chip.textContent = escapeHTML(keyword);
+            chipsContainer.appendChild(chip);
           });
-
-          if (error) throw error;
-
-          const computedScore = parseInt(data.match_score, 10) || 0;
-          scoreDisplay.textContent = `${computedScore}%`;
-
-          if (computedScore >= 80) scoreDisplay.style.color = "#16a34a";
-          else if (computedScore >= 50) scoreDisplay.style.color = "#ea580c";
-          else scoreDisplay.style.color = "#dc2626";
-
-          if (data.missing_keywords && Array.isArray(data.missing_keywords) && data.missing_keywords.length > 0) {
-            data.missing_keywords.forEach(keyword => {
-              const chip = document.createElement('span');
-              chip.style.cssText = "background: #fee2e2; color: #991b1b; font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 9999px; border: 1px solid #fca5a5; font-family: monospace;";
-              chip.textContent = escapeHTML(keyword);
-              chipsContainer.appendChild(chip);
-            });
-          } else {
-            chipsContainer.innerHTML = `<span style="font-size: 0.85rem; color: #16a34a; font-weight: 500;">✓ Excellent work! No missing keyword gaps detected relative to this text profile.</span>`;
-          }
-
-          resultsBox.style.display = "block";
-
-        } catch (err) {
-          console.error("Match calculation fault:", err);
-          alert(err.message || "Failed to analyze parameters.");
-        } finally {
-          analyzeBtn.disabled = false;
-          analyzeBtn.style.opacity = "1";
-          analyzeBtn.style.cursor = "pointer";
-          analyzeBtn.textContent = "Calculate Match Metrics";
+        } else {
+          chipsContainer.innerHTML = `<span style="font-size: 0.85rem; color: #16a34a; font-weight: 500;">✓ Excellent work! No missing keyword gaps detected relative to this text profile.</span>`;
         }
-      }
 
-      if (analyzeBtn) {
-        analyzeBtn.addEventListener('click', handleJobMatchOptimization);
+        resultsBox.style.display = "block";
+
+      } catch (err) {
+        console.error("Match calculation fault:", err);
+        alert(err.message || "Failed to analyze parameters.");
+      } finally {
+        analyzeBtn.disabled = false;
+        analyzeBtn.style.opacity = "1";
+        analyzeBtn.style.cursor = "pointer";
+        analyzeBtn.textContent = "Calculate Match Metrics";
       }
+    }
+
+    if (analyzeBtn) {
+      analyzeBtn.addEventListener('click', handleJobMatchOptimization);
+    }
     // END OF AI LOGIC CODE
 
   </script>
