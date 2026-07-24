@@ -2936,8 +2936,16 @@
       banner.style.cssText = "background: #2563eb; color: #fff; text-align: center; padding: 8px; font-size: 0.85rem; font-weight: 500; position: sticky; top: 0; z-index: 1000;";
       banner.innerHTML = `Viewing Yuktora Public Demo Mode — <a href="/signin.html" style="color: #fff; text-decoration: underline; margin-left: 8px;">Sign in to save your own jobs</a>`;
       document.body.prepend(banner);
+
+      // Safe dummy client for demo mode so auth calls don't crash
+      supabaseClient = {
+        auth: {
+          getSession: async () => ({ data: { session: null } }),
+          onAuthStateChange: () => { }
+        }
+      };
     } else {
-      // Only initialize Supabase and check session if NOT in demo mode
+      // Only initialize Supabase if credentials exist
       if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
         supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
           auth: {
@@ -2946,14 +2954,10 @@
             detectSessionInUrl: true
           }
         });
-
-        window.addEventListener('DOMContentLoaded', () => {
-          supabaseClient.auth.getSession().then(({ data: { session } }) => {
-            if (!session) {
-              window.location.href = '/signin.html';
-            }
-          });
-        });
+      } else {
+        // Fallback guard if someone hits /app without demo mode and keys aren't loaded
+        console.warn("⚠️ Supabase config missing and not in demo mode. Redirecting to signin.");
+        window.location.replace('/signin.html');
       }
     }
 
