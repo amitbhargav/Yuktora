@@ -32,6 +32,18 @@ module.exports = async function handler(req, res) {
   }
   // ==========================================
 
+  // Fire-and-forget audit log — doesn't block the response, doesn't fail the request
+  // if the log table isn't set up yet. Table: ai_usage_logs (user_id, email, success,
+  // error_message, created_at), RLS-scoped so users can only see their own rows.
+  const logUsage = (success, errorMessage) => {
+    supabase.from('ai_usage_logs').insert({
+      user_id: user.id,
+      email: user.email,
+      success,
+      error_message: errorMessage || null
+    }).then(({ error }) => { if (error) console.error('[ai_usage_logs]', error.message); });
+  };
+
   // API Key validation
   const apiKey = (process.env.ANTHROPIC_API_KEY || '').trim(); 
 
@@ -88,8 +100,9 @@ module.exports = async function handler(req, res) {
       if (result.status !== 200) console.error(`[Model: ${model}] Anthropic Response:`, JSON.stringify(result.data));
 
       if (result.status === 200) {
+        logUsage(true);
         return res.status(200).json(result.data);
-      } 
+      }
       
       if (result.status !== 200 && result.data?.error?.message?.includes('model: claude') && i < modelsToTry.length - 1) {
         continue;
@@ -97,6 +110,7 @@ module.exports = async function handler(req, res) {
 
       if (i === modelsToTry.length - 1) {
         if (result.status !== 200 && result.data?.error?.message?.includes('model: claude')) {
+          logUsage(false, 'Anthropic account blocked — all models rejected');
           return res.status(200).json({
             content: [{
               text: `TITLE: Anthropic Account Blocked
@@ -115,10 +129,12 @@ KEYWORDS: Blocked, Anthropic, Fail-Safe`
             }]
           });
         }
+        logUsage(false, result.data?.error?.message || `HTTP ${result.status}`);
         return res.status(result.status).json(result.data);
       }
     } catch (err) {
       if (i === modelsToTry.length - 1) {
+        logUsage(false, 'Server Setup Error: ' + err.message);
         return res.status(500).json({ error: { message: "Server Setup Error: " + err.message } });
       }
     }

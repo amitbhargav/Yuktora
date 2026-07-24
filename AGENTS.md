@@ -121,6 +121,29 @@ CREATE TABLE public.tracked_jobs (
   date       TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- AI Usage Audit Log — one row per /api/anthropic call, written server-side by
+-- api/anthropic.js after the JWT gate passes. Doubles as the Free-tier metering
+-- source once quota enforcement is added, and as a persistent record beyond
+-- Vercel's short-lived function logs.
+CREATE TABLE public.ai_usage_logs (
+  id            BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  user_id       UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  email         TEXT,
+  success       BOOLEAN NOT NULL,
+  error_message TEXT,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.ai_usage_logs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can insert their own usage logs"
+  ON public.ai_usage_logs FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view their own usage logs"
+  ON public.ai_usage_logs FOR SELECT
+  USING (auth.uid() = user_id);
 ```
 
 ---

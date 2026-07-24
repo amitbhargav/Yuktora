@@ -66,23 +66,34 @@ Live: https://yuktora.vercel.app
 * **"localStorage naming mismatch" claim retired:** audited the full git history of the `rapid_key` storage key used by `saveRapidKey()` and `fetchLiveJobs()` — it has been consistently named in every commit that ever touched it. The originally-roadmapped "reconcile localStorage key naming" bug does not reproduce in the current code; removed from the roadmap rather than carried forward.
 * **Apply button URL validation confirmed already in place:** `applyNow()` already validates the URL protocol via `new URL()`, whitelists `http:`/`https:`, and shows a friendly toast on anything else — the roadmapped "prevent Chrome's Blocked URL schema error" concern was already handled by existing code. No change needed.
 
+### Phase 3.11: AI Usage Audit Log (Shipped — needs one-time DB setup)
+* **Every `/api/anthropic` call now logs an outcome:** after the JWT gate passes, the proxy fire-and-forget writes a row to a new `ai_usage_logs` table (`user_id`, `email`, `success`, `error_message`, `created_at`) — RLS-scoped so each user can only see their own history. This is the persistent audit trail discussed for Phase 4.1; Free-tier quota *enforcement* is still pending (needs a `user_profiles.plan` column that doesn't exist until the payment integration lands).
+* **Requires a manual one-time step:** the table + RLS policies aren't created automatically — run the SQL in `AGENTS.md`'s schema reference once via Supabase's SQL Editor. Until then the insert calls fail silently (logged to Vercel's console only) and don't block or break AI calls.
+
+### Phase 3.12: DPDP Audit — escapeHTML Gaps + Real Data Erasure (Shipped)
+* **Closed escapeHTML gaps:** the applications tracker table, dashboard "recent applications" and "top sources" widgets, rejection-analysis panel, and profile tag chips were all rendering user-typed or externally-sourced (JSearch) text via raw `innerHTML` without escaping — inconsistent with the Phase 3 "Security Hardening" claim, which only covered some views (e.g. the Saved Jobs list already did this correctly). Now consistently escaped everywhere the same data is displayed.
+* **Hardened the Apply-URL onclick handler:** table-row Apply buttons interpolated a raw job URL directly into an inline `onclick` attribute — HTML-escaping alone doesn't protect this, because event-handler attribute values are HTML-decoded *before* being parsed as JS, so an escaped quote can still break out of the handler's own string literal. Now routes through the existing (previously unused) `sanitizeApplyURL()` protocol whitelist plus a quote strip.
+* **"Clear all data" now actually clears data:** `wipeData()` previously only cleared `localStorage`, leaving the Supabase-stored profile and tracked-jobs rows for that email fully intact — a right-to-erasure gap for a button that told the user their data was wiped. Now also deletes both tables' rows for the user's email before clearing local state.
+* **Consent checkbox verified, not touched:** `signin.html`'s mandatory privacy-policy checkbox (disables Send until checked, plus a hard block on submit) was re-checked and still functions correctly — no regression, no change needed.
+
 ---
 
 ## 🔮 Upcoming Roadmap
 
 ### Phase 4: Monetization & Backend Hardening
-1. **Usage metering & persistent audit log** — write a row to a new Supabase table (user, timestamp, success/failure) on every `/api/anthropic` call. Enforces the Free tier daily limit at the proxy layer and gives a queryable history beyond Vercel's short-lived function logs and Supabase's own auth logs (both exist today but expire quickly on the free tier).
-2. **Cashfree/Razorpay checkout** — wire Pro (₹499/mo) and Lifetime (₹6,999) buttons to actual payment flow; webhook updates `user_profiles.plan`.
-3. **Retire BYOK for Anthropic** — remove the Settings API key input once metering is live. Keep the JSearch/RapidAPI input (that one is genuinely user-owned).
+1. **Run the `ai_usage_logs` migration** — the audit-log code shipped in Phase 3.11, but the table itself still needs to be created via Supabase's SQL Editor (see `AGENTS.md`). Quick, one-time, GUI step.
+2. **Free-tier quota enforcement at the proxy layer** — once `ai_usage_logs` exists and has data, enforce the daily AI-call limit server-side instead of relying on the client-side `localStorage` counter alone (which a user can bypass by clearing storage).
+3. **Cashfree/Razorpay checkout** — wire Pro (₹499/mo) and Lifetime (₹6,999) buttons to actual payment flow; webhook updates `user_profiles.plan`.
+4. **Retire BYOK for Anthropic** — remove the Settings API key input once metering is live. Keep the JSearch/RapidAPI input (that one is genuinely user-owned).
 
 ### Phase 5: Growth & Reliability
-4. **Custom SMTP (Resend)** — replace default 2/hour Supabase mailer with production SMTP on a verified domain. Branded magic-link template. (Hit this limit firsthand while testing Phase 3.9 — worth prioritizing.)
-5. **Error tracking** — Sentry free tier for post-launch monitoring.
-6. **Theme polish pass** — resolve remaining sidebar wordmark and demo banner specificity issues, "+ Add job" button contrast check.
+5. **Custom SMTP (Resend)** — replace default 2/hour Supabase mailer with production SMTP on a verified domain. Branded magic-link template. (Hit this limit firsthand while testing Phase 3.9 — worth prioritizing.)
+6. **Error tracking** — Sentry free tier for post-launch monitoring.
+7. **Theme polish pass** — resolve remaining sidebar wordmark and demo banner specificity issues, "+ Add job" button contrast check.
 
 ### Phase 6: Trust & Compliance
-7. **Terms of Service + Refund Policy** pages — required by Indian payment gateway KYC.
-8. **Complete DPDP consent audit** — verify checkbox, `escapeHTML`, and data-export/deletion flows meet requirements before scale.
+8. **Terms of Service + Refund Policy** pages — required by Indian payment gateway KYC.
+9. **DPDP data-export flow** — the escapeHTML and data-erasure gaps from the original audit item are fixed (Phase 3.12); still open is a proper data-*export* flow (the existing "Export" button dumps local `S` state as JSON, not a formal Supabase-backed export) if that's required for compliance at scale.
 
 ---
 

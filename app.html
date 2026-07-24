@@ -3637,10 +3637,10 @@ Rules:
       tbody.innerHTML = apps.map(a => `
     <tr>
       <td>
-        <div style="font-weight:700;font-size:13px;color:var(--gray-900)">${a.title}</div>
-        <div style="font-size:12px;font-weight:500;color:var(--gray-400)">${a.company}${a.loc ? '&nbsp;·&nbsp;' + a.loc : ''} ${a.visa ? '🌍' : ''}</div>
+        <div style="font-weight:700;font-size:13px;color:var(--gray-900)">${escapeHTML(a.title)}</div>
+        <div style="font-size:12px;font-weight:500;color:var(--gray-400)">${escapeHTML(a.company)}${a.loc ? '&nbsp;·&nbsp;' + escapeHTML(a.loc) : ''} ${a.visa ? '🌍' : ''}</div>
       </td>
-      <td><span class="pill pill-gray">${a.platform}</span></td>
+      <td><span class="pill pill-gray">${escapeHTML(a.platform)}</span></td>
       <td style="font-size:12px;font-weight:500;color:var(--gray-500)">${a.date ? new Date(a.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '-'}</td>
       <td>
         <select style="font-size:12px;font-weight:600;padding:4px 8px;border:1px solid var(--border);border-radius:5px;background:var(--white);color:var(--gray-700);cursor:pointer;font-family:var(--sans)"
@@ -3654,7 +3654,7 @@ Rules:
       </td>
       <td>
         <div class="table-actions">
-          ${a.url ? `<button class="btn btn-ghost btn-xs" onclick="window.open('${a.url}','_blank')">↗</button>` : ''}
+          ${a.url ? `<button class="btn btn-ghost btn-xs" onclick="window.open('${sanitizeApplyURL(a.url).replace(/'/g, '%27')}','_blank')">↗</button>` : ''}
           <button class="btn btn-ghost btn-xs" onclick="prefillRej(${a.id})" title="Analyse rejection">🧠</button>
           <button class="btn btn-ghost btn-xs" style="color:var(--red)" onclick="deleteApp(${a.id})">✕</button>
         </div>
@@ -3738,9 +3738,9 @@ Be direct and specific. Reference actual content.`;
       el.innerHTML = S.rejs.slice(0, 5).map(r => `
     <div style="padding:10px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;cursor:pointer"
       onclick="this.querySelector('.rx').style.display=this.querySelector('.rx').style.display==='none'?'block':'none'">
-      <div style="font-weight:700;font-size:13px;color:var(--gray-800)">${r.role}</div>
-      <div style="font-size:11px;font-weight:500;color:var(--gray-400)">${r.stage} · ${new Date(r.date).toLocaleDateString('en-IN')}</div>
-      <div class="rx" style="display:none;margin-top:10px;font-size:13px;font-weight:500;color:var(--gray-600);white-space:pre-wrap;line-height:1.6">${r.analysis}</div>
+      <div style="font-weight:700;font-size:13px;color:var(--gray-800)">${escapeHTML(r.role)}</div>
+      <div style="font-size:11px;font-weight:500;color:var(--gray-400)">${escapeHTML(r.stage)} · ${new Date(r.date).toLocaleDateString('en-IN')}</div>
+      <div class="rx" style="display:none;margin-top:10px;font-size:13px;font-weight:500;color:var(--gray-600);white-space:pre-wrap;line-height:1.6">${escapeHTML(r.analysis)}</div>
     </div>`).join('');
     }
 
@@ -3753,7 +3753,7 @@ Be direct and specific. Reference actual content.`;
       const el = document.getElementById('tag-' + key);
       if (!el) return;
       el.innerHTML = arr.map((t, i) => `
-    <span class="tag">${t}<span class="tag-x" onclick="removeTag('${key}',${i})">×</span></span>`).join('');
+    <span class="tag">${escapeHTML(t)}<span class="tag-x" onclick="removeTag('${key}',${i})">×</span></span>`).join('');
     }
     function addTag(key) {
       const input = document.getElementById('in-' + key);
@@ -3806,10 +3806,10 @@ Be direct and specific. Reference actual content.`;
         recent.innerHTML = apps.slice(0, 5).map(a => `
       <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
         <div style="flex:1;min-width:0">
-          <div style="font-weight:700;font-size:13px;color:var(--gray-900);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.title}</div>
-          <div style="font-size:11.5px;font-weight:500;color:var(--gray-400)">${a.company} · ${a.platform}</div>
+          <div style="font-weight:700;font-size:13px;color:var(--gray-900);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHTML(a.title)}</div>
+          <div style="font-size:11.5px;font-weight:500;color:var(--gray-400)">${escapeHTML(a.company)} · ${escapeHTML(a.platform)}</div>
         </div>
-        <span style="font-size:12px;font-weight:700;color:${SC[a.status] || 'var(--gray-400)'};flex-shrink:0">${a.status}</span>
+        <span style="font-size:12px;font-weight:700;color:${SC[a.status] || 'var(--gray-400)'};flex-shrink:0">${escapeHTML(a.status)}</span>
       </div>`).join('');
       }
 
@@ -3821,7 +3821,7 @@ Be direct and specific. Reference actual content.`;
       src.innerHTML = sorted.map(([p, c]) => `
     <div style="margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px">
-        <span style="color:var(--gray-700);font-weight:600">${p}</span>
+        <span style="color:var(--gray-700);font-weight:600">${escapeHTML(p)}</span>
         <span style="color:var(--gray-400);font-weight:500">${c} (${Math.round(c / apps.length * 100)}%)</span>
       </div>
       <div class="progress"><div class="progress-fill" style="width:${Math.round(c / apps.length * 100)}%;background:var(--brand)"></div></div>
@@ -4146,8 +4146,25 @@ Be direct and specific. Reference actual content.`;
       };
       input.click();
     }
-    function wipeData() {
+    async function wipeData() {
       if (!confirm('Wipe all Yuktora data? This cannot be undone.')) return;
+
+      // Also erase the cloud copy — previously this only cleared localStorage,
+      // leaving the Supabase-stored profile/applications intact under the same email.
+      const email = (S.profile.email || '').trim();
+      if (!isDemoMode && supabaseClient && email) {
+        try {
+          await supabaseClient.from('tracked_jobs').delete().eq('email', email);
+          await supabaseClient.from('user_profiles').delete().eq('email', email);
+        } catch (e) {
+          console.error('[wipeData] cloud delete failed', e);
+          toast('Local data cleared, but cloud delete failed: ' + e.message, '⚠️');
+          localStorage.removeItem('htai2');
+          setTimeout(() => location.reload(), 3000);
+          return;
+        }
+      }
+
       localStorage.removeItem('htai2'); location.reload();
     }
 
