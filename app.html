@@ -2654,30 +2654,35 @@
     // window.ENV_SUPABASE_ANON_KEY → your anon/public key from the Supabase dashboard
     // ─────────────────────────────────────────────
     // Check for demo mode FIRST
-    const urlParams = new URLSearchParams(window.location.search);
-    const isDemoMode = urlParams.get('demo') === '1';
+   const urlParams = new URLSearchParams(window.location.search);
+const isDemoMode = urlParams.get('demo') === '1';
 
-    if (isDemoMode) {
-      console.log("🚀 Demo mode active — bypassing auth guard");
-      const banner = document.createElement('div');
-      banner.style.cssText = "background: #2563eb; color: #fff; text-align: center; padding: 8px; font-size: 0.85rem; font-weight: 500; position: sticky; top: 0; z-index: 1000;";
-      banner.innerHTML = `Viewing Yuktora Public Demo Mode — <a href="/signin.html" style="color: #fff; text-decoration: underline; margin-left: 8px;">Sign in to save your own jobs</a>`;
-      document.body.prepend(banner);
-    } else {
-      // Keep your real Supabase keys and client init safely inside the 'else' block
-      const SUPABASE_URL = 'https://qflgxfqoldrxvchogkkj.supabase.co';
-      const SUPABASE_ANON_KEY = 'your_anon_key_here';
+// Declare global dummies so the rest of the script never throws ReferenceErrors
+let SUPABASE_URL = '';
+let SUPABASE_ANON_KEY = '';
+let supabaseClient = null;
 
-      const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+if (isDemoMode) {
+    console.log("🚀 Demo mode active — bypassing auth guard");
+    const banner = document.createElement('div');
+    banner.style.cssText = "background: #2563eb; color: #fff; text-align: center; padding: 8px; font-size: 0.85rem; font-weight: 500; position: sticky; top: 0; z-index: 1000;";
+    banner.innerHTML = `Viewing Yuktora Public Demo Mode — <a href="/signin.html" style="color: #fff; text-decoration: underline; margin-left: 8px;">Sign in to save your own jobs</a>`;
+    document.body.prepend(banner);
+} else {
+    // Real keys for normal users
+    SUPABASE_URL = 'https://qflgxfqoldrxvchogkkj.supabase.co';
+    SUPABASE_ANON_KEY = 'your_anon_key_here';
+    
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-      });
+    });
 
-      supabaseClient.auth.getSession().then(({ data: { session } }) => {
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
         if (!session) {
-          window.location.href = '/signin.html';
+            window.location.href = '/signin.html';
         }
-      });
-    }
+    });
+}
 
     // supabase is exposed globally by the CDN script loaded in <head>
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
