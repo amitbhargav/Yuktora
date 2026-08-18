@@ -3158,6 +3158,34 @@
       S.key = ''; document.getElementById('api-input').value = '';
       persist(); updateApiStatus(); toast('License cleared');
     }
+    // Tries each AI proxy endpoint in order, first success wins. Both
+    // endpoints return the same { content: [{ text }] } shape on success, so
+    // callers never need to know which provider actually answered. Anthropic
+    // stays primary (generally the stronger model); Gemini is a free-tier
+    // fallback for whenever Anthropic is unavailable (e.g. out of credit).
+    const AI_PROVIDERS = [
+      { name: 'Anthropic', endpoint: '/api/anthropic' },
+      { name: 'Gemini', endpoint: '/api/gemini' }
+    ];
+    async function callAIBackend(prompt, session) {
+      const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + session.access_token
+      };
+      const body = JSON.stringify({ messages: [{ role: 'user', content: prompt }] });
+      const errors = [];
+      for (const provider of AI_PROVIDERS) {
+        try {
+          const res = await fetch(provider.endpoint, { method: 'POST', headers, body });
+          if (res.ok) return (await res.json()).content[0].text;
+          const e = await res.json().catch(() => ({}));
+          errors.push(`${provider.name}: ${e.error?.message || e.error || e.message || 'API error ' + res.status}`);
+        } catch (err) {
+          errors.push(`${provider.name}: Network error — ${err.message}`);
+        }
+      }
+      throw new Error(errors.join(' | '));
+    }
     async function claude(prompt, key) {
       const uses = parseInt(localStorage.getItem('yuktora_ai_uses') || '0');
       const isPro = S.key && S.key.startsWith('pro_');
@@ -3177,24 +3205,7 @@
         throw new Error('AI features require a signed-in account. Demo mode does not include live AI access.');
       }
 
-      let res;
-      try {
-        res = await fetch('/api/anthropic', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + session.access_token
-          },
-          body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
-        });
-      } catch (err) {
-        throw new Error('Network error: Could not reach the AI backend. Check that your Vercel server is running and ad-blockers are disabled.');
-      }
-
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}));
-        throw new Error(e.error?.message || e.error || e.message || 'API error: ' + res.status);
-      }
+      const text = await callAIBackend(prompt, session);
 
       // Increment usage for free users
       if (!isPro) {
@@ -3202,7 +3213,7 @@
         updateApiStatus();
       }
 
-      return (await res.json()).content[0].text;
+      return text;
     }
 
     // ─────────────────────────────────────────────
@@ -3277,6 +3288,23 @@
       return VISA_POSITIVE.some(re => re.test(t));
     }
 
+    // JD text sometimes gates on pre-existing local work rights without ever
+    // using the words "visa" or "sponsor" — e.g. "must have EU work
+    // eligibility". detectVisaSponsorship alone can't catch that; this flags it
+    // as a separate, stronger "needs pre-existing eligibility" signal.
+    const WORK_AUTH_REQUIRED = [
+      /must have[a-z ]{0,10}(the )?right to work/, /must be eligible to work in/,
+      /existing work authori[sz]ation/, /must have[a-z ]{0,10}work authori[sz]ation/,
+      /work eligibility (is )?required/, /(eu|uk|us) work eligibility/,
+      /eligible to work in (the )?(eu|uk|us|europe|united states|united kingdom|european union)/,
+      /must (currently )?(hold|have)[a-z ]{0,15}(eu|uk|us) (passport|visa|work permit)/,
+      /right to work in (the )?(eu|uk|us|europe|united kingdom|united states|european union)/
+    ];
+    function requiresLocalWorkAuthorization(text) {
+      const t = (text || '').toLowerCase();
+      return WORK_AUTH_REQUIRED.some(re => re.test(t));
+    }
+
     // ─────────────────────────────────────────────
     // LOCATION / "ABROAD" DETECTION
     // Used to decide whether a job needs confirmed visa sponsorship to be
@@ -3285,17 +3313,20 @@
     const COUNTRY_ALIASES = {
       'us': 'united states', 'usa': 'united states', 'u s': 'united states', 'u s a': 'united states',
       'uk': 'united kingdom', 'u k': 'united kingdom',
-      'uae': 'united arab emirates'
+      'uae': 'united arab emirates', 'eu': 'europe', 'european union': 'europe'
     };
-    // Only trust the last comma-segment as a country when it's actually a
-    // recognised one — a bare city ("Bangalore", no country suffix) must never
-    // resolve to a "country" that then mismatches against the candidate's and
-    // gets wrongly treated as abroad.
-    const KNOWN_COUNTRIES = new Set([
+    // Only trust the last comma-segment as a location when it's actually
+    // recognised — a bare city ("Bangalore", no country suffix) must never
+    // resolve to a "location" that then mismatches against the candidate's and
+    // gets wrongly treated as abroad. Includes broad regions (JSearch results
+    // sometimes only say "Europe"/"APAC" rather than naming a country) since
+    // those are still reliably distinct from a specific home country.
+    const KNOWN_LOCATIONS = new Set([
       'india', 'united states', 'united kingdom', 'canada', 'australia', 'germany', 'singapore',
       'united arab emirates', 'netherlands', 'ireland', 'france', 'switzerland', 'new zealand',
       'japan', 'china', 'south korea', 'saudi arabia', 'qatar', 'south africa', 'brazil', 'mexico',
-      'spain', 'italy', 'sweden', 'poland', 'indonesia', 'malaysia', 'philippines'
+      'spain', 'italy', 'sweden', 'poland', 'indonesia', 'malaysia', 'philippines',
+      'europe', 'emea', 'apac', 'asia pacific', 'middle east', 'gulf', 'gcc', 'north america', 'latam', 'latin america'
     ]);
     function normalizeCountry(str) {
       const s = (str || '').toLowerCase().trim().replace(/\./g, '');
@@ -3305,16 +3336,23 @@
       const parts = (locStr || '').split(',').map(p => p.trim()).filter(Boolean);
       if (!parts.length) return '';
       const last = normalizeCountry(parts[parts.length - 1]);
-      return KNOWN_COUNTRIES.has(last) ? last : '';
+      return KNOWN_LOCATIONS.has(last) ? last : '';
     }
     function isRemoteLoc(loc) { return /remote/i.test(loc || ''); }
-    // True only when both locations resolve to known, different countries —
+    // True only when both locations resolve to known, different locations —
     // missing data never triggers a false "abroad", it just skips the check.
     function isAbroadJob(jobLoc, candidateLoc) {
       if (isRemoteLoc(jobLoc)) return false;
       const jc = extractCountry(jobLoc), cc = extractCountry(candidateLoc);
       if (!jc || !cc) return false;
       return jc !== cc;
+    }
+    // Single entry point: should this job be hidden from results? Confirmed
+    // sponsorship always wins; otherwise either signal (abroad location, or
+    // the JD itself demanding pre-existing local eligibility) hides it.
+    function jobNeedsHiding(j) {
+      if (j.visa) return false;
+      return isAbroadJob(j.loc, S.profile.loc) || requiresLocalWorkAuthorization(j.jd);
     }
 
     // The candidate's intent: target roles + skills (falls back to the searched role)
@@ -3358,7 +3396,13 @@
     }
 
     // Readable breakdown shown in the analysis box — makes the score credible.
-    function matchBreakdown(matched, missing) {
+    // "Skills not found: none flagged" looked identical whether every skill
+    // matched or the profile simply had zero skills configured — those are very
+    // different situations and now say so explicitly.
+    function matchBreakdown(matched, missing, skillsCount) {
+      if (!skillsCount) {
+        return `MATCH BREAKDOWN (instant heuristic)\n▸ No skills set in your profile yet — this score is based on job-title match only.\n▸ Add skills in My Profile for a real keyword breakdown.\n\nClick "Analyse & score with AI" on the Paste JD tab for a full Claude report.`;
+      }
       const m = matched.length ? matched.slice(0, 6).join(', ') : '—';
       const g = missing.length ? missing.slice(0, 4).join(', ') : 'none flagged';
       return `MATCH BREAKDOWN (instant heuristic)\n▸ Skills matched in posting: ${m}\n▸ Skills not found: ${g}\n\nClick "Analyse & score with AI" on the Paste JD tab for a full Claude report.`;
@@ -3424,11 +3468,12 @@
               visa: detectVisaSponsorship(job.job_description),
               jd: job.job_description || 'No description provided.',
               url: job.job_apply_link || job.job_google_link || '#',
-              date: new Date().toISOString()
+              date: new Date().toISOString(),
+              scoreSource: 'heuristic' // rescored live against the current profile on every render
             };
             const { score, matched, missing } = scoreJob(base, intent);
             base.score = score;
-            base.analysis = matchBreakdown(matched, missing);
+            base.analysis = matchBreakdown(matched, missing, intent.skills.length);
             return base;
           });
 
@@ -3477,7 +3522,7 @@
             }
           ].map(job => {
             const { score, matched, missing } = scoreJob(job, intent);
-            return { ...job, score, analysis: matchBreakdown(matched, missing) };
+            return { ...job, score, analysis: matchBreakdown(matched, missing, intent.skills.length), scoreSource: 'heuristic' };
           });
 
           const seen = new Set(S.jobs.map(jobKey));
@@ -3624,6 +3669,27 @@ KEYWORDS: [8 top keywords from JD to add to resume, comma-separated]`;
 
     function clearJobs() { S.jobs = []; persist(); renderSavedJobs(); toast('Cleared'); }
 
+    // Live-fetched jobs are scored once at fetch time against whatever the
+    // profile looked like *then* — if skills/roles/resume change afterwards,
+    // that score and its breakdown silently go stale (e.g. a job scored 100%
+    // purely on title match, from before any skills existed in the profile,
+    // stays frozen at 100% forever with an empty-looking breakdown). AI-scored
+    // jobs (Paste JD / manual entry) are left alone — re-running those costs a
+    // real Claude call, so only the free heuristic path gets live-rescored.
+    function rescoreHeuristicJobs() {
+      const intent = buildIntent();
+      let changed = false;
+      S.jobs.forEach(j => {
+        if (j.scoreSource !== 'heuristic') return;
+        const { score, matched, missing } = scoreJob(j, intent);
+        const visa = detectVisaSponsorship(j.jd);
+        const analysis = matchBreakdown(matched, missing, intent.skills.length);
+        if (j.score !== score || j.visa !== visa || j.analysis !== analysis) changed = true;
+        j.score = score; j.visa = visa; j.analysis = analysis;
+      });
+      if (changed) persist();
+    }
+
     const MATCH_FLOOR = 90;
     function renderSavedJobs() {
       const list = document.getElementById('jobs-list');
@@ -3634,10 +3700,13 @@ KEYWORDS: [8 top keywords from JD to add to resume, comma-separated]`;
         return;
       }
 
-      // Abroad roles without an explicitly confirmed sponsorship statement in the
-      // JD are hidden entirely, not just unbadged — showing them risks someone
-      // applying to a role that will reject them on work authorization alone.
-      const eligible = S.jobs.filter(j => !(isAbroadJob(j.loc, S.profile.loc) && !j.visa));
+      rescoreHeuristicJobs();
+
+      // Roles hidden entirely (not just unbadged) when sponsorship isn't
+      // explicitly confirmed: abroad relative to the candidate's profile
+      // location, OR the JD itself demands pre-existing local work rights
+      // (e.g. "must have EU work eligibility") even without naming a country.
+      const eligible = S.jobs.filter(j => !jobNeedsHiding(j));
       const hiddenAbroad = S.jobs.length - eligible.length;
 
       if (!eligible.length) {

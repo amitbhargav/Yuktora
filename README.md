@@ -124,11 +124,24 @@ Live: https://yuktora.vercel.app
 * **DOCX support added alongside PDF:** Mammoth.js via CDN, same client-side-only pattern as the existing PDF.js integration — the file input now accepts either format, nothing uploaded to any backend.
 * **Verified with a headless-browser run:** uploaded both a sample PDF and DOCX, confirmed extraction, save, and the collapse/toggle/re-collapse-on-revisit behavior, zero console errors.
 
+### Phase 3.20: Visa Detection Follow-up — Region Recognition, Live Rescoring (Shipped)
+* **Location detection was too narrow:** Phase 3.18's `isAbroadJob()` only recognised specific country names — a JSearch result location like `"europe"` (a region, not a country) didn't resolve to anything, so the abroad-hiding check silently skipped it and the job slipped through unfiltered. `KNOWN_LOCATIONS` now also recognises broad regions (Europe, EMEA, APAC, Middle East, Gulf, North America, LatAm, etc.) as distinct from a candidate's home country.
+* **New signal — JD text can require local eligibility without ever saying "visa" or "sponsor":** added `requiresLocalWorkAuthorization()`, matching phrasing like "must have EU work eligibility" or "right to work in the UK required." `jobNeedsHiding()` now hides a job if *either* it's abroad with unconfirmed sponsorship, *or* the JD demands pre-existing local work rights — confirmed sponsorship always overrides both.
+* **Fixed the "match breakdown looks broken" bug:** live-fetched jobs were scored once at fetch time and frozen forever — a job scored 100% purely on title match (because the profile had zero skills configured *at that moment*) stayed frozen at 100% with an unhelpful "Skills not found: none flagged" breakdown even after skills were added later. Added `rescoreHeuristicJobs()`, which recomputes score, visa status, and the breakdown text against the *current* profile on every render — tagged only onto heuristic-scored jobs (`scoreSource: 'heuristic'`); AI-scored jobs from Paste JD are left alone since re-scoring those would cost a real Claude call. `matchBreakdown()` also now explicitly says "No skills set in your profile yet" instead of the ambiguous "none flagged" when the profile has zero skills.
+* **Verified** with 12 unit tests (including the exact "europe"-location and "EU work eligibility" scenarios reported) plus a live headless-browser run reproducing the full before/after: a stale 100%-match "europe" job with no confirmed sponsorship gets hidden, then reappears with a live-recalculated score once the JD confirms sponsorship and a matching skill is added to the profile.
+
+### Phase 3.21: Free-Tier AI Fallback — Gemini (Shipped)
+* **Problem:** `/api/anthropic` is the only AI backend, gated on a paid Anthropic account's credit balance — when that balance hits zero, every AI feature (Resume Tailor, Analyse & Score, Rejection AI) fails outright with Anthropic's raw billing error.
+* **Built out `api/gemini.js`** (previously an empty stub left for this exact purpose — see Phase 3.6): same Supabase JWT gate and `ai_usage_logs` logging as `api/anthropic.js`, calling Google's free-tier Gemini API (`gemini-2.0-flash` → `gemini-1.5-flash` fallback). Its response is normalized to the identical `{ content: [{ text }] }` shape `api/anthropic.js` returns, so nothing downstream needs to know which provider actually answered.
+* **Frontend `claude()` now tries both, in order:** Anthropic first (generally the stronger model), automatically falling back to Gemini on any failure — a bad response, a network error, or a billing block. If both fail, the surfaced error includes both providers' reasons, not just the first one, so nothing gets silently swallowed.
+* **Requires a one-time manual step** (same pattern as `ai_usage_logs`/`recruiter_leads`): get a free key at aistudio.google.com (no credit card required) and add it to Vercel as `GEMINI_API_KEY`, then redeploy so the serverless functions pick it up.
+* **Verified** with isolated fallback-chain tests (Anthropic succeeds / Anthropic fails+Gemini succeeds / both fail with combined error / Anthropic network error+Gemini succeeds) and a response-shape check against a realistic Gemini API payload — all passing. Not verified against a live Gemini key/quota, since none exists in this environment; recommend a real end-to-end check once `GEMINI_API_KEY` is set.
+
 ---
 
 ## 🔮 Upcoming Roadmap
 
-### Phase 3.20: Daily-Use UX Pass (remaining)
+### Phase 3.22: Daily-Use UX Pass (remaining)
 Parts 2–4 of the same initiative that started with Phase 3.17 — aimed at turning Yuktora from "a product I built" into a tool used daily.
 1. **Auto-parse skills from resume** — when the base resume is uploaded/updated, call Claude to extract a skills list and prefill the Skills chips in My Profile (still editable, add/remove as normal). Depends on Phase 3.17's saved resume text.
 2. **Job matching threshold on Job Search** — show 80%+ Fit Score matches by default, with a "Show close matches (60–79%)" toggle for the rest, visually de-emphasised. Independent of the other three items.
