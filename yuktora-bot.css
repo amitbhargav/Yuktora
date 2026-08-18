@@ -59,6 +59,9 @@
     linear-gradient(180deg, var(--burg-2, #3A1F10) 0%, var(--burg-3, #2B1E14) 55%, #1C130D 100%);
   opacity: 0;
   transition: opacity .35s ease;
+  color-scheme: dark; /* tells the browser this UI is intentionally dark, so it
+                          doesn't silently swap form controls (like the input
+                          below) to a light/black-on-white default */
 }
 .yb-overlay.on { display: flex; opacity: 1 }
 .yb-overlay.closing { opacity: 0 }
@@ -344,7 +347,10 @@
   padding: 12px 14px;
   font-family: var(--font-body, 'Outfit', sans-serif);
   font-size: .88rem;
-  color: #F3E7D6;
+  color: #F3E7D6 !important;
+  -webkit-text-fill-color: #F3E7D6;
+  caret-color: #F3E7D6;
+  color-scheme: dark;
   outline: none;
 }
 .yb-ofinput::placeholder { color: rgba(238, 226, 209, .4) }

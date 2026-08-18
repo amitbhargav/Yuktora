@@ -23,13 +23,13 @@
 
   /* ── content config (marketing flow) ── */
   const YB_PAIN = {
-    rejected: { label: "😕 Not sure why I keep getting rejected", card: 'rejected', ic: '🧠', title: 'Rejection Analyser',
+    rejected: { label: "😕 Not sure why I keep getting rejected", card: 'rejected', appTab: 'rejection', ic: '🧠', title: 'Rejection Analyser',
       blurb: 'See exactly why you were filtered out.',
       reply: "That's exactly what Rejection Analyser is built for — it explains why you were filtered out: missing keywords, weak bullets, or a straight-up role mismatch. No more guessing." },
-    fit: { label: "🤔 Don't know if I'm even a fit", card: 'fit', ic: '🎯', title: 'AI Match Scoring',
+    fit: { label: "🤔 Don't know if I'm even a fit", card: 'fit', appTab: 'dashboard', ic: '🎯', title: 'AI Match Scoring',
       blurb: '0–100 match score, gaps included.',
       reply: "That's the first thing Yuktora tells you. Paste the JD and get a 0–100 match score with the exact gaps and ATS keywords you're missing — before you spend an evening tailoring a resume for a role you were never going to land." },
-    blind: { label: "📋 Applying blindly, losing track of everything", card: 'blind', ic: '📊', title: 'Application Tracker',
+    blind: { label: "📋 Applying blindly, losing track of everything", card: 'blind', appTab: 'tracker', ic: '📊', title: 'Application Tracker',
       blurb: 'Every application, one dashboard.',
       reply: "That's what the Application Tracker fixes — every application, every status, every platform, in one dashboard. Stop losing track of what you sent where." }
   };
@@ -209,6 +209,10 @@
   function ybGoToUrl(url) {
     return () => setTimeout(() => { window.location.href = url; }, 200);
   }
+  /* opens the actual live tool in demo mode — no sign-in needed to try it */
+  function ybGoToAppDemo(tabId) {
+    return ybGoToUrl('/app.html?demo=1&tab=' + tabId);
+  }
 
   /* ── conversation: marketing flow (homepage, pricing, signin, blog, 404) ── */
   function ybStart() {
@@ -224,10 +228,10 @@
         if (key === 'explore') {
           ybBotMsg("Take your time! Here's everywhere you can go:", () => {
             ybCardGrid([
-              { ic: '🎯', title: 'Features', blurb: 'All 6, one scroll away.', action: ybGoToAnchor('#features') },
+              { ic: '🚀', title: 'Try the live demo', blurb: 'Every tool, no sign-in needed.', primary: true, action: ybGoToAppDemo('dashboard') },
               { ic: '📋', title: 'How it works', blurb: 'JD to tailored app, 4 steps.', action: ybGoToAnchor('#how-it-works') },
               { ic: '💳', title: 'Pricing', blurb: 'Free tier + paid plans.', action: ybGoToUrl('/pricing') },
-              { ic: '🚀', title: 'Start Free', blurb: 'Magic link, no password.', wide: true, primary: true, action: ybGoToUrl('/app') }
+              { ic: '✦', title: 'Start Free', blurb: 'Magic link, no password.', wide: true, action: ybGoToUrl('/app') }
             ]);
           });
           return;
@@ -241,8 +245,8 @@
     const feat = YB_PAIN[ybPainPick];
     ybBotMsg("Alright, here's my read — start here:", () => {
       ybCardGrid([
-        { ic: feat.ic, title: feat.title, blurb: feat.blurb, primary: true, action: ybGoToFeature(feat.card) },
-        { ic: '📋', title: 'How it works', blurb: 'The full flow, 4 steps.', action: ybGoToAnchor('#how-it-works') },
+        { ic: feat.ic, title: 'Try ' + feat.title, blurb: 'Live demo, no sign-in needed.', primary: true, action: ybGoToAppDemo(feat.appTab) },
+        { ic: '📖', title: 'Learn more first', blurb: 'See how it works on the homepage.', action: ybGoToFeature(feat.card) },
         { ic: '🚀', title: 'Start Free', blurb: 'Magic link, no password.', wide: true, action: ybGoToUrl('/app') }
       ]);
       ybBotMsg("Other questions — pricing, data safety, whatever — just type below, I'm still here.");
