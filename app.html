@@ -1901,7 +1901,8 @@
         </div>
       </div>
       <div class="sidebar-foot">
-        <div class="api-pill">
+        <div class="api-pill" onclick="nav('settings')" style="cursor:pointer"
+          title="AI calls remaining on this browser (Tailor, Analyse & Score, Rejection AI). Click to see the full explanation in Settings.">
           <span class="api-led" id="api-led"></span>
           <span id="api-txt">API key not set</span>
         </div>
@@ -1918,9 +1919,8 @@
           <a href="/" class="btn btn-ghost btn-sm" style="margin-right:12px;">← Back to Home</a>
           <button class="btn btn-secondary btn-sm" onclick="exportData()">Export data</button>
           <button class="btn btn-secondary btn-sm" id="btn-load-cloud" onclick="cloudLoad()"
-            title="Load your saved data from Supabase">🔄 Load Data</button>
-          <button class="btn btn-green btn-sm" id="btn-save-cloud" onclick="cloudSave()"
-            title="Save your profile & applications to Supabase">💾 Save to Cloud</button>
+            title="Pull your saved data from the cloud, overwriting what's here now — use if you edited on another device">🔄
+            Refresh from cloud</button>
           <button class="btn btn-primary btn-sm" onclick="nav('search')">+ Add job</button>
           <!-- ── User menu: signed-in email + sign out ── -->
           <div
@@ -2551,40 +2551,34 @@
           <div class="grid-2">
             <div class="card">
               <div class="card-header">
-                <div class="card-title">Input</div>
+                <div class="card-title">Which application?</div>
               </div>
               <div class="card-body">
                 <div class="field">
-                  <label class="field-label">Role &amp; company</label>
-                  <input type="text" class="input" id="r-role" placeholder="Senior TPM at Amazon">
-                </div>
-                <div class="field-row">
-                  <div class="field">
-                    <label class="field-label">Rejection stage</label>
-                    <select class="input" id="r-stage">
-                      <option>ATS / Resume screening</option>
-                      <option>Recruiter screen</option>
-                      <option>Hiring manager screen</option>
-                      <option>Technical interview</option>
-                      <option>Final round</option>
-                      <option>Unknown</option>
-                    </select>
-                  </div>
+                  <label class="field-label">Tracked application</label>
+                  <select class="input" id="r-app-select" onchange="onRejAppSelect()">
+                    <option value="">— Select from your tracker —</option>
+                  </select>
+                  <div class="field-hint" id="r-app-hint">Role, company, and the original job description are pulled in
+                    automatically. Your saved resume is used too — nothing to paste.</div>
                 </div>
                 <div class="field">
-                  <label class="field-label">Job requirements</label>
-                  <textarea class="input" id="r-jd" rows="4" placeholder="What the job required..."></textarea>
-                </div>
-                <div class="field">
-                  <label class="field-label">Resume you submitted</label>
-                  <textarea class="input" id="r-resume" rows="5"
-                    placeholder="Paste the resume version you sent..."></textarea>
+                  <label class="field-label">Rejection stage</label>
+                  <select class="input" id="r-stage">
+                    <option>ATS / Resume screening</option>
+                    <option>Recruiter screen</option>
+                    <option>Hiring manager screen</option>
+                    <option>Technical interview</option>
+                    <option>Final round</option>
+                    <option>Unknown</option>
+                  </select>
                 </div>
                 <div class="field">
                   <label class="field-label">Rejection message (optional)</label>
                   <textarea class="input" id="r-msg" rows="2" placeholder="Any feedback received..."></textarea>
                 </div>
-                <button class="btn btn-primary" style="width:100%" onclick="analyseRejection()">Analyse with AI</button>
+                <button class="btn btn-primary" style="width:100%" id="r-analyse-btn"
+                  onclick="analyseRejection()">Analyse with AI</button>
               </div>
             </div>
             <div style="display:flex;flex-direction:column;gap:14px">
@@ -2593,7 +2587,31 @@
                   <div class="card-title">AI analysis</div>
                 </div>
                 <div class="card-body">
-                  <div class="ai-box" id="r-output">Run analysis to see why you were rejected and exactly what to fix.
+                  <div class="empty-sub" style="text-align:center;padding:16px" id="r-output-empty">Select a tracked
+                    application and run analysis to see why you were rejected and exactly what to fix.</div>
+                  <div id="r-output-sections" style="display:none">
+                    <div class="field" style="margin-bottom:14px">
+                      <label class="field-label">Likely root cause</label>
+                      <div class="ai-box" id="r-out-cause"></div>
+                    </div>
+                    <div class="field-row" style="margin-bottom:14px">
+                      <div class="field">
+                        <label class="field-label">Gaps found</label>
+                        <div class="ai-box" id="r-out-gaps" style="min-height:60px"></div>
+                      </div>
+                      <div class="field">
+                        <label class="field-label">Resume fixes</label>
+                        <div class="ai-box" id="r-out-fixes" style="min-height:60px"></div>
+                      </div>
+                    </div>
+                    <div class="field" style="margin-bottom:14px">
+                      <label class="field-label">Strategy</label>
+                      <div class="ai-box" id="r-out-strategy"></div>
+                    </div>
+                    <div class="field">
+                      <label class="field-label">Next 3 actions</label>
+                      <div class="ai-box" id="r-out-actions"></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2746,7 +2764,10 @@
                   </div>
                 </div>
               </div>
-              <button class="btn btn-primary" style="width:100%" onclick="saveProfile()">Save profile</button>
+              <button class="btn btn-primary" style="width:100%" id="btn-profile-edit-save"
+                onclick="handleProfileEditSaveClick()">✏️ Edit profile</button>
+              <div class="field-hint" style="text-align:center">Saving pushes to the cloud automatically — no separate
+                step.</div>
             </div>
           </div>
         </div>
@@ -2763,18 +2784,24 @@
 
             <div class="card">
               <div class="card-header">
-                <div class="card-title">Yuktora Pro</div>
+                <div class="card-title">AI usage limit</div>
               </div>
               <div class="card-body">
                 <div class="banner banner-blue" style="margin-bottom:14px">
-                  <span class="banner-icon">🚀</span>
+                  <span class="banner-icon">🧮</span>
                   <div><strong>Status:</strong> <span id="pro-status-text">Free Plan (5 uses left)</span></div>
+                </div>
+                <div class="field-hint" style="margin-bottom:14px;line-height:1.6">
+                  Every click of "Tailor with AI," "Analyse & score with AI," or "Analyse with AI" (Rejection AI) counts
+                  as one use. This counter lives in this browser only (not your account) and applies to your real
+                  sign-in the same as anyone else's — it's not a demo-only limit. <strong>Pro purchasing isn't live
+                    yet</strong> (Razorpay integration still pending), so there's currently no real way to buy past the
+                  free limit. Until that ships, entering any text starting with <code>pro_</code> below removes the cap
+                  for testing — it's a client-side check only, not a real license.
                 </div>
                 <div class="field">
                   <label class="field-label">Pro License Key</label>
-                  <input type="password" class="input" id="api-input" placeholder="Enter your Yuktora Pro key...">
-                  <div class="field-hint">Upgrade at <a href="/pricing" style="color:var(--brand)"
-                      target="_blank">yuktora.vercel.app/pricing</a> to get unlimited AI.</div>
+                  <input type="password" class="input" id="api-input" placeholder="e.g. pro_test (any pro_ prefix works for now)">
                 </div>
                 <div class="flex-row">
                   <button class="btn btn-primary btn-sm" onclick="saveKey()">Save License</button>
@@ -3088,7 +3115,7 @@
       if (id === 'profile') loadProfile();
       if (id === 'settings') loadSettings();
       if (id === 'tailor') loadTailorDefaults();
-      if (id === 'rejection') renderRejections();
+      if (id === 'rejection') { renderRejAppOptions(); renderRejections(); }
     }
     document.querySelectorAll('.nav-item').forEach(el => {
       el.addEventListener('click', () => nav(el.dataset.page));
@@ -3146,7 +3173,7 @@
         if (banner) {
           banner.style.display = left <= 2 ? 'flex' : 'none'; // Only pester them when running low
           if (document.getElementById('usage-banner-text')) {
-            document.getElementById('usage-banner-text').innerHTML = left > 0 ? `<strong>Free tier:</strong> You have ${left} AI uses remaining.` : `<strong>Free limit reached:</strong> Upgrade to Pro to continue using AI features.`;
+            document.getElementById('usage-banner-text').innerHTML = left > 0 ? `<strong>Free tier:</strong> You have ${left} AI uses remaining on this browser.` : `<strong>Free limit reached on this browser.</strong> See Settings for how to continue.`;
           }
         }
         if (document.getElementById('pro-status-text')) document.getElementById('pro-status-text').textContent = `Free Plan (${left} uses left)`;
@@ -3672,15 +3699,20 @@ KEYWORDS: [8 top keywords from JD to add to resume, comma-separated]`;
       }
     }
 
-    function addToTracker() {
+    async function addToTracker() {
       if (!S.curJob) { toast('Analyse a job first', '⚠️'); return; }
       const j = S.curJob;
       S.apps.unshift({
         id: j.id, title: j.title, company: j.company, loc: j.loc,
         platform: j.src || 'Other', date: new Date().toISOString().split('T')[0],
-        status: 'Applied', score: j.score, url: j.url, visa: j.visa, notes: ''
+        status: 'Applied', score: j.score, url: j.url, visa: j.visa, notes: '',
+        // Kept local-only (not in the tracked_jobs cloud schema) — lets
+        // Rejection AI pull the original JD for this application later
+        // without a SQL migration. Won't survive a cross-device cloud load.
+        jd: j.jd || ''
       });
       persist(); updateBadges(); toast('Added to tracker', '📋');
+      await syncToCloud();
     }
     function goTailor() {
       if (!S.curJob) { toast('Analyse a job first', '⚠️'); return; }
@@ -3923,7 +3955,7 @@ Rules:
       </td>
     </tr>`).join('');
     }
-    function saveApp() {
+    async function saveApp() {
       const title = document.getElementById('ma-title').value.trim();
       const company = document.getElementById('ma-co').value.trim();
       if (!title || !company) { toast('Fill title and company', '⚠️'); return; }
@@ -3942,57 +3974,103 @@ Rules:
       ['ma-title', 'ma-co', 'ma-loc', 'ma-score', 'ma-url', 'ma-notes'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('ma-visa').checked = false;
       toast('Application saved', '📋');
+      await syncToCloud();
     }
-    function updateStatus(id, status) {
+    async function updateStatus(id, status) {
       const a = S.apps.find(x => x.id === id);
-      if (a) { a.status = status; persist(); updateBadges(); toast('Updated: ' + status, '✓'); }
+      if (a) { a.status = status; persist(); updateBadges(); toast('Updated: ' + status, '✓'); await syncToCloud(); }
     }
-    function deleteApp(id) {
+    async function deleteApp(id) {
       S.apps = S.apps.filter(x => x.id !== id);
       persist(); renderTracker(); updateBadges(); toast('Removed', '🗑');
+      await syncToCloud();
     }
     function prefillRej(id) {
-      const a = S.apps.find(x => x.id === id);
-      if (!a) return;
-      document.getElementById('r-role').value = a.title + ' at ' + (a.company || '');
       nav('rejection');
+      const sel = document.getElementById('r-app-select');
+      if (sel) { sel.value = id; onRejAppSelect(); }
     }
 
     // ─────────────────────────────────────────────
     // REJECTION ANALYSER
+    // Redesigned to pull role/company/JD from a tracked application and the
+    // resume from S.profile.resume — the only things left to type are the
+    // rejection stage (a real choice) and an optional message. Nothing to
+    // re-paste that's already known elsewhere in the app.
     // ─────────────────────────────────────────────
+    function renderRejAppOptions() {
+      const sel = document.getElementById('r-app-select');
+      const current = sel.value;
+      sel.innerHTML = '<option value="">— Select from your tracker —</option>' +
+        S.apps.map(a => `<option value="${a.id}">${escapeHTML(a.title)} at ${escapeHTML(a.company || 'Unknown')}</option>`).join('');
+      if (S.apps.some(a => String(a.id) === current)) sel.value = current;
+      document.getElementById('r-app-hint').textContent = S.apps.length
+        ? 'Role, company, and the original job description are pulled in automatically. Your saved resume is used too — nothing to paste.'
+        : 'No tracked applications yet — add one from Job Search first, then come back here to analyse it.';
+      onRejAppSelect();
+    }
+    function onRejAppSelect() {
+      // Just a UI touch — the actual role/company/JD lookup happens fresh in
+      // analyseRejection() from the selected id, so there's no stale copy to
+      // keep in sync.
+      const sel = document.getElementById('r-app-select');
+      const btn = document.getElementById('r-analyse-btn');
+      btn.disabled = !sel.value;
+    }
     async function analyseRejection() {
-      const role = document.getElementById('r-role').value.trim();
+      const sel = document.getElementById('r-app-select');
+      const app = S.apps.find(x => String(x.id) === sel.value);
+      if (!app) { toast('Select a tracked application first', '⚠️'); return; }
+
+      const role = `${app.title} at ${app.company || 'Unknown'}`;
       const stage = document.getElementById('r-stage').value;
-      const jd = document.getElementById('r-jd').value.trim();
-      const res = document.getElementById('r-resume').value.trim() || S.profile.resume;
+      const jd = app.jd || '';
+      const res = S.profile.resume || '';
       const msg = document.getElementById('r-msg').value.trim();
-      if (!role) { toast('Enter the job role', '⚠️'); return; }
-      const out = document.getElementById('r-output');
-      out.className = 'ai-box loading';
-      out.innerHTML = '<div class="spinner"></div><span>Analysing with AI...</span>';
-      const prompt = `You are an expert career coach. Analyse why this candidate was rejected and give specific, actionable feedback.
+
+      document.getElementById('r-output-empty').style.display = 'none';
+      const sections = document.getElementById('r-output-sections');
+      sections.style.display = 'block';
+      ['r-out-cause', 'r-out-gaps', 'r-out-fixes', 'r-out-strategy', 'r-out-actions'].forEach(id => {
+        document.getElementById(id).innerHTML = '<div class="spinner"></div>';
+      });
+
+      const prompt = `You are an expert career coach. Analyse why this candidate was rejected and give specific, actionable feedback. Reply in EXACTLY this format, nothing else — each field's items separated by " | ":
+
+ROOT_CAUSE: [1-2 sentences on why rejected at this stage]
+GAPS: [gap 1] | [gap 2] | [gap 3]
+RESUME_FIXES: [exact bullet to rewrite, quoted] | [exact bullet to rewrite, quoted]
+STRATEGY: [1-2 sentences: apply to similar roles? how to position better?]
+NEXT_ACTIONS: [action 1] | [action 2] | [action 3]
 
 ROLE: ${role}
 STAGE: ${stage}
 JD: ${jd || 'Not provided'}
 RESUME: ${res || 'Not provided'}
-REJECTION: ${msg || 'None'}
+REJECTION FEEDBACK: ${msg || 'None'}
 
-Give:
-1. LIKELY ROOT CAUSE: Why rejected at this stage?
-2. SPECIFIC GAPS: Missing keywords, experience, or skills?
-3. RESUME FIXES: Exact bullets to rewrite (quote from resume)
-4. STRATEGY: Apply to similar roles? How to position better?
-5. NEXT 3 ACTIONS: Concrete immediate steps
-
-Be direct and specific. Reference actual content.`;
+Be direct and specific. Reference actual content from the JD and resume.`;
       try {
         const result = await claude(prompt);
-        out.className = 'ai-box'; out.textContent = result;
+        const get = (k) => { const l = result.split('\n').find(x => x.startsWith(k + ':')); return l ? l.replace(k + ':', '').trim() : ''; };
+        const list = (k) => get(k).split('|').map(s => s.trim()).filter(Boolean);
+        const asBullets = (items, empty) => items.length
+          ? items.map(i => `▸ ${escapeHTML(i)}`).join('<br>')
+          : `<span style="color:var(--gray-400)">${empty}</span>`;
+
+        document.getElementById('r-out-cause').textContent = get('ROOT_CAUSE') || 'Not provided';
+        document.getElementById('r-out-gaps').innerHTML = asBullets(list('GAPS'), 'None flagged');
+        document.getElementById('r-out-fixes').innerHTML = asBullets(list('RESUME_FIXES'), 'None suggested');
+        document.getElementById('r-out-strategy').textContent = get('STRATEGY') || 'Not provided';
+        document.getElementById('r-out-actions').innerHTML = asBullets(list('NEXT_ACTIONS'), 'None suggested');
+
         S.rejs.unshift({ id: Date.now(), role, stage, date: new Date().toISOString(), analysis: result });
         persist(); renderRejections(); toast('Analysis done', '🧠');
-      } catch (e) { out.className = 'ai-box'; out.textContent = 'Error: ' + e.message; toast(e.message, '✗'); }
+      } catch (e) {
+        document.getElementById('r-out-cause').textContent = 'Error: ' + e.message;
+        ['r-out-gaps', 'r-out-fixes', 'r-out-strategy', 'r-out-actions'].forEach(id => document.getElementById(id).textContent = '—');
+        toast(e.message, '✗');
+      }
     }
     function renderRejections() {
       const el = document.getElementById('r-past');
@@ -4016,6 +4094,15 @@ Be direct and specific. Reference actual content.`;
       if (!el) return;
       el.innerHTML = arr.map((t, i) => `
     <span class="tag">${escapeHTML(t)}<span class="tag-x" onclick="removeTag('${key}',${i})">×</span></span>`).join('');
+      // The × remove buttons just got recreated — reapply the current
+      // profile lock state so a re-render (e.g. AI skill extraction landing
+      // mid-view-mode) doesn't silently make them clickable again.
+      if (el.closest('#page-profile')) {
+        el.querySelectorAll('[onclick*="removeTag"]').forEach(x => {
+          x.style.pointerEvents = S._profileEditing ? '' : 'none';
+          x.style.opacity = S._profileEditing ? '' : '0.45';
+        });
+      }
     }
     function addTag(key) {
       const input = document.getElementById('in-' + key);
@@ -4095,6 +4182,7 @@ Be direct and specific. Reference actual content.`;
       ['roles', 'locs', 'skills'].forEach(k => renderTags(k));
       updateResumeSummary();
       document.getElementById('p-resume-file-status').textContent = 'Parsed entirely in your browser — click "Save profile" below to keep it.';
+      setProfileEditMode(false); // always opens read-only; click "Edit profile" to change anything
     }
     // Calls Claude once, only when the resume text actually changed on this
     // save, to extract (a) a skills list to prefill the Skills chips (merged
@@ -4139,7 +4227,10 @@ ${resumeText.slice(0, 6000)}`;
         // Non-fatal — the resume text itself already saved fine; this is best-effort enrichment.
       }
     }
-    function saveProfile() {
+    // Saves locally AND pushes to the cloud in one action — this single
+    // button is what replaced the separate "Save profile" / "Save to Cloud"
+    // two-step flow. syncToCloud() no-ops quietly in demo mode / signed out.
+    async function saveProfile() {
       const prevResume = (S.profile.resume || '').trim();
       ['name', 'email', 'phone', 'loc', 'li', 'resume'].forEach(f => {
         const el = document.getElementById('p-' + f); if (el) S.profile[f] = el.value;
@@ -4148,7 +4239,32 @@ ${resumeText.slice(0, 6000)}`;
       persist(); updateResumeSummary(); toast('Profile saved', '👤');
 
       const newResume = (S.profile.resume || '').trim();
-      if (newResume && newResume !== prevResume) extractResumeInsights(newResume);
+      if (newResume && newResume !== prevResume) await extractResumeInsights(newResume);
+      await syncToCloud();
+    }
+
+    // ── Edit / view lock ─────────────────────────────────────────────────
+    // My Profile opens read-only by default so nothing changes by accident;
+    // "Edit profile" unlocks the fields, and the same button becomes "Save
+    // profile" — one click both persists (local + cloud) and re-locks.
+    const PROFILE_LOCKABLE_IDS = ['p-name', 'p-phone', 'p-loc', 'p-li', 'p-visa', 'in-roles', 'in-locs', 'in-skills', 'p-resume-file'];
+    function setProfileEditMode(editing) {
+      PROFILE_LOCKABLE_IDS.forEach(id => { const el = document.getElementById(id); if (el) el.disabled = !editing; });
+      document.querySelectorAll('#page-profile [onclick*="addTag"], #page-profile [onclick*="removeTag"]').forEach(el => {
+        el.style.pointerEvents = editing ? '' : 'none';
+        el.style.opacity = editing ? '' : '0.45';
+      });
+      const btn = document.getElementById('btn-profile-edit-save');
+      btn.textContent = editing ? '💾 Save profile' : '✏️ Edit profile';
+      S._profileEditing = editing;
+    }
+    async function handleProfileEditSaveClick() {
+      if (S._profileEditing) {
+        await saveProfile();
+        setProfileEditMode(false);
+      } else {
+        setProfileEditMode(true);
+      }
     }
 
     // ─────────────────────────────────────────────
@@ -4237,10 +4353,12 @@ ${resumeText.slice(0, 6000)}`;
     //                   notes text, date text, created_at timestamptz)
     // ─────────────────────────────────────────────
     async function saveToSupabase(email) {
+      // Null-guarded — this now also runs silently from syncToCloud() after
+      // ordinary edits (profile save, tracker changes), not just from a
+      // dedicated topbar button, so it must work with no button in the DOM.
       const btn = document.getElementById('btn-save-cloud');
-      const orig = btn.textContent;
-      btn.textContent = '⏳ Saving…';
-      btn.disabled = true;
+      const orig = btn?.textContent;
+      if (btn) { btn.textContent = '⏳ Saving…'; btn.disabled = true; }
 
       try {
         // 1) Upsert the user profile row (resume + full profile JSON)
@@ -4291,9 +4409,23 @@ ${resumeText.slice(0, 6000)}`;
         console.error('[saveToSupabase]', err);
         toast('Cloud save failed: ' + (err.message || err), '✗');
       } finally {
-        btn.textContent = orig;
-        btn.disabled = false;
+        if (btn) { btn.textContent = orig; btn.disabled = false; }
       }
+    }
+
+    // Silently pushes local state to Supabase after any edit (profile save,
+    // tracker add/update/delete) — this is what makes a dedicated "Save to
+    // Cloud" button unnecessary: local and cloud stay in sync automatically
+    // instead of drifting apart between manual clicks. No-ops quietly in demo
+    // mode / when signed out (same guard as extractResumeInsights()) — errors
+    // still surface via saveToSupabase()'s own toast, so a failed sync isn't
+    // silent, just not a required extra click.
+    async function syncToCloud() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) return;
+      const email = (S.profile.email || '').trim();
+      if (!email) return;
+      await saveToSupabase(email);
     }
 
     // ── fetchFromSupabase(email) ─────────────────────────────────────────────────
@@ -4492,13 +4624,11 @@ ${resumeText.slice(0, 6000)}`;
       });
     }
 
-    // ── Button wrappers called from the topbar ───────────────────────────────────
-    // cloudSave() reads the verified email from S.profile (set by onAuthStateChange).
-    // cloudLoad() does the same — no manual text-field input required.
-    async function cloudSave() {
-      const email = _getEmail(); if (!email) return;
-      await saveToSupabase(email);
-    }
+    // ── Button wrapper for the topbar's "Refresh from cloud" ─────────────────────
+    // Reads the verified email from S.profile (set by onAuthStateChange) — no
+    // manual text-field input required. Manual push is now automatic via
+    // syncToCloud(), called after every save/tracker mutation instead of a
+    // dedicated button.
     async function cloudLoad() {
       const email = _getEmail(); if (!email) return;
       await fetchFromSupabase(email);
