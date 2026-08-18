@@ -22,6 +22,8 @@
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
   </script>
+  <!-- ── Mammoth.js (CDN) — parses uploaded resume DOCX files client-side ── -->
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
   <style>
     /* ─────────────────────────────────────────────
    DESIGN TOKENS - LIGHT & BRIGHT SAAS THEME
@@ -2719,18 +2721,24 @@
                 </div>
                 <div class="card-body">
                   <div class="field">
-                    <label class="field-label">Upload resume (PDF)</label>
-                    <input type="file" class="input" id="p-resume-file" accept="application/pdf"
+                    <label class="field-label">Upload resume (PDF or DOCX)</label>
+                    <input type="file" class="input" id="p-resume-file"
+                      accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                       onchange="handleResumeFile(this.files[0])">
                     <div class="field-hint" id="p-resume-file-status">Parsed entirely in your browser — click "Save
                       profile" below to keep it.</div>
                   </div>
                   <div class="field">
-                    <label class="field-label">Resume text</label>
-                    <textarea class="input" id="p-resume" rows="14"
-                      placeholder="Paste your full resume — used as base for AI tailoring..."></textarea>
-                    <div class="field-hint">Auto-loaded into Resume Tailor. Uploading a PDF above fills this in
-                      automatically — you can still edit it by hand.</div>
+                    <div id="p-resume-summary"
+                      style="font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:6px;"></div>
+                    <a href="#" id="p-resume-toggle" onclick="toggleResumeText();return false"
+                      style="color:var(--brand);font-weight:600;font-size:12px">Paste resume text manually
+                      instead</a>
+                    <div id="p-resume-field" style="display:none;margin-top:10px">
+                      <textarea class="input" id="p-resume" rows="14"
+                        placeholder="Paste your full resume — used as base for AI tailoring..."></textarea>
+                      <div class="field-hint">Auto-loaded into Resume Tailor.</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -3911,20 +3919,30 @@ Be direct and specific. Reference actual content.`;
       }
       return text.trim();
     }
+    // Extracts plain text from a DOCX File entirely client-side via Mammoth.js.
+    async function extractDocxText(file) {
+      const buf = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer: buf });
+      return (result.value || '').trim();
+    }
     async function handleResumeFile(file) {
       const status = document.getElementById('p-resume-file-status');
       if (!file) return;
-      if (file.type !== 'application/pdf') {
-        toast('Please upload a PDF file', '⚠️');
-        status.textContent = 'That file isn\'t a PDF — try again.';
+      const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+      const isDocx = file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || /\.docx$/i.test(file.name);
+      if (!isPdf && !isDocx) {
+        toast('Please upload a PDF or DOCX file', '⚠️');
+        status.textContent = 'That file isn\'t a PDF or DOCX — try again.';
         return;
       }
       status.textContent = `Parsing ${file.name}...`;
       try {
-        const text = await extractPdfText(file);
+        const text = isPdf ? await extractPdfText(file) : await extractDocxText(file);
         if (!text) {
-          status.textContent = 'No selectable text found — this PDF may be a scanned image. Paste your resume text below instead.';
-          toast('Could not extract text from PDF', '⚠️');
+          status.textContent = isPdf
+            ? 'No selectable text found — this PDF may be a scanned image. Use "Paste resume text manually" below instead.'
+            : 'Could not extract text from that DOCX. Use "Paste resume text manually" below instead.';
+          toast('Could not extract text from file', '⚠️');
           return;
         }
         document.getElementById('p-resume').value = text;
@@ -3932,8 +3950,26 @@ Be direct and specific. Reference actual content.`;
         toast('Resume parsed ✓', '📄');
       } catch (e) {
         console.error(e);
-        status.textContent = 'Failed to parse that PDF: ' + e.message;
-        toast('Could not parse PDF', '❌');
+        status.textContent = 'Failed to parse that file: ' + e.message;
+        toast('Could not parse file', '❌');
+      }
+    }
+    // The extracted/pasted resume text stays collapsed by default — the summary
+    // line + this toggle are the only things shown until the user asks to see it.
+    function toggleResumeText() {
+      const field = document.getElementById('p-resume-field');
+      field.style.display = field.style.display === 'none' ? 'block' : 'none';
+    }
+    function updateResumeSummary() {
+      const summary = document.getElementById('p-resume-summary');
+      const toggle = document.getElementById('p-resume-toggle');
+      const text = S.profile.resume || '';
+      if (text) {
+        summary.textContent = `Resume saved — ${text.length.toLocaleString()} characters ✓`;
+        toggle.textContent = 'Edit extracted text';
+      } else {
+        summary.textContent = 'No resume saved yet.';
+        toggle.textContent = 'Paste resume text manually instead';
       }
     }
     function loadProfile() {
@@ -3942,13 +3978,16 @@ Be direct and specific. Reference actual content.`;
       });
       document.getElementById('p-visa').checked = S.profile.visa || false;
       ['roles', 'locs', 'skills'].forEach(k => renderTags(k));
+      updateResumeSummary();
+      document.getElementById('p-resume-field').style.display = 'none';
+      document.getElementById('p-resume-file-status').textContent = 'Parsed entirely in your browser — click "Save profile" below to keep it.';
     }
     function saveProfile() {
       ['name', 'email', 'phone', 'loc', 'li', 'resume'].forEach(f => {
         const el = document.getElementById('p-' + f); if (el) S.profile[f] = el.value;
       });
       S.profile.visa = document.getElementById('p-visa').checked;
-      persist(); toast('Profile saved', '👤');
+      persist(); updateResumeSummary(); toast('Profile saved', '👤');
     }
 
     // ─────────────────────────────────────────────
