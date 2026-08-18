@@ -58,8 +58,18 @@
   /* ── page-aware link helpers ── */
   function ybHome(hash) { return YB_IS_HOME ? hash : '/' + hash; }
 
-  /* ── animated avatar: speaking pulses the equalizer, ring breathes/glows idle ── */
-  let ybSpeakTimer = null;
+  /* ── animated avatar: blinking eyes, speaking pulses the equalizer + brows ── */
+  function ybScheduleBlink() {
+    const delay = 2400 + Math.random() * 2600;
+    setTimeout(() => {
+      const l = document.getElementById('ybEyeL'), r = document.getElementById('ybEyeR');
+      if (l && r) {
+        l.classList.add('blink'); r.classList.add('blink');
+        setTimeout(() => { l.classList.remove('blink'); r.classList.remove('blink'); }, 140);
+      }
+      ybScheduleBlink();
+    }, delay);
+  }
   function ybSpeakStart() {
     const ring = document.getElementById('ybRing');
     if (ring) ring.classList.add('yb-speaking');
@@ -292,6 +302,7 @@
   window.ybClose = ybClose;
   window.ybSend = ybSend;
 
+  ybScheduleBlink();
   (function initYB() {
     if (YB_IS_APP) {
       // Logged-in users aren't prospects — never auto-popup, launcher only.

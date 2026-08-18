@@ -7,26 +7,34 @@
    --burg/--cream custom properties (e.g. app.html).
    ═══════════════════════════════════════════════════════════════════ */
 
+/* ── launcher: labeled pill so it reads as "reopen the guide", not a stray icon ── */
 .yb-launcher {
   position: fixed;
-  right: 24px;
-  bottom: 24px;
+  right: 22px;
+  bottom: 22px;
   z-index: 998;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  height: 52px;
+  padding: 0 18px 0 12px;
+  border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, .14);
   cursor: pointer;
-  background: radial-gradient(circle at 35% 30%, var(--gold, #A8683A), var(--burg-2, #3A1F10) 70%);
+  background: linear-gradient(135deg, var(--gold, #A8683A), var(--burg-2, #3A1F10));
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 9px;
   box-shadow: 0 8px 24px rgba(43, 30, 20, .4);
   animation: ybPulseBtn 2.6s ease-out infinite;
 }
-.yb-launcher:hover { transform: scale(1.06) }
-.yb-launcher svg { width: 22px; height: 22px; fill: #fff }
-.yb-launcher .yb-dot { position: absolute; top: 2px; right: 2px; width: 10px; height: 10px; border-radius: 50%; background: #3FD17E; border: 2px solid var(--burg-2, #3A1F10) }
+.yb-launcher:hover { transform: scale(1.04) }
+.yb-launcher svg { width: 20px; height: 20px; fill: #fff; flex-shrink: 0 }
+.yb-launcher-label {
+  font-family: var(--font-body, 'Outfit', sans-serif);
+  font-size: .82rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+.yb-launcher .yb-dot { position: absolute; top: 1px; right: 1px; width: 10px; height: 10px; border-radius: 50%; background: #3FD17E; border: 2px solid var(--burg-2, #3A1F10) }
 @keyframes ybPulseBtn {
   0% { box-shadow: 0 0 0 0 rgba(168, 104, 58, .5), 0 8px 24px rgba(43, 30, 20, .4) }
   70% { box-shadow: 0 0 0 14px rgba(168, 104, 58, 0), 0 8px 24px rgba(43, 30, 20, .4) }
@@ -111,6 +119,10 @@
   50% { transform: translateY(-4px) }
 }
 .yb-face-svg { position: relative; width: 92px; height: 92px; z-index: 1; }
+.yb-eye { transform-origin: center; transition: transform .06s }
+.yb-eye.blink { transform: scaleY(.08) }
+.yb-brow { transform-origin: center; transition: transform .25s ease; }
+.yb-ring.yb-speaking .yb-brow { transform: translateY(-1.4px) }
 
 /* ── speech-indicator equalizer (replaces a literal mouth) ── */
 .yb-eq {
