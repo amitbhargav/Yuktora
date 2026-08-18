@@ -3284,7 +3284,7 @@
         const query = encodeURIComponent(`${role} in ${loc}`);
 
         try {
-          const response = await fetch(`https://jsearch.p.rapidapi.com/search?query=${query}&page=1&num_pages=1`, {
+          const response = await fetch(`https://jsearch.p.rapidapi.com/search-v2?query=${query}&num_pages=1`, {
             method: 'GET',
             headers: {
               'x-rapidapi-key': apiKey,
