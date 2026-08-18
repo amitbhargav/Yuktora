@@ -88,7 +88,7 @@
   .yb-overlay.yb-panel .yb-overlay-inner { max-width: none; }
   .yb-overlay.yb-panel .yb-ring { width: 64px; height: 64px; margin-bottom: 12px }
   .yb-overlay.yb-panel .yb-face-svg { width: 54px; height: 54px }
-  .yb-overlay.yb-panel .yb-eyebrow2 { font-size: .64rem; margin-bottom: 14px }
+  #ybOverlay.yb-panel .yb-eyebrow2 { font-size: .64rem; margin-bottom: 14px }
   .yb-overlay.yb-panel .yb-tmsg.headline { font-size: 1.28rem; }
   .yb-overlay.yb-panel .yb-tmsg.sub { font-size: .88rem; }
   .yb-overlay.yb-panel .yb-pill { padding: 9px 15px; font-size: .8rem }
@@ -197,19 +197,27 @@
   50% { height: 12px }
 }
 
-.yb-eyebrow2 {
+/* Scoped with #ybOverlay to out-specificity app.html's own
+   [class*="eyebrow"] rule (used for its "BUILT WITH..." badges), which
+   was matching this element by substring and silently applying its own
+   light-tan pill background + dark text, making this line unreadable. */
+#ybOverlay .yb-eyebrow2 {
   font-family: var(--font-body, 'Outfit', sans-serif);
   font-size: .72rem;
   font-weight: 600;
   letter-spacing: .12em;
   text-transform: uppercase;
   color: rgba(238, 220, 195, .68);
+  background: none;
+  padding: 0;
+  border-radius: 0;
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 22px;
 }
-.yb-eyebrow2 .d { width: 6px; height: 6px; border-radius: 50%; background: #3FD17E; box-shadow: 0 0 6px #3FD17E; flex-shrink: 0 }
+#ybOverlay .yb-eyebrow2::before { content: none; }
+#ybOverlay .yb-eyebrow2 .d { width: 6px; height: 6px; border-radius: 50%; background: #3FD17E; box-shadow: 0 0 6px #3FD17E; flex-shrink: 0 }
 
 /* ── transcript: headline first message, subtext for the rest ── */
 .yb-transcript { width: 100%; }
@@ -339,9 +347,13 @@
   padding-top: 16px;
   border-top: 1px solid rgba(255, 255, 255, .08);
 }
-.yb-ofinput {
+/* Scoped with #ybOverlay: app.html defines its own global
+   input[type="text"] rule (attribute selector = higher specificity than
+   a plain class), which was silently overriding this field's background
+   to white — making the light text unreadable on it. */
+#ybOverlay .yb-ofinput {
   flex: 1;
-  background: rgba(255, 255, 255, .05);
+  background: rgba(255, 255, 255, .05) !important;
   border: 1px solid rgba(255, 255, 255, .14);
   border-radius: 10px;
   padding: 12px 14px;
@@ -353,8 +365,8 @@
   color-scheme: dark;
   outline: none;
 }
-.yb-ofinput::placeholder { color: rgba(238, 226, 209, .4) }
-.yb-ofinput:focus { border-color: var(--gold, #A8683A) }
+#ybOverlay .yb-ofinput::placeholder { color: rgba(238, 226, 209, .4) }
+#ybOverlay .yb-ofinput:focus { border-color: var(--gold, #A8683A) }
 .yb-ofsend {
   width: 42px;
   height: 42px;
