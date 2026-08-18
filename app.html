@@ -1987,10 +1987,16 @@
           </div>
 
           <!-- ══════════════════════════════════════════════════════════════
-       AI MATCH ANALYTICS ENGINE
-       Three static UI widgets: Fit Meter · Keyword Gap · Tailor Panel
+       AI MATCH ANALYTICS ENGINE — HIDDEN (see README Phase 3.25): confirmed
+       100% hardcoded/static markup (fixed "Senior Product Manager", "85%
+       Match", fixed keyword chips like "Product Strategy"/"SQL / Analytics")
+       that never gets touched by any JS — renderDash() only updates
+       s-found/s-applied/s-interviews/s-rate/dash-recent/dash-sources, never
+       any mae-* element. Left in the DOM (not deleted) so it can be wired to
+       real S.curJob/S.profile data later instead of showing fake numbers
+       regardless of who's signed in or what they've actually analysed.
   ══════════════════════════════════════════════════════════════ -->
-          <div style="margin-top:28px;">
+          <div style="margin-top:28px;display:none">
 
             <!-- Section header -->
             <div class="mae-section-head">
@@ -2734,15 +2740,9 @@
                   </div>
                   <div class="field">
                     <div id="p-resume-summary"
-                      style="font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:6px;"></div>
-                    <a href="#" id="p-resume-toggle" onclick="toggleResumeText();return false"
-                      style="color:var(--brand);font-weight:600;font-size:12px">Paste resume text manually
-                      instead</a>
-                    <div id="p-resume-field" style="display:none;margin-top:10px">
-                      <textarea class="input" id="p-resume" rows="14"
-                        placeholder="Paste your full resume — used as base for AI tailoring..."></textarea>
-                      <div class="field-hint">Auto-loaded into Resume Tailor.</div>
-                    </div>
+                      style="font-size:13px;font-weight:600;color:var(--gray-700);"></div>
+                    <textarea class="input" id="p-resume" rows="14" style="display:none"
+                      placeholder="Paste your full resume — used as base for AI tailoring..."></textarea>
                   </div>
                 </div>
               </div>
@@ -4075,23 +4075,16 @@ Be direct and specific. Reference actual content.`;
         toast('Could not parse file', '❌');
       }
     }
-    // The extracted/pasted resume text stays collapsed by default — the summary
-    // line + this toggle are the only things shown until the user asks to see it.
-    function toggleResumeText() {
-      const field = document.getElementById('p-resume-field');
-      field.style.display = field.style.display === 'none' ? 'block' : 'none';
-    }
+    // The resume textarea itself is never shown in My Profile — upload is the
+    // only interaction; this is just a one-line confirmation of the outcome.
     function updateResumeSummary() {
       const summary = document.getElementById('p-resume-summary');
-      const toggle = document.getElementById('p-resume-toggle');
       const text = S.profile.resume || '';
       if (text) {
         const roleSuffix = S.profile.resumeRole ? ` · Detected role: ${S.profile.resumeRole}` : '';
-        summary.textContent = `Resume saved — ${text.length.toLocaleString()} characters ✓${roleSuffix}`;
-        toggle.textContent = 'Edit extracted text';
+        summary.textContent = `Resume uploaded ✓${roleSuffix}`;
       } else {
-        summary.textContent = 'No resume saved yet.';
-        toggle.textContent = 'Paste resume text manually instead';
+        summary.textContent = 'No resume uploaded yet.';
       }
     }
     function loadProfile() {
@@ -4101,7 +4094,6 @@ Be direct and specific. Reference actual content.`;
       document.getElementById('p-visa').checked = S.profile.visa || false;
       ['roles', 'locs', 'skills'].forEach(k => renderTags(k));
       updateResumeSummary();
-      document.getElementById('p-resume-field').style.display = 'none';
       document.getElementById('p-resume-file-status').textContent = 'Parsed entirely in your browser — click "Save profile" below to keep it.';
     }
     // Calls Claude once, only when the resume text actually changed on this
@@ -4482,8 +4474,17 @@ ${resumeText.slice(0, 6000)}`;
           const emailEl = document.getElementById('p-email');
           if (emailEl) emailEl.value = verifiedEmail;
 
-          // Auto-load cloud data on sign-in or token refresh
-          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          // Auto-load cloud data — but ONLY when there's nothing meaningful to
+          // lose locally. This used to fire on every SIGNED_IN/TOKEN_REFRESHED
+          // event unconditionally (token refreshes happen automatically in the
+          // background, not just on manual navigation), silently overwriting
+          // S.apps with whatever was last pushed via "Save to Cloud" — so any
+          // tracker entry added since then vanished on the next reload with no
+          // warning. Now only pulls automatically on a genuinely fresh
+          // browser/device (no local jobs or tracked applications yet); once
+          // there's local data, only the explicit "Load Data" button can
+          // overwrite it.
+          if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && !S.apps.length && !S.jobs.length) {
             toast(`Signed in as ${verifiedEmail} — loading your data...`, '🔒');
             await fetchFromSupabase(verifiedEmail);
           }
