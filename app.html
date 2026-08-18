@@ -2258,9 +2258,13 @@
                   <div id="tab-search">
                     <div class="field-hint" style="margin-bottom:14px;">Fetch jobs instantly from global boards using
                       secure aggregator APIs.</div>
+                    <div id="role-mismatch-banner" class="banner banner-amber" style="display:none">
+                      <span class="banner-icon">🧭</span>
+                      <div id="role-mismatch-text"></div>
+                    </div>
                     <div class="field">
                       <label class="field-label">Job Role</label>
-                      <input type="text" class="input" id="search-role"
+                      <input type="text" class="input" id="search-role" oninput="checkRoleMismatch()"
                         placeholder="e.g. Senior Technical Program Manager">
                     </div>
                     <div class="field-row">
@@ -3355,6 +3359,19 @@
       return isAbroadJob(j.loc, S.profile.loc) || requiresLocalWorkAuthorization(j.jd);
     }
 
+    // True when the searched role and the resume's AI-detected primary role
+    // share too few title-words to be the same role family — e.g. a resume
+    // written for "Technical Program Manager" being searched against "Project
+    // Manager". Ratio is taken over the LONGER title so genuine synonyms and
+    // seniority variants ("Senior TPM" vs "TPM") don't get flagged.
+    function isRoleMismatch(searchedRole, resumeRole) {
+      if (!searchedRole || !resumeRole) return false;
+      const st = tokenize(searchedRole), rt = tokenize(resumeRole);
+      if (!st.length || !rt.length) return false;
+      const overlap = rt.filter(t => st.includes(t)).length;
+      return (overlap / Math.max(st.length, rt.length)) < 0.5;
+    }
+
     // The candidate's intent: target roles + skills (falls back to the searched role)
     function buildIntent(searchedRole) {
       const roles = (S.profile.roles && S.profile.roles.length)
@@ -3410,6 +3427,22 @@
 
     function jobKey(j) { return ((j.title || '') + '|' + (j.company || '')).toLowerCase().trim(); }
 
+    // Live-updates the role-mismatch banner as the user types a search role —
+    // a heads-up, not a block, since searching a deliberately different role
+    // (e.g. pivoting careers) is a legitimate thing to do.
+    function checkRoleMismatch() {
+      const banner = document.getElementById('role-mismatch-banner');
+      const role = document.getElementById('search-role').value.trim();
+      const resumeRole = S.profile.resumeRole;
+      if (isRoleMismatch(role, resumeRole)) {
+        document.getElementById('role-mismatch-text').textContent =
+          `Your resume is written for "${resumeRole}" — you're searching "${role}." Related but distinct; scores may run lower unless you tailor your resume for this role first.`;
+        banner.style.display = 'flex';
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+
     // --- SMART DUAL-MODE FETCH JOBS ---
     async function fetchLiveJobs() {
       const role = document.getElementById('search-role').value.trim();
@@ -3417,6 +3450,7 @@
       const apiKey = localStorage.getItem('rapid_key'); // Check if user has a real key
 
       if (!role) { toast('Please enter a Job Role', '⚠️'); return; }
+      checkRoleMismatch();
 
       const btn = document.querySelector('#tab-search .btn-primary');
       btn.textContent = 'Fetching...';
@@ -4034,7 +4068,8 @@ Be direct and specific. Reference actual content.`;
       const toggle = document.getElementById('p-resume-toggle');
       const text = S.profile.resume || '';
       if (text) {
-        summary.textContent = `Resume saved — ${text.length.toLocaleString()} characters ✓`;
+        const roleSuffix = S.profile.resumeRole ? ` · Detected role: ${S.profile.resumeRole}` : '';
+        summary.textContent = `Resume saved — ${text.length.toLocaleString()} characters ✓${roleSuffix}`;
         toggle.textContent = 'Edit extracted text';
       } else {
         summary.textContent = 'No resume saved yet.';
@@ -4051,12 +4086,59 @@ Be direct and specific. Reference actual content.`;
       document.getElementById('p-resume-field').style.display = 'none';
       document.getElementById('p-resume-file-status').textContent = 'Parsed entirely in your browser — click "Save profile" below to keep it.';
     }
+    // Calls Claude once, only when the resume text actually changed on this
+    // save, to extract (a) a skills list to prefill the Skills chips (merged
+    // in, never clobbering skills the user already added by hand) and (b) a
+    // single "primary role" string used by checkRoleMismatch() in Job Search.
+    // Silently skipped in demo mode / when signed out — no nag toast, since
+    // this is a convenience layered on top of the manual paste/edit path,
+    // not a requirement.
+    async function extractResumeInsights(resumeText) {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) return;
+
+      const prompt = `Analyse this resume. Reply in EXACTLY this format, nothing else:
+PRIMARY_ROLE: [the single job title that best represents this candidate's primary professional identity, e.g. "Technical Program Manager"]
+SKILLS: [comma-separated list of 8-15 concrete skills, tools, and competencies actually evidenced in the resume text — no generic soft skills like "communication" or "teamwork"]
+
+RESUME:
+${resumeText.slice(0, 6000)}`;
+
+      try {
+        const result = await claude(prompt);
+        const get = (k) => { const l = result.split('\n').find(x => x.startsWith(k + ':')); return l ? l.replace(k + ':', '').trim() : ''; };
+        const primaryRole = get('PRIMARY_ROLE');
+        const extracted = get('SKILLS').split(',').map(s => s.trim()).filter(Boolean);
+
+        if (primaryRole) S.profile.resumeRole = primaryRole;
+
+        if (!S.profile.skills) S.profile.skills = [];
+        const existing = new Set(S.profile.skills.map(s => s.toLowerCase()));
+        let added = 0;
+        extracted.forEach(s => {
+          if (!existing.has(s.toLowerCase())) { S.profile.skills.push(s); existing.add(s.toLowerCase()); added++; }
+        });
+        if (added) renderTags('skills');
+
+        persist(); updateResumeSummary();
+        if (added || primaryRole) {
+          toast(`AI extracted${added ? ` ${added} skill${added === 1 ? '' : 's'}` : ''}${primaryRole ? ` · role: ${primaryRole}` : ''}`, '🧠');
+        }
+      } catch (e) {
+        console.error('extractResumeInsights failed:', e);
+        // Non-fatal — the resume text itself already saved fine; this is best-effort enrichment.
+      }
+    }
     function saveProfile() {
+      const prevResume = (S.profile.resume || '').trim();
       ['name', 'email', 'phone', 'loc', 'li', 'resume'].forEach(f => {
         const el = document.getElementById('p-' + f); if (el) S.profile[f] = el.value;
       });
       S.profile.visa = document.getElementById('p-visa').checked;
       persist(); updateResumeSummary(); toast('Profile saved', '👤');
+
+      const newResume = (S.profile.resume || '').trim();
+      if (newResume && newResume !== prevResume) extractResumeInsights(newResume);
     }
 
     // ─────────────────────────────────────────────

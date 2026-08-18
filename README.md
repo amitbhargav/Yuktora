@@ -137,15 +137,19 @@ Live: https://yuktora.vercel.app
 * **Requires a one-time manual step** (same pattern as `ai_usage_logs`/`recruiter_leads`): get a free key at aistudio.google.com (no credit card required) and add it to Vercel as `GEMINI_API_KEY`, then redeploy so the serverless functions pick it up.
 * **Verified** with isolated fallback-chain tests (Anthropic succeeds / Anthropic fails+Gemini succeeds / both fail with combined error / Anthropic network error+Gemini succeeds) and a response-shape check against a realistic Gemini API payload — all passing. Not verified against a live Gemini key/quota, since none exists in this environment; recommend a real end-to-end check once `GEMINI_API_KEY` is set.
 
+### Phase 3.22: Auto-Parsed Skills + Resume/Search Role-Mismatch Nudge (Shipped)
+* **Skills auto-extraction, item 1 of the Phase 3.17 daily-use UX pass:** saving a *changed* base resume in My Profile now fires one Claude call (`extractResumeInsights()`) that pulls a concrete skills list (8–15 items, no generic soft skills) straight from the resume text and merges it into the Skills chips — never clobbering skills already added by hand, only skipped entirely if the resume text didn't actually change on that save. Silently no-ops in demo mode / when signed out, since it's a convenience layer on top of the existing manual-edit path, not a requirement.
+* **New idea surfaced mid-session, folded into the same Claude call:** a resume written for one role (e.g. "Technical Program Manager") searched against a meaningfully different one (e.g. "Project Manager") was scoring and displaying with no indication of the mismatch. The same extraction call now also returns a single "primary role" string (`S.profile.resumeRole`), and Job Search shows a live amber banner above the Job Role field — via `isRoleMismatch()`, a token-overlap check ("Senior TPM" vs "TPM" still counts as a match; "Technical Program Manager" vs "Project Manager" doesn't) — the moment what you type diverges too far from what your resume demonstrates. A heads-up, not a block: searching a genuinely different role on purpose (career pivot) still works exactly as before.
+* **Verified** with 9 unit tests on the token-overlap threshold (including the exact TPM-vs-PM case reported, plus the boundary behaviour at exactly 50% overlap) and a full headless-browser run with a mocked AI backend: saved resume → extraction fires → skills chips + detected role populate → summary line updates → searching a mismatched role shows the banner → searching the matching role hides it again. Zero console errors.
+
 ---
 
 ## 🔮 Upcoming Roadmap
 
-### Phase 3.22: Daily-Use UX Pass (remaining)
-Parts 2–4 of the same initiative that started with Phase 3.17 — aimed at turning Yuktora from "a product I built" into a tool used daily.
-1. **Auto-parse skills from resume** — when the base resume is uploaded/updated, call Claude to extract a skills list and prefill the Skills chips in My Profile (still editable, add/remove as normal). Depends on Phase 3.17's saved resume text.
-2. **Job matching threshold on Job Search** — show 80%+ Fit Score matches by default, with a "Show close matches (60–79%)" toggle for the rest, visually de-emphasised. Independent of the other three items.
-3. **One-click Resume Tailor from job cards** — a "Tailor for this role" button per job card that pulls the saved base resume + that job's JD and runs the tailor directly, skipping the Resume Tailor page's form. Depends on Phase 3.17's saved resume; touches the same job-card markup as item 2 above, so sequenced after it.
+### Phase 3.23: Daily-Use UX Pass (remaining)
+Items 2–3 of the same initiative that started with Phase 3.17 — item 1 (auto-parsed skills) shipped in Phase 3.22 above.
+1. **Job matching threshold on Job Search** — show 80%+ Fit Score matches by default, with a "Show close matches (60–79%)" toggle for the rest, visually de-emphasised.
+2. **One-click Resume Tailor from job cards** — a "Tailor for this role" button per job card that pulls the saved base resume + that job's JD and runs the tailor directly, skipping the Resume Tailor page's form. Touches the same job-card markup item 1 above changes, so sequenced after it.
 
 ### Phase 4: Monetization & Backend Hardening
 1. **Run the `ai_usage_logs` migration** — shipped in code (Phase 3.11) but needs its table created via Supabase's SQL Editor (see `AGENTS.md`). Quick, one-time, GUI step. (`recruiter_leads` migration from Phase 3.14 is on hold — see Phase 3.15.)
