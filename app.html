@@ -3354,8 +3354,16 @@
     // Single entry point: should this job be hidden from results? Confirmed
     // sponsorship always wins; otherwise either signal (abroad location, or
     // the JD itself demanding pre-existing local eligibility) hides it.
+    // Jobs fetched via Search Live (or anything from before scoreSource
+    // tagging existed) get visa re-derived fresh from the JD text every time,
+    // rather than trusting a possibly-stale stored j.visa — this is what
+    // makes already-cached jobs self-correct after a detection-accuracy fix
+    // ships, without needing a one-time data migration. 'manual' entries keep
+    // the user's own hand-checked signal as authoritative; 'ai' (Paste JD)
+    // keeps Claude's own judgment.
     function jobNeedsHiding(j) {
-      if (j.visa) return false;
+      const visa = (j.scoreSource === 'ai' || j.scoreSource === 'manual') ? !!j.visa : detectVisaSponsorship(j.jd);
+      if (visa) return false;
       return isAbroadJob(j.loc, S.profile.loc) || requiresLocalWorkAuthorization(j.jd);
     }
 
@@ -3648,7 +3656,14 @@ KEYWORDS: [8 top keywords from JD to add to resume, comma-separated]`;
         const body = res.replace(/^(TITLE|COMPANY|LOCATION|SOURCE|VISA|SCORE|KEYWORDS):.*$/gm, '').replace(/^\s*\n/gm, '').trim();
         out.textContent = body;
 
-        S.curJob = { id: Date.now(), title, company, loc, src, visa, score, jd, url, analysis: res, date: new Date().toISOString() };
+        S.curJob = {
+          id: Date.now(), title, company, loc, src, visa, score, jd, url, analysis: res, date: new Date().toISOString(),
+          // 'manual' preserves the user's own hand-checked sponsorship signal
+          // (jm-visa) as authoritative; 'ai' is Claude's own JD-text judgment.
+          // Neither gets silently overridden by the regex-based recheck that
+          // heuristic (Search Live) jobs get in jobNeedsHiding()/rescoreHeuristicJobs().
+          scoreSource: curTab === 'manual' ? 'manual' : 'ai'
+        };
         S.jobs.unshift(S.curJob);
         persist(); renderSavedJobs(); updateBadges();
         toast(`Match: ${score}%`, score >= 70 ? '🟢' : score >= 50 ? '🟡' : '🔴');
@@ -3708,18 +3723,21 @@ KEYWORDS: [8 top keywords from JD to add to resume, comma-separated]`;
     // that score and its breakdown silently go stale (e.g. a job scored 100%
     // purely on title match, from before any skills existed in the profile,
     // stays frozen at 100% forever with an empty-looking breakdown). AI-scored
-    // jobs (Paste JD / manual entry) are left alone — re-running those costs a
-    // real Claude call, so only the free heuristic path gets live-rescored.
+    // jobs (Paste JD / manual entry, tagged 'ai'/'manual') are left alone —
+    // re-running those costs a real Claude call. Anything else — including
+    // jobs fetched before scoreSource tagging existed at all — is treated as
+    // heuristic and rescored/migrated, so already-cached jobs self-correct
+    // after an accuracy fix ships instead of staying stale forever.
     function rescoreHeuristicJobs() {
       const intent = buildIntent();
       let changed = false;
       S.jobs.forEach(j => {
-        if (j.scoreSource !== 'heuristic') return;
+        if (j.scoreSource === 'ai' || j.scoreSource === 'manual') return;
         const { score, matched, missing } = scoreJob(j, intent);
         const visa = detectVisaSponsorship(j.jd);
         const analysis = matchBreakdown(matched, missing, intent.skills.length);
-        if (j.score !== score || j.visa !== visa || j.analysis !== analysis) changed = true;
-        j.score = score; j.visa = visa; j.analysis = analysis;
+        if (j.score !== score || j.visa !== visa || j.analysis !== analysis || j.scoreSource !== 'heuristic') changed = true;
+        j.score = score; j.visa = visa; j.analysis = analysis; j.scoreSource = 'heuristic';
       });
       if (changed) persist();
     }

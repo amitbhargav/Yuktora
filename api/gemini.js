@@ -58,7 +58,10 @@ module.exports = async function handler(req, res) {
   });
 
   // Free-tier model fallback, same retry-the-next-model pattern as api/anthropic.js.
-  const modelsToTry = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+  // Google renames/retires model IDs over time (gemini-1.5-flash has already
+  // 404'd as "not found" for some keys) — trying several current + recent
+  // names maximises the odds of hitting one this specific key can actually use.
+  const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-001', 'gemini-1.5-flash-latest'];
 
   for (let i = 0; i < modelsToTry.length; i++) {
     const model = modelsToTry[i];
@@ -106,8 +109,15 @@ module.exports = async function handler(req, res) {
 
       if (i < modelsToTry.length - 1) continue; // try the next model on any non-200
 
-      logUsage(false, result.data?.error?.message || `HTTP ${result.status}`);
-      return res.status(result.status).json(result.data);
+      // Every model in the list failed — most likely this key/account doesn't
+      // have access to any of them. Surface which ones were tried so it's
+      // diagnosable without needing to read server logs.
+      const triedList = modelsToTry.join(', ');
+      const lastMessage = result.data?.error?.message || `HTTP ${result.status}`;
+      logUsage(false, lastMessage);
+      return res.status(result.status).json({
+        error: { message: `${lastMessage} (tried: ${triedList} — check which models your Gemini API key supports at aistudio.google.com)` }
+      });
     } catch (err) {
       if (i === modelsToTry.length - 1) {
         logUsage(false, 'Server Setup Error: ' + err.message);
