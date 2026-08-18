@@ -3241,6 +3241,74 @@
         .filter(w => w.length > 2 && !STOP.has(w));
     }
 
+    // ─────────────────────────────────────────────
+    // VISA SPONSORSHIP DETECTION
+    // A plain "does the text contain the word visa" check can't tell "will
+    // sponsor" from "will NOT sponsor" — it was flagging explicit non-sponsorship
+    // statements (e.g. "KPMG will not sponsor... visa status") as sponsored.
+    // Requires an explicit positive statement; negation and silence both mean
+    // "not confirmed", never assumed true.
+    // ─────────────────────────────────────────────
+    const VISA_NEGATIVE = [
+      /will not sponsor/, /won'?t sponsor/, /does ?n'?t sponsor/, /do ?n'?t sponsor/,
+      /unable to sponsor/, /not able to sponsor/, /cannot sponsor/, /can ?not sponsor/,
+      /no (visa )?sponsorship/, /not provide[a-z ]{0,20}sponsorship/, /not offer[a-z ]{0,20}sponsorship/,
+      /without[a-z ]{0,15}sponsorship/, /no longer sponsor/, /not eligible for[a-z ]{0,15}sponsorship/,
+      /sponsorship[a-z ]{0,15}(is )?not (available|provided|offered)/,
+      /must be authorized to work[\s\S]{0,120}without[\s\S]{0,40}sponsorship/
+    ];
+    const VISA_POSITIVE = [
+      /will sponsor/, /we sponsor/, /able to sponsor/, /can sponsor/, /open to sponsor(ing)?/,
+      /sponsorship (is )?(available|provided|offered)/, /visa sponsorship available/,
+      /h-?1b sponsorship/, /provides?[a-z ]{0,10}(visa )?sponsorship/
+    ];
+    function detectVisaSponsorship(text) {
+      const t = (text || '').toLowerCase();
+      if (!t.includes('visa') && !t.includes('sponsor')) return false;
+      if (VISA_NEGATIVE.some(re => re.test(t))) return false;
+      return VISA_POSITIVE.some(re => re.test(t));
+    }
+
+    // ─────────────────────────────────────────────
+    // LOCATION / "ABROAD" DETECTION
+    // Used to decide whether a job needs confirmed visa sponsorship to be
+    // worth showing — a remote role or a same-country role never does.
+    // ─────────────────────────────────────────────
+    const COUNTRY_ALIASES = {
+      'us': 'united states', 'usa': 'united states', 'u s': 'united states', 'u s a': 'united states',
+      'uk': 'united kingdom', 'u k': 'united kingdom',
+      'uae': 'united arab emirates'
+    };
+    // Only trust the last comma-segment as a country when it's actually a
+    // recognised one — a bare city ("Bangalore", no country suffix) must never
+    // resolve to a "country" that then mismatches against the candidate's and
+    // gets wrongly treated as abroad.
+    const KNOWN_COUNTRIES = new Set([
+      'india', 'united states', 'united kingdom', 'canada', 'australia', 'germany', 'singapore',
+      'united arab emirates', 'netherlands', 'ireland', 'france', 'switzerland', 'new zealand',
+      'japan', 'china', 'south korea', 'saudi arabia', 'qatar', 'south africa', 'brazil', 'mexico',
+      'spain', 'italy', 'sweden', 'poland', 'indonesia', 'malaysia', 'philippines'
+    ]);
+    function normalizeCountry(str) {
+      const s = (str || '').toLowerCase().trim().replace(/\./g, '');
+      return COUNTRY_ALIASES[s] || s;
+    }
+    function extractCountry(locStr) {
+      const parts = (locStr || '').split(',').map(p => p.trim()).filter(Boolean);
+      if (!parts.length) return '';
+      const last = normalizeCountry(parts[parts.length - 1]);
+      return KNOWN_COUNTRIES.has(last) ? last : '';
+    }
+    function isRemoteLoc(loc) { return /remote/i.test(loc || ''); }
+    // True only when both locations resolve to known, different countries —
+    // missing data never triggers a false "abroad", it just skips the check.
+    function isAbroadJob(jobLoc, candidateLoc) {
+      if (isRemoteLoc(jobLoc)) return false;
+      const jc = extractCountry(jobLoc), cc = extractCountry(candidateLoc);
+      if (!jc || !cc) return false;
+      return jc !== cc;
+    }
+
     // The candidate's intent: target roles + skills (falls back to the searched role)
     function buildIntent(searchedRole) {
       const roles = (S.profile.roles && S.profile.roles.length)
@@ -3345,7 +3413,7 @@
               company: job.employer_name,
               loc: job.job_city ? `${job.job_city}, ${job.job_country}` : loc,
               src: job.job_publisher || 'Web',
-              visa: (job.job_description || '').toLowerCase().includes('visa'),
+              visa: detectVisaSponsorship(job.job_description),
               jd: job.job_description || 'No description provided.',
               url: job.job_apply_link || job.job_google_link || '#',
               date: new Date().toISOString()
@@ -3557,16 +3625,30 @@ KEYWORDS: [8 top keywords from JD to add to resume, comma-separated]`;
         list.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">No jobs yet</div><div class="empty-sub">Fetch jobs or paste a JD to see strong matches</div></div>';
         return;
       }
+
+      // Abroad roles without an explicitly confirmed sponsorship statement in the
+      // JD are hidden entirely, not just unbadged — showing them risks someone
+      // applying to a role that will reject them on work authorization alone.
+      const eligible = S.jobs.filter(j => !(isAbroadJob(j.loc, S.profile.loc) && !j.visa));
+      const hiddenAbroad = S.jobs.length - eligible.length;
+
+      if (!eligible.length) {
+        count.textContent = `${hiddenAbroad} job${hiddenAbroad > 1 ? 's' : ''} hidden — no visa sponsorship confirmed`;
+        list.innerHTML = '<div class="empty"><div class="empty-icon">🌍</div><div class="empty-title">No eligible jobs to show</div><div class="empty-sub">Every analysed job is abroad without confirmed visa sponsorship</div></div>';
+        return;
+      }
+
       // Default view = strong matches only (90%+), sorted high → low so order is stable every render.
-      const sorted = [...S.jobs].sort((a, b) => (b.score || 0) - (a.score || 0));
+      const sorted = [...eligible].sort((a, b) => (b.score || 0) - (a.score || 0));
       let shown = sorted.filter(j => (j.score || 0) >= MATCH_FLOOR);
+      const hiddenSuffix = hiddenAbroad ? ` · ${hiddenAbroad} hidden (no visa confirmed)` : '';
 
       if (shown.length) {
-        count.textContent = `${shown.length} strong match${shown.length > 1 ? 'es' : ''} (${MATCH_FLOOR}%+) · ${S.jobs.length} analysed`;
+        count.textContent = `${shown.length} strong match${shown.length > 1 ? 'es' : ''} (${MATCH_FLOOR}%+) · ${S.jobs.length} analysed${hiddenSuffix}`;
       } else {
         // Graceful fallback — never show an empty list. Surface the closest matches instead.
         shown = sorted.slice(0, 5);
-        count.textContent = `No ${MATCH_FLOOR}%+ matches yet — showing your ${shown.length} closest`;
+        count.textContent = `No ${MATCH_FLOOR}%+ matches yet — showing your ${shown.length} closest${hiddenSuffix}`;
       }
 
       list.innerHTML = shown.map(j => `
