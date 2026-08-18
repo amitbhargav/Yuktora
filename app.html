@@ -2262,8 +2262,12 @@
                   </div>
 
                   <div id="tab-search">
-                    <div class="field-hint" style="margin-bottom:14px;">Fetch jobs instantly from global boards using
-                      secure aggregator APIs.</div>
+                    <div class="field-hint" style="margin-bottom:14px;">Fetch jobs instantly from Indeed, Glassdoor,
+                      ZipRecruiter, and company career pages — the boards covered by our aggregator. <strong>LinkedIn
+                        and Naukri aren't covered here</strong> (neither publishes to the job index this pulls from);
+                      found one there yourself? Use the <a href="#" onclick="switchTab('paste');return false"
+                        style="color:var(--brand);font-weight:600">Paste JD</a> tab instead — same scoring, same
+                      tracking.</div>
                     <div id="role-mismatch-banner" class="banner banner-amber" style="display:none">
                       <span class="banner-icon">🧭</span>
                       <div id="role-mismatch-text"></div>
@@ -2273,20 +2277,9 @@
                       <input type="text" class="input" id="search-role" oninput="checkRoleMismatch()"
                         placeholder="e.g. Senior Technical Program Manager">
                     </div>
-                    <div class="field-row">
-                      <div class="field">
-                        <label class="field-label">Location</label>
-                        <input type="text" class="input" id="search-loc" placeholder="Bangalore, India">
-                      </div>
-                      <div class="field">
-                        <label class="field-label">Platform Filter</label>
-                        <select class="input" id="search-platform">
-                          <option>All Platforms</option>
-                          <option>LinkedIn</option>
-                          <option>Naukri</option>
-                          <option>Visa Sponsored Only</option>
-                        </select>
-                      </div>
+                    <div class="field">
+                      <label class="field-label">Location</label>
+                      <input type="text" class="input" id="search-loc" placeholder="Bangalore, India">
                     </div>
                     <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="fetchLiveJobs()">
                       🔍 Fetch Jobs
@@ -3394,6 +3387,43 @@
       return isAbroadJob(j.loc, S.profile.loc) || requiresLocalWorkAuthorization(j.jd);
     }
 
+    // ─────────────────────────────────────────────
+    // SENIORITY SIGNAL
+    // Purely informational — labels a job's apparent fit for a 10+ year
+    // senior candidate, never hides anything. Regex can't reliably tell "the
+    // role's overall experience bar" from "years required with one specific
+    // tool" (e.g. "3+ years with Kubernetes" inside an otherwise senior
+    // posting), so this only fires on strong, low-ambiguity signals and stays
+    // silent — no badge at all — the rest of the time, deliberately biased
+    // toward not mislabelling a genuinely senior role.
+    // ─────────────────────────────────────────────
+    const JUNIOR_TITLE_WORDS = /\b(junior|jr\.?|intern(ship)?|entry.level|associate|graduate|fresher|trainee)\b/i;
+    const SENIOR_TITLE_WORDS = /\b(senior|sr\.?|staff|principal|lead|director|head of|vp|vice president|chief|distinguished)\b/i;
+    // "X+ years of [...] experience" — the role-level bar. Title checks
+    // always run first and win (see below), so this JD fallback only matters
+    // for ambiguous titles ("Project Manager", "Platform Engineer") with no
+    // senior/junior wording at all. Known imprecision, accepted deliberately:
+    // "X years of experience with <tool>" can still match this even though
+    // it's a per-skill requirement, not the role's real seniority floor —
+    // reliably telling "experience in program management" (a field) from
+    // "experience with Kubernetes" (a tool) needs real language
+    // understanding, not regex. Low-stakes since this only ever adds an
+    // informational badge, never hides a job.
+    const TOTAL_YEARS_PATTERN = /(\d{1,2})\+?\s*(?:-|to)?\s*\d{0,2}\s*years?\s*(?:of\s*)?(?:overall|total|professional|relevant|industry)?\s*experience\b/i;
+    function detectSeniority(title, jd) {
+      const t = (title || '');
+      const text = `${title || ''} ${jd || ''}`;
+      if (JUNIOR_TITLE_WORDS.test(t)) return 'junior';
+      if (SENIOR_TITLE_WORDS.test(t)) return 'senior';
+      const yearsMatch = text.match(TOTAL_YEARS_PATTERN);
+      if (yearsMatch) {
+        const years = parseInt(yearsMatch[1], 10);
+        if (years >= 8) return 'senior';
+        if (years <= 3) return 'junior';
+      }
+      return 'unclear'; // no confident signal either way — show no badge
+    }
+
     // True when the searched role and the resume's AI-detected primary role
     // share too few title-words to be the same role family — e.g. a resume
     // written for "Technical Program Manager" being searched against "Project
@@ -3812,7 +3842,17 @@ KEYWORDS: [8 top keywords from JD to add to resume, comma-separated]`;
         count.textContent = `No ${MATCH_FLOOR}%+ matches yet — showing your ${shown.length} closest${hiddenSuffix}`;
       }
 
-      list.innerHTML = shown.map(j => `
+      // Seniority is shown as a per-card badge, never a hide — this line just
+      // surfaces the breakdown so it's visible without reading every card.
+      const seniorCount = shown.filter(j => detectSeniority(j.title, j.jd) === 'senior').length;
+      if (seniorCount) count.textContent += ` · ${seniorCount} senior-fit`;
+
+      list.innerHTML = shown.map(j => {
+        const seniority = detectSeniority(j.title, j.jd);
+        const seniorityPill = seniority === 'senior' ? '<span class="pill pill-green" title="Strong senior-level signal in the title or stated experience bar">✓ Senior-fit</span>'
+          : seniority === 'junior' ? '<span class="pill pill-amber" title="Title or stated experience bar reads entry-level — still shown, just flagged">⚠️ Entry-level</span>'
+          : '';
+        return `
     <div class="job-card${S.curJob?.id === j.id ? ' sel' : ''}" onclick="selectJob(${j.id})">
       <div class="job-initials">${escapeHTML((j.company || '?').slice(0, 2)).toUpperCase()}</div>
       <div class="job-info">
@@ -3821,10 +3861,12 @@ KEYWORDS: [8 top keywords from JD to add to resume, comma-separated]`;
         <div class="job-pills">
           <span class="pill pill-gray">${escapeHTML(j.src || 'Other')}</span>
           ${j.visa ? '<span class="pill pill-blue">🌍 Visa</span>' : ''}
+          ${seniorityPill}
         </div>
       </div>
       <div class="score-ring score-ring-sm ${j.score >= 70 ? 'score-hi' : j.score >= 50 ? 'score-md' : 'score-lo'}">${j.score}%</div>
-    </div>`).join('');
+    </div>`;
+      }).join('');
     }
     function selectJob(id) {
       const j = S.jobs.find(x => x.id === id);
