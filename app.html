@@ -17,6 +17,11 @@
 
   <!-- ── Supabase JS SDK (CDN) ─────────────────────────────────────────────── -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- ── PDF.js (CDN) — parses uploaded resume PDFs client-side, no backend involved ── -->
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  </script>
   <style>
     /* ─────────────────────────────────────────────
    DESIGN TOKENS - LIGHT & BRIGHT SAAS THEME
@@ -2411,7 +2416,11 @@
                 </div>
                 <div class="field">
                   <label class="field-label">Your resume</label>
-                  <textarea class="input" id="t-resume" rows="10" placeholder="Paste your resume text..."></textarea>
+                  <div class="ai-box" id="t-resume-preview" style="max-height:180px;overflow:auto;font-size:12px;">No
+                    base resume saved yet.</div>
+                  <div class="field-hint">Loaded from your saved base resume — upload or edit it in <a href="#"
+                      onclick="nav('profile');return false;" style="color:var(--brand);font-weight:600">My
+                      Profile</a>.</div>
                 </div>
                 <div class="field">
                   <label class="field-label">Tailoring style</label>
@@ -2710,9 +2719,18 @@
                 </div>
                 <div class="card-body">
                   <div class="field">
+                    <label class="field-label">Upload resume (PDF)</label>
+                    <input type="file" class="input" id="p-resume-file" accept="application/pdf"
+                      onchange="handleResumeFile(this.files[0])">
+                    <div class="field-hint" id="p-resume-file-status">Parsed entirely in your browser — click "Save
+                      profile" below to keep it.</div>
+                  </div>
+                  <div class="field">
+                    <label class="field-label">Resume text</label>
                     <textarea class="input" id="p-resume" rows="14"
                       placeholder="Paste your full resume — used as base for AI tailoring..."></textarea>
-                    <div class="field-hint">Auto-loaded into Resume Tailor</div>
+                    <div class="field-hint">Auto-loaded into Resume Tailor. Uploading a PDF above fills this in
+                      automatically — you can still edit it by hand.</div>
                   </div>
                 </div>
               </div>
@@ -3585,15 +3603,19 @@ KEYWORDS: [8 top keywords from JD to add to resume, comma-separated]`;
     // TAILOR
     // ─────────────────────────────────────────────
     function loadTailorDefaults() {
-      if (S.profile.resume && !document.getElementById('t-resume').value)
-        document.getElementById('t-resume').value = S.profile.resume;
+      const preview = document.getElementById('t-resume-preview');
+      const res = (S.profile.resume || '').trim();
+      preview.textContent = res
+        ? res.slice(0, 600) + (res.length > 600 ? '…' : '')
+        : 'No base resume saved yet — add one in My Profile first.';
     }
     async function tailorResume() {
       const role = document.getElementById('t-role').value.trim();
       const jd = document.getElementById('t-jd').value.trim();
-      const res = document.getElementById('t-resume').value.trim();
+      const res = (S.profile.resume || '').trim();
       const style = document.getElementById('t-style').value;
-      if (!jd || !res) { toast('Fill JD and resume', '⚠️'); return; }
+      if (!res) { toast('Add your base resume in My Profile first', '⚠️'); nav('profile'); return; }
+      if (!jd) { toast('Fill in the job description', '⚠️'); return; }
       const out = document.getElementById('t-output');
       const kout = document.getElementById('t-keywords');
       out.className = 'ai-box loading';
@@ -3793,6 +3815,44 @@ Be direct and specific. Reference actual content.`;
     }
     function removeTag(key, i) {
       S.profile[key].splice(i, 1); renderTags(key); persist();
+    }
+    // Extracts plain text from a PDF File entirely client-side via PDF.js — the
+    // file itself never leaves the browser, only the extracted text gets saved.
+    async function extractPdfText(file) {
+      const buf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      let text = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map(it => it.str).join(' ') + '\n\n';
+      }
+      return text.trim();
+    }
+    async function handleResumeFile(file) {
+      const status = document.getElementById('p-resume-file-status');
+      if (!file) return;
+      if (file.type !== 'application/pdf') {
+        toast('Please upload a PDF file', '⚠️');
+        status.textContent = 'That file isn\'t a PDF — try again.';
+        return;
+      }
+      status.textContent = `Parsing ${file.name}...`;
+      try {
+        const text = await extractPdfText(file);
+        if (!text) {
+          status.textContent = 'No selectable text found — this PDF may be a scanned image. Paste your resume text below instead.';
+          toast('Could not extract text from PDF', '⚠️');
+          return;
+        }
+        document.getElementById('p-resume').value = text;
+        status.textContent = `Loaded "${file.name}" (${text.length.toLocaleString()} characters). Click "Save profile" to keep it.`;
+        toast('Resume parsed ✓', '📄');
+      } catch (e) {
+        console.error(e);
+        status.textContent = 'Failed to parse that PDF: ' + e.message;
+        toast('Could not parse PDF', '❌');
+      }
     }
     function loadProfile() {
       ['name', 'email', 'phone', 'loc', 'li', 'resume'].forEach(f => {

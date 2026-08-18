@@ -106,9 +106,21 @@ Live: https://yuktora.vercel.app
 * **Fixed two real specificity collisions with `app.html`'s own theme CSS** (marketing pages were never affected — this only reproduced inside the dashboard): `app.html` has a `[class*="eyebrow"]` substring selector for its own "BUILT WITH YUKTORA INTELLIGENCE" badge, which was also matching the guide's `.yb-eyebrow2` status line and silently applying its light-tan badge background under the guide's light-cream text — unreadable until manually text-selected. Separately, `app.html`'s `input[type="text"]` rule (an attribute selector, which outranks a plain class in CSS specificity regardless of load order) was overriding the FAQ input's background to white, so light text landed on a white box. Fixed by scoping both rules under the `#ybOverlay` ID, which now safely outranks either collision.
 * **Not changed:** `styles.css`, `api/`, `package.json`, all Supabase/payment/auth logic — this phase only touched `yuktora-bot.js`, `yuktora-bot.css`, `app.html` (deep-link support only), and one SVG path repeated across the 6 HTML pages.
 
+### Phase 3.17: Base Resume Upload — PDF Parsing, Single Source of Truth (Shipped)
+* **Problem being solved:** the resume lived as two separate paste-in-a-textarea fields — one in My Profile, one duplicated on the Resume Tailor page — with no way to upload an actual resume file. First of a 4-part daily-use UX pass (see Phase 3.18 below for the rest).
+* **Client-side PDF parsing, zero backend change:** added a file input to the "Base resume" card in My Profile. Selecting a PDF extracts its text entirely in-browser via PDF.js (loaded from CDN, same pattern as the existing Supabase JS SDK `<script>` tag) — the file itself never leaves the browser or touches `api/`, `package.json`, or the auth chain. The extracted text fills the existing resume textarea, still editable by hand, and still saves through the existing `saveProfile()` → `persist()` → "Save to Cloud" flow into the existing `user_profiles.resume` column. No new SQL migration, no new Supabase Storage bucket — deliberately kept to text-only for now.
+* **Removed the duplicate paste field:** the Resume Tailor page's own resume textarea (`#t-resume`) is gone. `tailorResume()` now reads directly from `S.profile.resume`, and the page shows a read-only preview with a link back to My Profile if you need to update it — one source of truth instead of two fields that could drift out of sync.
+* **Verified with a real headless-browser run** (Playwright against the local static server): uploaded a sample PDF, confirmed extracted text landed in the profile textarea, confirmed Save Profile propagated it into the Resume Tailor preview, zero console errors.
+
 ---
 
 ## 🔮 Upcoming Roadmap
+
+### Phase 3.18: Daily-Use UX Pass (remaining)
+Parts 2–4 of the same initiative that started with Phase 3.17 above — aimed at turning Yuktora from "a product I built" into a tool used daily.
+1. **Auto-parse skills from resume** — when the base resume is uploaded/updated, call Claude to extract a skills list and prefill the Skills chips in My Profile (still editable, add/remove as normal). Depends on Phase 3.17's saved resume text.
+2. **Job matching threshold on Job Search** — show 80%+ Fit Score matches by default, with a "Show close matches (60–79%)" toggle for the rest, visually de-emphasised. Independent of the other three items.
+3. **One-click Resume Tailor from job cards** — a "Tailor for this role" button per job card that pulls the saved base resume + that job's JD and runs the tailor directly, skipping the Resume Tailor page's form. Depends on Phase 3.17's saved resume; touches the same job-card markup as item 2 above, so sequenced after it.
 
 ### Phase 4: Monetization & Backend Hardening
 1. **Run the `ai_usage_logs` migration** — shipped in code (Phase 3.11) but needs its table created via Supabase's SQL Editor (see `AGENTS.md`). Quick, one-time, GUI step. (`recruiter_leads` migration from Phase 3.14 is on hold — see Phase 3.15.)
