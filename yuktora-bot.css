@@ -1,0 +1,331 @@
+/* ═══════════════════════════════════════════════════════════════════
+   YUKTORA INTELLIGENCE — full-screen guide overlay (all pages)
+   Same pattern as amitbhargav.github.io's "A.I." intro: full-viewport
+   dark takeover, pulsing avatar, big serif greeting w/ blinking
+   cursor, pill-shaped choice buttons, skip link. Self-contained with
+   fallback values so it works even on pages without the site's own
+   --burg/--cream custom properties (e.g. app.html).
+   ═══════════════════════════════════════════════════════════════════ */
+
+.yb-launcher {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 998;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .14);
+  cursor: pointer;
+  background: radial-gradient(circle at 35% 30%, var(--gold, #A8683A), var(--burg-2, #3A1F10) 70%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(43, 30, 20, .4);
+  animation: ybPulseBtn 2.6s ease-out infinite;
+}
+.yb-launcher:hover { transform: scale(1.06) }
+.yb-launcher svg { width: 22px; height: 22px; fill: #fff }
+.yb-launcher .yb-dot { position: absolute; top: 2px; right: 2px; width: 10px; height: 10px; border-radius: 50%; background: #3FD17E; border: 2px solid var(--burg-2, #3A1F10) }
+@keyframes ybPulseBtn {
+  0% { box-shadow: 0 0 0 0 rgba(168, 104, 58, .5), 0 8px 24px rgba(43, 30, 20, .4) }
+  70% { box-shadow: 0 0 0 14px rgba(168, 104, 58, 0), 0 8px 24px rgba(43, 30, 20, .4) }
+  100% { box-shadow: 0 0 0 0 rgba(168, 104, 58, 0), 0 8px 24px rgba(43, 30, 20, .4) }
+}
+
+/* ── full-viewport overlay ── */
+.yb-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  background:
+    radial-gradient(ellipse 900px 600px at 50% 22%, rgba(168, 104, 58, .16), transparent 60%),
+    linear-gradient(180deg, var(--burg-2, #3A1F10) 0%, var(--burg-3, #2B1E14) 55%, #1C130D 100%);
+  opacity: 0;
+  transition: opacity .35s ease;
+}
+.yb-overlay.on { display: flex; opacity: 1 }
+.yb-overlay.closing { opacity: 0 }
+
+.yb-overlay-close {
+  position: absolute;
+  top: 22px;
+  right: 26px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  background: rgba(255, 255, 255, .04);
+  color: rgba(255, 255, 255, .7);
+  font-size: 15px;
+  cursor: pointer;
+}
+.yb-overlay-close:hover { background: rgba(255, 255, 255, .1); color: #fff }
+
+.yb-overlay-inner {
+  width: 100%;
+  max-width: 660px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  overflow-y: auto;
+  max-height: 100%;
+  padding: 8px 4px 4px;
+}
+.yb-overlay-inner::-webkit-scrollbar { width: 0; }
+
+/* ── animated character avatar ── */
+.yb-ring {
+  position: relative;
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: ybBreathe 3.4s ease-in-out infinite;
+}
+.yb-ring::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 104, 58, .38), transparent 70%);
+  animation: ybRingGlow 2.8s ease-in-out infinite;
+  transition: opacity .3s;
+}
+.yb-ring.yb-speaking::before { animation-duration: 1.1s; opacity: 1 }
+@keyframes ybRingGlow {
+  0%, 100% { transform: scale(1); opacity: .65 }
+  50% { transform: scale(1.16); opacity: 1 }
+}
+@keyframes ybBreathe {
+  0%, 100% { transform: translateY(0) }
+  50% { transform: translateY(-4px) }
+}
+.yb-face-svg { position: relative; width: 92px; height: 92px; z-index: 1; }
+
+/* ── speech-indicator equalizer (replaces a literal mouth) ── */
+.yb-eq {
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 14px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--burg-2, #3A1F10);
+  border: 1px solid rgba(255, 255, 255, .12);
+  opacity: 0;
+  transition: opacity .25s;
+  z-index: 2;
+}
+.yb-ring.yb-speaking .yb-eq { opacity: 1; }
+.yb-eq span {
+  display: block;
+  width: 2.5px;
+  border-radius: 2px;
+  background: var(--gold, #A8683A);
+  height: 3px;
+  animation: none;
+}
+.yb-ring.yb-speaking .yb-eq span { animation: ybEq .85s ease-in-out infinite; }
+.yb-ring.yb-speaking .yb-eq span:nth-child(1) { animation-delay: 0s }
+.yb-ring.yb-speaking .yb-eq span:nth-child(2) { animation-delay: .15s }
+.yb-ring.yb-speaking .yb-eq span:nth-child(3) { animation-delay: .3s }
+.yb-ring.yb-speaking .yb-eq span:nth-child(4) { animation-delay: .1s }
+@keyframes ybEq {
+  0%, 100% { height: 3px }
+  50% { height: 12px }
+}
+
+.yb-eyebrow2 {
+  font-family: var(--font-body, 'Outfit', sans-serif);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(238, 220, 195, .68);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+.yb-eyebrow2 .d { width: 6px; height: 6px; border-radius: 50%; background: #3FD17E; box-shadow: 0 0 6px #3FD17E; flex-shrink: 0 }
+
+/* ── transcript: headline first message, subtext for the rest ── */
+.yb-transcript { width: 100%; }
+.yb-tmsg { margin-bottom: 18px; }
+.yb-tmsg.headline {
+  font-family: var(--font-display, 'Fraunces', Georgia, serif);
+  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  font-weight: 500;
+  line-height: 1.25;
+  color: #FBF3E8;
+  letter-spacing: -.01em;
+}
+.yb-tmsg.headline .yb-cursor {
+  display: inline-block;
+  width: 2px;
+  margin-left: 3px;
+  background: var(--gold, #A8683A);
+  animation: ybBlinkCursor 1s step-end infinite;
+}
+@keyframes ybBlinkCursor { 0%, 100% { opacity: 1 } 50% { opacity: 0 } }
+
+.yb-tmsg.sub {
+  font-family: var(--font-body, 'Outfit', sans-serif);
+  font-size: 1.02rem;
+  color: rgba(238, 226, 209, .78);
+  line-height: 1.55;
+}
+.yb-tmsg.faded {
+  font-family: var(--font-body, 'Outfit', sans-serif);
+  font-size: .84rem;
+  color: rgba(238, 226, 209, .38);
+  line-height: 1.5;
+}
+.yb-tmsg.user-pick {
+  display: inline-flex;
+  font-family: var(--font-body, 'Outfit', sans-serif);
+  font-size: .78rem;
+  color: rgba(238, 226, 209, .55);
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 999px;
+  padding: 5px 13px;
+  margin: 0 0 14px;
+}
+
+.yb-typing2 {
+  display: inline-flex;
+  gap: 4px;
+  margin: 4px 0 18px;
+}
+.yb-typing2 span { width: 5px; height: 5px; border-radius: 50%; background: rgba(238, 226, 209, .5); animation: ybBlink2 1.1s infinite }
+.yb-typing2 span:nth-child(2) { animation-delay: .15s } .yb-typing2 span:nth-child(3) { animation-delay: .3s }
+@keyframes ybBlink2 { 0%, 60%, 100% { opacity: .2 } 30% { opacity: 1 } }
+
+/* ── pill choice buttons ── */
+.yb-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 6px 0 26px;
+}
+.yb-pill {
+  font-family: var(--font-body, 'Outfit', sans-serif);
+  font-size: .88rem;
+  font-weight: 600;
+  color: #F3E7D6;
+  background: rgba(255, 255, 255, .045);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 999px;
+  padding: 13px 22px;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.yb-pill:hover { border-color: var(--gold, #A8683A); background: rgba(168, 104, 58, .16); transform: translateY(-1px) }
+.yb-pill:disabled { opacity: .4; cursor: default; transform: none }
+
+/* ── result cards (wrap-up recommendation) ── */
+.yb-pcards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  margin: 6px 0 26px;
+}
+.yb-pcard {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 14px;
+  padding: 16px 17px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.yb-pcard:hover { border-color: var(--gold, #A8683A); background: rgba(168, 104, 58, .14); transform: translateY(-2px) }
+.yb-pcard.wide { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 12px }
+.yb-pcard.primary { border-color: var(--gold, #A8683A); background: rgba(168, 104, 58, .16) }
+.yb-pcard-ic { font-size: 1.2rem }
+.yb-pcard-title { font-family: var(--font-body, 'Outfit', sans-serif); font-size: .88rem; font-weight: 700; color: #FBF3E8 }
+.yb-pcard-blurb { font-family: var(--font-body, 'Outfit', sans-serif); font-size: .74rem; color: rgba(238, 226, 209, .6); line-height: 1.4 }
+
+.yb-skip2 {
+  font-family: var(--font-body, 'Outfit', sans-serif);
+  font-size: .82rem;
+  color: rgba(238, 226, 209, .5);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  margin-bottom: 6px;
+}
+.yb-skip2:hover { color: rgba(238, 226, 209, .85) }
+
+/* ── bottom free-text FAQ bar ── */
+.yb-overlay-foot {
+  width: 100%;
+  max-width: 660px;
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+}
+.yb-ofinput {
+  flex: 1;
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: var(--font-body, 'Outfit', sans-serif);
+  font-size: .88rem;
+  color: #F3E7D6;
+  outline: none;
+}
+.yb-ofinput::placeholder { color: rgba(238, 226, 209, .4) }
+.yb-ofinput:focus { border-color: var(--gold, #A8683A) }
+.yb-ofsend {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: none;
+  background: var(--gold, #A8683A);
+  color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.yb-ofsend:hover { background: var(--gold-2, #8A5624) }
+
+.feat-flash { animation: featFlash 1.8s ease }
+@keyframes featFlash {
+  0% { box-shadow: 0 0 0 0 rgba(168, 104, 58, .6) }
+  30% { box-shadow: 0 0 0 8px rgba(168, 104, 58, .15) }
+  100% { box-shadow: 0 0 0 0 rgba(168, 104, 58, 0) }
+}
+
+@media(max-width:600px) {
+  .yb-launcher { right: 16px; bottom: 16px }
+  .yb-pcards { grid-template-columns: 1fr }
+  .yb-overlay { padding: 24px 16px }
+  .yb-overlay-close { top: 14px; right: 14px }
+}

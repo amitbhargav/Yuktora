@@ -14,6 +14,54 @@
 </style>
 </head>
 <body>
+  <!-- ═══ YUKTORA INTELLIGENCE — full-screen guide overlay ═══ -->
+  <link rel="stylesheet" href="/yuktora-bot.css">
+
+  <button class="yb-launcher" id="ybLauncher" aria-label="Chat with Yuktora Intelligence" onclick="ybReopen()">
+    <div class="yb-dot"></div>
+    <svg viewBox="0 0 24 24"><path d="M12 2.5c1 2 2 3 4 4-2 1-3 2-4 4-1-2-2-3-4-4 2-1 3-2 4-4z"/><path d="M4.5 3.2c.5 1 1 1.5 2 2-1 .5-1.5 1-2 2-.5-1-1-1.5-2-2 1-.5 1.5-1 2-2z"/><path d="M3 12.5C3 9.5 6.5 7.5 11 7.5s8 2 8 5-3.5 5-8 5c-.9 0-1.75-.08-2.53-.23L4 19l1.1-3.1C3.8 15 3 13.85 3 12.5z"/></svg>
+  </button>
+
+  <div class="yb-overlay" id="ybOverlay">
+    <button class="yb-overlay-close" onclick="ybClose()" aria-label="Close">&#10005;</button>
+    <div class="yb-overlay-inner">
+      <div class="yb-ring" id="ybRing">
+        <svg class="yb-face-svg" id="ybFaceSvg" viewBox="0 0 120 120">
+          <defs>
+            <radialGradient id="ybFaceGrad" cx="35%" cy="26%" r="82%">
+              <stop offset="0%" stop-color="#F6E7D2"/>
+              <stop offset="55%" stop-color="#C9873F"/>
+              <stop offset="100%" stop-color="#8A5624"/>
+            </radialGradient>
+            <clipPath id="ybFaceClip"><circle cx="60" cy="60" r="52"/></clipPath>
+          </defs>
+          <circle cx="60" cy="60" r="52" fill="url(#ybFaceGrad)"/>
+          <!-- professional bust silhouette: rounded head + shoulders, collar notch -->
+          <g clip-path="url(#ybFaceClip)">
+            <circle cx="60" cy="45" r="14.5" fill="#2B1E14" opacity=".88"/>
+            <path d="M60 63
+                     C 40 63 26 79 26 109
+                     L 94 109
+                     C 94 79 80 63 60 63 Z"
+                  fill="#2B1E14" opacity=".88"/>
+            <path d="M52 66 L60 76 L68 66" stroke="#F6E7D2" stroke-width="1.8" fill="none"
+                  stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>
+          </g>
+        </svg>
+        <div class="yb-eq" id="ybEq"><span></span><span></span><span></span><span></span></div>
+      </div>
+      <div class="yb-eyebrow2"><span class="d"></span>A.I. · YUKTORA INTELLIGENCE · YOUR CO-PILOT FOR THIS SEARCH</div>
+      <div class="yb-transcript" id="ybTranscript"></div>
+      <button class="yb-skip2" onclick="ybClose()">Skip straight to the site &rarr;</button>
+      <div class="yb-overlay-foot">
+        <input class="yb-ofinput" id="ybInput" type="text" placeholder="Ask about pricing, safety, how it works..." onkeydown="if(event.key==='Enter')ybSend()">
+        <button class="yb-ofsend" onclick="ybSend()" title="Send">&#10148;</button>
+      </div>
+    </div>
+  </div>
+  <script src="/yuktora-bot.js" defer></script>
+
+
 <nav class="site-nav">
   <div class="nav-wrap">
     <a href="/" class="nav-logo"><div class="nav-logo-mark">🎯</div>Yuktora</a>
