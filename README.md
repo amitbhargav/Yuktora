@@ -112,12 +112,24 @@ Live: https://yuktora.vercel.app
 * **Removed the duplicate paste field:** the Resume Tailor page's own resume textarea (`#t-resume`) is gone. `tailorResume()` now reads directly from `S.profile.resume`, and the page shows a read-only preview with a link back to My Profile if you need to update it — one source of truth instead of two fields that could drift out of sync.
 * **Verified with a real headless-browser run** (Playwright against the local static server): uploaded a sample PDF, confirmed extracted text landed in the profile textarea, confirmed Save Profile propagated it into the Resume Tailor preview, zero console errors.
 
+### Phase 3.18: Visa Sponsorship Detection Accuracy (Shipped)
+* **The bug:** `fetchLiveJobs()` flagged a job as visa-sponsored (🌍 badge, folded into the fit score) whenever the word "visa" appeared *anywhere* in the JD text — including inside explicit non-sponsorship statements. A real example caught in testing: a KPMG posting stating "*KPMG LLP will not sponsor applicants for U.S. work visa status... no sponsorship is available for H-1B, L-1...*" was shown as a confirmed-sponsored 100% match.
+* **Fix:** replaced the substring check with `detectVisaSponsorship()` — requires an explicit positive statement ("will sponsor", "sponsorship available", etc.); negation ("will not sponsor", "unable to sponsor") or plain silence both resolve to *unconfirmed*, never assumed true. Verified against the exact KPMG text plus 11 other scenarios via unit tests.
+* **Stronger than a badge fix — international jobs are hidden, not just unbadged:** added `isAbroadJob()`, comparing the job's country against the candidate's profile location (skipping remote roles, and any case with insufficient location data, to avoid over-filtering). A job outside the candidate's country with unconfirmed sponsorship no longer appears in Job Search results at all; the "Analysed jobs" summary now reports how many were hidden and why (e.g. "2 hidden — no visa sponsorship confirmed").
+* **Country matching is deliberately conservative:** only resolves a location's country when it matches a known-country whitelist — a bare city name like "Bangalore" (no country suffix) never gets treated as an unrecognised "country" that would false-positive as abroad against "India".
+
+### Phase 3.19: Resume Upload UX Refinement — Collapsed Text, DOCX Support (Shipped)
+* **Problem:** Phase 3.17 shipped the resume textarea always visible, even after a successful upload — a full 14-row box sitting there with parsed text dumped into it wasn't the "upload and done" experience wanted.
+* **Collapsed by default, everywhere:** the Base resume card now shows a one-line summary ("Resume saved — N characters ✓") plus a small "Edit extracted text" link that reveals the box only on request. It re-collapses every time the Profile page is (re)loaded — no lingering open state. Users without a file to upload get the same link labelled "Paste resume text manually instead."
+* **DOCX support added alongside PDF:** Mammoth.js via CDN, same client-side-only pattern as the existing PDF.js integration — the file input now accepts either format, nothing uploaded to any backend.
+* **Verified with a headless-browser run:** uploaded both a sample PDF and DOCX, confirmed extraction, save, and the collapse/toggle/re-collapse-on-revisit behavior, zero console errors.
+
 ---
 
 ## 🔮 Upcoming Roadmap
 
-### Phase 3.18: Daily-Use UX Pass (remaining)
-Parts 2–4 of the same initiative that started with Phase 3.17 above — aimed at turning Yuktora from "a product I built" into a tool used daily.
+### Phase 3.20: Daily-Use UX Pass (remaining)
+Parts 2–4 of the same initiative that started with Phase 3.17 — aimed at turning Yuktora from "a product I built" into a tool used daily.
 1. **Auto-parse skills from resume** — when the base resume is uploaded/updated, call Claude to extract a skills list and prefill the Skills chips in My Profile (still editable, add/remove as normal). Depends on Phase 3.17's saved resume text.
 2. **Job matching threshold on Job Search** — show 80%+ Fit Score matches by default, with a "Show close matches (60–79%)" toggle for the rest, visually de-emphasised. Independent of the other three items.
 3. **One-click Resume Tailor from job cards** — a "Tailor for this role" button per job card that pulls the saved base resume + that job's JD and runs the tailor directly, skipping the Resume Tailor page's form. Depends on Phase 3.17's saved resume; touches the same job-card markup as item 2 above, so sequenced after it.
