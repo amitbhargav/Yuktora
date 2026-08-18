@@ -1,10 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════════
-   YUKTORA INTELLIGENCE — full-screen guide overlay (all pages)
-   Same pattern as amitbhargav.github.io's "A.I." intro: full-viewport
-   dark takeover, pulsing avatar, big serif greeting w/ blinking
-   cursor, pill-shaped choice buttons, skip link. Self-contained with
-   fallback values so it works even on pages without the site's own
-   --burg/--cream custom properties (e.g. app.html).
+   YUKTORA INTELLIGENCE — guide overlay (all pages)
+   Two modes toggled via JS: default = full-screen immersive (used
+   once, automatically, for first-time visitors). ".yb-panel" = compact
+   docked widget (used for every manual reopen). The docked-panel
+   override only applies above 640px — below that, a small popover
+   gets cramped, so it stays full-screen regardless of mode.
+   Self-contained with fallback values so it works even on pages
+   without the site's own --burg/--cream custom properties (e.g.
+   app.html).
    ═══════════════════════════════════════════════════════════════════ */
 
 /* ── launcher: labeled pill so it reads as "reopen the guide", not a stray icon ── */
@@ -59,6 +62,36 @@
 }
 .yb-overlay.on { display: flex; opacity: 1 }
 .yb-overlay.closing { opacity: 0 }
+
+/* ── panel mode: compact docked widget, page stays visible behind it.
+   Only takes effect above 640px — see mobile override at bottom. ── */
+@media(min-width: 641px) {
+  .yb-overlay.yb-panel {
+    inset: auto;
+    right: 22px;
+    bottom: 88px;
+    width: 380px;
+    max-height: min(620px, 76vh);
+    border-radius: 20px;
+    padding: 20px 20px 16px;
+    box-shadow: 0 24px 60px -14px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .06);
+    transform: scale(.94) translateY(10px);
+    transform-origin: bottom right;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .yb-overlay.yb-panel.on { transform: scale(1) translateY(0) }
+  .yb-overlay.yb-panel.closing { transform: scale(.94) translateY(10px) }
+  .yb-overlay.yb-panel .yb-overlay-close { top: 12px; right: 12px; width: 28px; height: 28px; font-size: 12px }
+  .yb-overlay.yb-panel .yb-overlay-inner { max-width: none; }
+  .yb-overlay.yb-panel .yb-ring { width: 64px; height: 64px; margin-bottom: 12px }
+  .yb-overlay.yb-panel .yb-face-svg { width: 54px; height: 54px }
+  .yb-overlay.yb-panel .yb-eyebrow2 { font-size: .64rem; margin-bottom: 14px }
+  .yb-overlay.yb-panel .yb-tmsg.headline { font-size: 1.28rem; }
+  .yb-overlay.yb-panel .yb-tmsg.sub { font-size: .88rem; }
+  .yb-overlay.yb-panel .yb-pill { padding: 9px 15px; font-size: .8rem }
+  .yb-overlay.yb-panel .yb-pcards { grid-template-columns: 1fr; }
+  .yb-overlay.yb-panel .yb-overlay-foot { margin-top: 12px; padding-top: 12px; }
+}
 
 .yb-overlay-close {
   position: absolute;

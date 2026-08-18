@@ -1,12 +1,17 @@
 /* ═══════════════════════════════════════════════════════════════════
-   YUKTORA INTELLIGENCE — full-screen guide overlay
-   One script, included on every page. Auto-detects which page it's
-   running on and adapts:
-     - Marketing pages (/, /pricing, /signin, /blog, /404) → full
-       "what's slowing you down" onboarding + sales-guide flow.
-     - App (/app) → logged-in users aren't prospects anymore, so no
-       auto-popup. Launcher opens straight into a product-help guide
-       instead, same full-screen visual treatment.
+   YUKTORA INTELLIGENCE — guide overlay
+   One script, included on every page. Two display modes:
+     - "onboard" mode: full-screen immersive welcome, shown ONCE
+       automatically to first-time visitors on marketing pages, after
+       a short delay. Trimmed to a single question → straight to a
+       recommendation card (no multi-step interrogation).
+     - "panel" mode: every subsequent open (clicking "Ask AI" again,
+       later visits) opens as a small docked chat panel instead —
+       the page stays visible behind it. Full-screen is reserved for
+       that one first impression; everyday use is a lightweight
+       widget, not a repeated takeover.
+   App (/app) → logged-in users aren't prospects, so no auto-open;
+   launcher opens straight into a product-help guide in panel mode.
    Anchor links (#features, #how-it-works) and the feature-card
    flash-scroll only exist on the homepage — everywhere else they
    resolve to "/#features" etc. so they still work.
@@ -28,22 +33,14 @@
       blurb: 'Every application, one dashboard.',
       reply: "That's what the Application Tracker fixes — every application, every status, every platform, in one dashboard. Stop losing track of what you sent where." }
   };
-  const YB_GEO = {
-    india: { label: "🇮🇳 Mostly India", reply: "Good to know — Yuktora tracks Naukri, LinkedIn India and direct applications side by side, so nothing gets mixed up." },
-    intl: { label: "🌍 Mostly international", reply: "Then keep an eye on the sponsorship hints — Yuktora flags roles that mention visa sponsorship right in the match score." },
-    both: { label: "🌐 Both", reply: "Smart. Yuktora keeps India and international roles in separate views so they don't blur into one messy list." }
-  };
-  const YB_TRACK = {
-    sheet: { label: "📊 A spreadsheet", reply: "You'll like this then — one dashboard instead of duplicate tabs and formulas that break every time you add a row." },
-    notes: { label: "📝 Sticky notes & memory", reply: "Honestly, most people start there. The tracker replaces that with real status history per application — nothing relies on memory." },
-    none: { label: "🤷 Nothing, tbh", reply: "No judgment — that's exactly the gap the tracker exists to close." }
-  };
   const YB_FAQ = [
     { k: ['price', 'pricing', 'cost', 'free', 'paid'], a: "Free forever tier, no signup needed to try it. Paid plans unlock more — check the Pricing page in the nav for exact numbers." },
     { k: ['safe', 'privacy', 'data', 'secure', 'security'], a: "Your data's encrypted and synced via Supabase, tied to your verified identity through Magic Link sign-in. Row-level security means only you can see your own data." },
     { k: ['auto apply', 'autoapply', 'scrape', 'scraping', 'bot apply'], a: "No auto-applying and no scraping — ever. You stay in full control of every application; Yuktora just helps you tailor and track them." },
     { k: ['password', 'sign in', 'signin', 'login', 'magic link'], a: "No password needed — it's Magic Link sign-in. Enter your email, click the link, you're in. Works across all your devices." },
     { k: ['naukri', 'linkedin', 'indeed', 'platform', 'job board'], a: "Works with LinkedIn, Naukri, Indeed and most job boards — just paste the JD from wherever you found it." },
+    { k: ['india', 'international', 'sponsorship', 'visa', 'abroad'], a: "Yuktora tracks Naukri, LinkedIn India and international boards in separate views so they don't blur together — and flags visa-sponsorship mentions right in the match score." },
+    { k: ['spreadsheet', 'sticky note', 'tracking', 'excel'], a: "If you're tracking in a spreadsheet or sticky notes today, the Tracker replaces that with real status history per application — nothing relies on memory or duplicate tabs." },
     { k: ['how it works', 'how does', 'work'], a: "Paste a JD → AI scores your match 0–100 and flags gaps → generate tailored resume bullets → log it in the tracker. Under 60 seconds end to end." },
     { k: ['contact', 'support', 'help', 'reach', 'email'], a: "Fastest route is amitbhargav.sunny@gmail.com — link's in the footer under Company → Contact Us." },
     { k: ['upgrade', 'pro', 'lifetime'], a: "You can upgrade from inside the app — head to Pricing (in the nav) or your account menu once signed in." },
@@ -81,12 +78,15 @@
 
   function ybTranscript() { return document.getElementById('ybTranscript'); }
 
-  /* ── open / close ── */
-  function ybOpen(startFn) {
+  /* ── open / close ──
+     mode: 'onboard' = full-screen immersive (first-time auto-open only)
+           'panel'   = compact docked widget (every manual reopen) ── */
+  function ybOpen(startFn, mode) {
     const overlay = document.getElementById('ybOverlay');
     ybTranscript().innerHTML = '';
     ybMsgCount = 0;
     overlay.classList.remove('closing');
+    overlay.classList.toggle('yb-panel', mode === 'panel');
     overlay.classList.add('on');
     startFn();
   }
@@ -212,7 +212,7 @@
 
   /* ── conversation: marketing flow (homepage, pricing, signin, blog, 404) ── */
   function ybStart() {
-    ybBotMsg("Hi! I'm Yuktora Intelligence 👋", () => {
+    ybBotMsg("Hi, I'm Yuktora Intelligence.", () => {
       ybAskPain();
     });
   }
@@ -233,20 +233,6 @@
           return;
         }
         ybPainPick = key;
-        ybBotMsg(obj.reply, () => ybAskGeo());
-      });
-    });
-  }
-  function ybAskGeo() {
-    ybBotMsg("Quick follow-up — India, international, or both?", () => {
-      ybPills(Object.entries(YB_GEO), (key, obj) => {
-        ybBotMsg(obj.reply, () => ybAskTrack());
-      });
-    });
-  }
-  function ybAskTrack() {
-    ybBotMsg("Last one — how are you tracking applications right now?", () => {
-      ybPills(Object.entries(YB_TRACK), (key, obj) => {
         ybBotMsg(obj.reply, () => ybWrapUp());
       });
     });
@@ -271,7 +257,7 @@
     upgrade: { label: '💳 How do I upgrade to Pro?', reply: "Head to the Pricing page from the nav, or your account menu — Pro and Lifetime plans are billed securely via Razorpay." }
   };
   function ybStartApp() {
-    ybBotMsg("Hey! 👋 Need a hand with anything?", () => {
+    ybBotMsg("Hey — need a hand with anything?", () => {
       ybPills(Object.entries(YB_APP_HELP), (key, obj) => {
         ybBotMsg(obj.reply, () => {
           ybBotMsg("Anything else — just type below.");
@@ -297,7 +283,10 @@
 
   /* ── boot ── */
   window.ybReopen = function () {
-    ybOpen(YB_IS_APP ? ybStartApp : ybStart);
+    // Any manual click on the launcher — first-run or not — opens the
+    // compact panel. The full-screen treatment is reserved for the
+    // one automatic first impression below.
+    ybOpen(YB_IS_APP ? ybStartApp : ybStart, 'panel');
   };
   window.ybClose = ybClose;
   window.ybSend = ybSend;
@@ -309,7 +298,7 @@
       return;
     }
     if (!localStorage.getItem('yuktora_bot_seen')) {
-      setTimeout(() => ybOpen(ybStart), 500);
+      setTimeout(() => ybOpen(ybStart, 'onboard'), 900);
     }
   })();
   document.addEventListener('keydown', e => {
