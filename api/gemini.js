@@ -61,7 +61,7 @@ module.exports = async function handler(req, res) {
   // Google renames/retires model IDs over time (gemini-1.5-flash has already
   // 404'd as "not found" for some keys) — trying several current + recent
   // names maximises the odds of hitting one this specific key can actually use.
-  const modelsToTry = ['gemini-2.5-flash'];
+  const modelsToTry = ['gemini-3.7-flash'];
 
   for (let i = 0; i < modelsToTry.length; i++) {
     const model = modelsToTry[i];
